@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ExaminationSystem.API/ExaminationSystem.API.csproj" />
+    <Project Path="src/ExaminationSystem.Application/ExaminationSystem.Application.csproj" Id="151dea4f-20ba-4827-a27b-7131ed22062c" />
+    <Project Path="src/ExaminationSystem.Domain/ExaminationSystem.Domain.csproj" Id="102ece27-9ea3-482e-941a-4a5566a8cf66" />
+    <Project Path="src/ExaminationSystem.Persistence/ExaminationSystem.Persistence.csproj" />
+  </Folder>
+</Solution>
