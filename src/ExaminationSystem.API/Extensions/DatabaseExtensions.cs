@@ -2,7 +2,7 @@ using ExaminationSystem.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExaminationSystem.API.Extensions;
-
+  //sssssss
 public static class DatabaseExtensions
 {
     public static WebApplication ApplyDatabaseMigrations(this WebApplication app)
