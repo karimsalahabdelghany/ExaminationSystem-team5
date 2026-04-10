@@ -1,14 +1,11 @@
-﻿namespace ExaminationSystem.Domain.Interfaces;
+namespace ExaminationSystem.Domain.Interfaces;
 
 public interface IBaseEntity
 {
-    public DateTime CreatedAt { get; set; }
-    public Guid CreatedBy { get; set; } 
-    public DateTime? UpdatedAt { get; set; }
-    public Guid? UpdatedBy { get; set; }
-
-    public bool IsDeleted { get; set; }
-    public DateTime? DeletedAt { get; set; } 
-    public Guid? DeletedBy { get; set; }
-
+    DateTime CreatedAt { get; set; }
+    string CreatedBy { get; set; }
+    DateTime? UpdatedAt { get; set; }
+    string? UpdatedBy { get; set; }
+    bool IsDeleted { get; set; }
+    DateTime? DeletedAt { get; set; }
 }

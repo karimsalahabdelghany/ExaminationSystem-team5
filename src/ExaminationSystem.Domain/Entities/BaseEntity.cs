@@ -1,15 +1,15 @@
-﻿using ExaminationSystem.Domain.Interfaces;
+using ExaminationSystem.Domain.Interfaces;
 
 namespace ExaminationSystem.Domain.Entities;
 
-public abstract class BaseEntity : IBaseEntity
+public abstract class BaseEntity 
 {
-    public Guid Id { get; set; }
-    public DateTime CreatedAt { get ; set ; }
-    public Guid CreatedBy { get ; set ; }
+    public Guid Id { get; private set; }
+    public DateTime CreatedAt { get; set; }
+    public string CreatedBy { get; set; } = "system";
     public DateTime? UpdatedAt { get; set; }
-    public Guid? UpdatedBy { get; set; }
+    public string? UpdatedBy { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
-    public Guid? DeletedBy { get; set; }
 }
+
