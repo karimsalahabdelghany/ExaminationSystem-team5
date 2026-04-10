@@ -1,0 +1,49 @@
+using ExaminationSystem.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace ExaminationSystem.Persistence.Configurations;
+
+public sealed class DiplomaConfiguration : BaseEntityConfiguration<Diploma>
+{
+    protected override void ConfigureEntity(EntityTypeBuilder<Diploma> builder)
+    {
+        builder.ToTable("Diplomas");
+
+        builder.Property(x => x.Name)
+            .HasMaxLength(200)
+            .IsRequired();
+        builder.Property(x => x.Description)
+            .HasMaxLength(2000)
+            .IsRequired();
+        builder.Property(x => x.Duration).IsRequired();
+
+        builder.HasData(
+            new
+            {
+                Id = Guid.Parse("2D21AE7D-D8A0-4F19-9509-F39B5B339A7F"),
+                Name = "Backend Engineering Diploma",
+                Description = "A foundational backend program covering architecture, APIs, and persistence.",
+                Duration = 24,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                CreatedBy = "seed",
+                UpdatedAt = (DateTime?)null,
+                UpdatedBy = (string?)null,
+                IsDeleted = false,
+                DeletedAt = (DateTime?)null
+            },
+            new
+            {
+                Id = Guid.Parse("8480D832-E7DA-4F56-9A58-91D90A51E683"),
+                Name = "Cloud & DevOps Diploma",
+                Description = "A practical cloud engineering track with CI/CD, IaC, and monitoring.",
+                Duration = 20,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                CreatedBy = "seed",
+                UpdatedAt = (DateTime?)null,
+                UpdatedBy = (string?)null,
+                IsDeleted = false,
+                DeletedAt = (DateTime?)null
+            });
+    }
+}
