@@ -1,6 +1,5 @@
-using ExaminationSystem.Application.Extensions;
+using ExaminationSystem.API.Extensions;
 using Scalar.AspNetCore;
-using ExaminationSystem.Persistence.Extensions;
 
 namespace ExaminationSystem.API;
 
@@ -10,15 +9,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-
-        builder.Services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
-        builder.Services.AddApplication();
-        builder.Services.AddPersistence(builder.Configuration);
+        builder.Services.AddApiDependencies(builder.Configuration);
 
         var app = builder.Build();
+        app.ApplyDatabaseMigrations();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -35,6 +29,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
 
