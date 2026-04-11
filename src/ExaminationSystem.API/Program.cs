@@ -1,4 +1,4 @@
-using ExaminationSystem.API.Extensions;
+using ExaminationSystem.API.Middleware;
 using Scalar.AspNetCore;
 
 namespace ExaminationSystem.API;
@@ -10,8 +10,10 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddApiDependencies(builder.Configuration);
-
+        
         var app = builder.Build();
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+
         app.ApplyDatabaseMigrations();
 
         // Configure the HTTP request pipeline.
