@@ -1,3 +1,6 @@
+using ExaminationSystem.Application.Interfaces;
+using ExaminationSystem.Persistence.Repositories;
+
 namespace ExaminationSystem.Persistence.Extensions;
 
 public static class ServiceCollectionExtension
@@ -18,6 +21,8 @@ public static class ServiceCollectionExtension
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationContext>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         return services;
     }

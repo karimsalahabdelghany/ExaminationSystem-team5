@@ -1,8 +1,5 @@
-using ExaminationSystem.Domain.Entities;
 using ExaminationSystem.Domain.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 namespace ExaminationSystem.Persistence;
 

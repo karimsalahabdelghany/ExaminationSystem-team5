@@ -13,8 +13,10 @@ public static class ServiceCollectionExtension
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtension).Assembly));
         services.AddValidatorsFromAssembly(typeof(ServiceCollectionExtension).Assembly);
         services.AddScoped<TransactionScope>();
+
         services.AddTransient(typeof(IPipelineBehavior<,>),
                              typeof(UnitOfWorkBehavior<,>));
+
         services.AddTransient(typeof(IPipelineBehavior<,>),
                             typeof(ValidationBehaviour<,>));
         return services;
