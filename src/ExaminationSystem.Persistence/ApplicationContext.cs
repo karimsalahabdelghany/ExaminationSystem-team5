@@ -24,7 +24,6 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole<Guid>, Gu
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
     public DbSet<QuizAttempt> QuizAttempts => Set<QuizAttempt>();
     public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
-    public DbSet<AttemptAnswerOption> AttemptAnswerOptions => Set<AttemptAnswerOption>();
     public DbSet<AttemptResult> AttemptResults => Set<AttemptResult>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

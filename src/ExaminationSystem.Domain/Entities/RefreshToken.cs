@@ -6,20 +6,17 @@ public class RefreshToken : BaseEntity
     {
     }
 
-    public RefreshToken(Guid userId, string tokenHash, DateTime expiryDate, string ipAddress)
+    public RefreshToken(Guid userId, string tokenHash, DateTime expiresAt)
     {
         UserId = userId;
         TokenHash = tokenHash;
-        ExpiryDate = expiryDate;
-        IpAddress = ipAddress;
+        ExpiresAt = expiresAt;
     }
 
-    public Guid UserId { get; private set; }
-    public string TokenHash { get; private set; } = string.Empty;
-    public DateTime ExpiryDate { get; private set; }
-    public DateTime? RevokedAt { get; private set; }
-    public string IpAddress { get; private set; } = string.Empty;
+    public Guid UserId { get; set; }
+    public string TokenHash { get; set; } = string.Empty;
+    public bool IsRevoked { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
-    public User User { get; private set; } = null!;
+    public User User { get; set; } = null!;
 }
-

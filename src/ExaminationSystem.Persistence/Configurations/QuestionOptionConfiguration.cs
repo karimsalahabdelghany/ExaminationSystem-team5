@@ -15,6 +15,7 @@ public sealed class QuestionOptionConfiguration : BaseEntityConfiguration<Questi
             .HasMaxLength(1000)
             .IsRequired();
         builder.Property(x => x.IsCorrect).IsRequired();
+        builder.Property(x => x.OrderIndex).IsRequired();
 
         builder.HasIndex(x => x.QuestionId);
 

@@ -18,6 +18,9 @@ public sealed class QuestionConfiguration : BaseEntityConfiguration<Question>
             .HasConversion<byte>()
             .HasColumnType("tinyint")
             .IsRequired();
+        builder.Property(x => x.Explanation)
+            .HasMaxLength(4000);
+        builder.Property(x => x.OrderIndex).IsRequired();
 
         builder.HasIndex(x => x.QuizId);
 

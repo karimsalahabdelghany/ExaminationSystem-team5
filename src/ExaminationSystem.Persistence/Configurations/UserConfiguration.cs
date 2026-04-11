@@ -35,7 +35,19 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.NormalizedEmail)
             .HasMaxLength(256);
 
-        builder.Property(x => x.LastLoginAt)
+        builder.Property(x => x.FullName)
+            .HasMaxLength(256)
+            .IsRequired();
+
+        builder.Property(x => x.Status)
+            .HasConversion<byte>()
+            .HasColumnType("tinyint")
+            .IsRequired();
+
+        builder.Property(x => x.FailedLoginAttempts)
+            .IsRequired();
+
+        builder.Property(x => x.LockedUntil)
             .HasColumnType("datetime2");
 
         builder.Property(x => x.CreatedAt)

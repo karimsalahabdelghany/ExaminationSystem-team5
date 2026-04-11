@@ -2,6 +2,7 @@ namespace ExaminationSystem.Domain.Enums;
 
 public enum QuestionType : byte
 {
-    SingleChoice = 1,
-    MultipleChoice = 2
+    MultipleChoice = 0,
+    TrueFalse = 1,
+    ShortAnswer = 2,
 }

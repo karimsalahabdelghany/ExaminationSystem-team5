@@ -1,5 +1,3 @@
-using ExaminationSystem.Domain.Enums;
-
 namespace ExaminationSystem.Domain.Entities;
 
 public class QuizAttempt : BaseEntity
@@ -10,23 +8,29 @@ public class QuizAttempt : BaseEntity
     {
     }
 
-    public QuizAttempt(Guid userId, Guid quizId, DateTime startTime, QuizAttemptStatus status)
+    public QuizAttempt(Guid userId, Guid quizId, QuizAttemptStatus status, DateTime startTime, DateTime deadline)
     {
         UserId = userId;
         QuizId = quizId;
-        StartTime = startTime;
         Status = status;
+        StartTime = startTime;
+        Deadline = deadline;
     }
 
-    public Guid UserId { get; private set; }
-    public Guid QuizId { get; private set; }
-    public DateTime StartTime { get; private set; }
-    public DateTime? EndTime { get; private set; }
-    public QuizAttemptStatus Status { get; private set; }
+    public Guid UserId { get; set; }
+    public Guid QuizId { get; set; }
+    public QuizAttemptStatus Status { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime Deadline { get; set; }
+    public DateTime? SubmittedAt { get; set; }
 
-    public User User { get; private set; } = null!;
-    public Quiz Quiz { get; private set; } = null!;
+    public User User { get; set; } = null!;
+    public Quiz Quiz { get; set; } = null!;
     public IReadOnlyCollection<AttemptAnswer> Answers => _answers;
-    public AttemptResult Result { get; private set; } = null!;
-}
+    public AttemptResult? Result { get; set; }
 
+    public void AttachResult(AttemptResult result)
+    {
+        Result = result;
+    }
+}

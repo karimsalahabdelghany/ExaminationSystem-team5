@@ -1,5 +1,3 @@
-using ExaminationSystem.Domain.Enums;
-
 namespace ExaminationSystem.Domain.Entities;
 
 public class Question : BaseEntity
@@ -11,19 +9,22 @@ public class Question : BaseEntity
     {
     }
 
-    public Question(Guid quizId, string text, QuestionType type)
+    public Question(Guid quizId, string text, QuestionType type, string? explanation, int orderIndex)
     {
         QuizId = quizId;
         Text = text;
         Type = type;
+        Explanation = explanation;
+        OrderIndex = orderIndex;
     }
 
-    public Guid QuizId { get; private set; }
-    public string Text { get; private set; } = string.Empty;
-    public QuestionType Type { get; private set; }
+    public Guid QuizId { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public QuestionType Type { get; set; }
+    public string? Explanation { get; set; }
+    public int OrderIndex { get; set; }
 
-    public Quiz Quiz { get; private set; } = null!;
+    public Quiz Quiz { get; set; } = null!;
     public IReadOnlyCollection<QuestionOption> Options => _options;
     public IReadOnlyCollection<AttemptAnswer> AttemptAnswers => _attemptAnswers;
 }
-

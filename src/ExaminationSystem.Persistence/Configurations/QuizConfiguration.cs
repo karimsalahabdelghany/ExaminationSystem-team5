@@ -14,8 +14,16 @@ public sealed class QuizConfiguration : BaseEntityConfiguration<Quiz>
         builder.Property(x => x.Title)
             .HasMaxLength(200)
             .IsRequired();
-        builder.Property(x => x.Duration).IsRequired();
+        builder.Property(x => x.Instructions)
+            .HasMaxLength(4000)
+            .IsRequired();
+        builder.Property(x => x.DurationMinutes).IsRequired();
+        builder.Property(x => x.PassScore).IsRequired();
         builder.Property(x => x.MaxAttempts).IsRequired();
+        builder.Property(x => x.Status)
+            .HasConversion<byte>()
+            .HasColumnType("tinyint")
+            .IsRequired();
 
         builder.HasIndex(x => x.DiplomaId);
 

@@ -6,17 +6,17 @@ public class PasswordResetToken : BaseEntity
     {
     }
 
-    public PasswordResetToken(Guid userId, string tokenHash, DateTime expiryDate)
+    public PasswordResetToken(Guid userId, string tokenHash, DateTime expiresAt)
     {
         UserId = userId;
         TokenHash = tokenHash;
-        ExpiryDate = expiryDate;
+        ExpiresAt = expiresAt;
     }
 
-    public Guid UserId { get; private set; }
-    public string TokenHash { get; private set; } = string.Empty;
-    public DateTime ExpiryDate { get; private set; }
+    public Guid UserId { get; set; }
+    public string TokenHash { get; set; } = string.Empty;
+    public bool IsUsed { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
-    public User User { get; private set; } = null!;
+    public User User { get; set; } = null!;
 }
-

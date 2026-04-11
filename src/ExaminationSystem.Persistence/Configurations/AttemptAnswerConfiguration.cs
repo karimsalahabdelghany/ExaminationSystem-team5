@@ -12,18 +12,28 @@ public sealed class AttemptAnswerConfiguration : BaseEntityConfiguration<Attempt
 
         builder.Property(x => x.AttemptId).IsRequired();
         builder.Property(x => x.QuestionId).IsRequired();
+        builder.Property(x => x.SelectedOptionId).IsRequired();
+        builder.Property(x => x.AnsweredAt)
+            .HasColumnType("datetime2")
+            .IsRequired();
 
         builder.HasIndex(x => x.AttemptId);
         builder.HasIndex(x => x.QuestionId);
+        builder.HasIndex(x => x.SelectedOptionId);
 
         builder.HasOne(x => x.Attempt)
             .WithMany(x => x.Answers)
             .HasForeignKey(x => x.AttemptId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Question)
             .WithMany(x => x.AttemptAnswers)
             .HasForeignKey(x => x.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.SelectedOption)
+            .WithMany(x => x.AttemptAnswers)
+            .HasForeignKey(x => x.SelectedOptionId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -14,9 +14,6 @@ public sealed class LoginLogConfiguration : BaseEntityConfiguration<LoginLog>
         builder.Property(x => x.IpAddress)
             .HasMaxLength(64)
             .IsRequired();
-        builder.Property(x => x.UserAgent)
-            .HasMaxLength(512)
-            .IsRequired();
         builder.Property(x => x.Success).IsRequired();
 
         builder.HasIndex(x => x.UserId);
@@ -24,6 +21,6 @@ public sealed class LoginLogConfiguration : BaseEntityConfiguration<LoginLog>
         builder.HasOne(x => x.User)
             .WithMany(x => x.LoginLogs)
             .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

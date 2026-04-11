@@ -32,13 +32,16 @@ namespace ExaminationSystem.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    FullName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Status = table.Column<byte>(type: "tinyint", nullable: false),
+                    FailedLoginAttempts = table.Column<int>(type: "int", nullable: false),
+                    LockedUntil = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UpdatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastLoginAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
@@ -192,7 +195,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IpAddress = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    UserAgent = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     Success = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
@@ -209,7 +211,7 @@ namespace ExaminationSystem.Persistence.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -218,9 +220,11 @@ namespace ExaminationSystem.Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
+                    CodeHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     Purpose = table.Column<byte>(type: "tinyint", nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AttemptCount = table.Column<int>(type: "int", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -246,7 +250,8 @@ namespace ExaminationSystem.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TokenHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -272,9 +277,8 @@ namespace ExaminationSystem.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TokenHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RevokedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IpAddress = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    IsRevoked = table.Column<bool>(type: "bit", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -333,8 +337,11 @@ namespace ExaminationSystem.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     DiplomaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Duration = table.Column<int>(type: "int", nullable: false),
+                    Instructions = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
+                    DurationMinutes = table.Column<int>(type: "int", nullable: false),
+                    PassScore = table.Column<int>(type: "int", nullable: false),
                     MaxAttempts = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<byte>(type: "tinyint", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -361,6 +368,8 @@ namespace ExaminationSystem.Persistence.Migrations
                     QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     Type = table.Column<byte>(type: "tinyint", nullable: false),
+                    Explanation = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
+                    OrderIndex = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -386,9 +395,10 @@ namespace ExaminationSystem.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<byte>(type: "tinyint", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Deadline = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -421,6 +431,7 @@ namespace ExaminationSystem.Persistence.Migrations
                     QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     IsCorrect = table.Column<bool>(type: "bit", nullable: false),
+                    OrderIndex = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -440,12 +451,37 @@ namespace ExaminationSystem.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AttemptResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    AttemptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Score = table.Column<decimal>(type: "decimal(9,2)", nullable: false),
+                    Passed = table.Column<bool>(type: "bit", nullable: false),
+                    TotalQuestions = table.Column<int>(type: "int", nullable: false),
+                    CorrectCount = table.Column<int>(type: "int", nullable: false),
+                    CalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttemptResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AttemptResults_QuizAttempts_AttemptId",
+                        column: x => x.AttemptId,
+                        principalTable: "QuizAttempts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AttemptAnswers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     AttemptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SelectedOptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AnsweredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -457,6 +493,12 @@ namespace ExaminationSystem.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_AttemptAnswers", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_AttemptAnswers_QuestionOptions_SelectedOptionId",
+                        column: x => x.SelectedOptionId,
+                        principalTable: "QuestionOptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_AttemptAnswers_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
@@ -467,59 +509,7 @@ namespace ExaminationSystem.Persistence.Migrations
                         column: x => x.AttemptId,
                         principalTable: "QuizAttempts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AttemptResults",
-                columns: table => new
-                {
-                    AttemptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Score = table.Column<int>(type: "int", nullable: false),
-                    TotalQuestions = table.Column<int>(type: "int", nullable: false),
-                    CorrectAnswers = table.Column<int>(type: "int", nullable: false),
-                    Percentage = table.Column<float>(type: "real", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AttemptResults", x => x.AttemptId);
-                    table.ForeignKey(
-                        name: "FK_AttemptResults_QuizAttempts_AttemptId",
-                        column: x => x.AttemptId,
-                        principalTable: "QuizAttempts",
-                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AttemptAnswerOptions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
-                    AttemptAnswerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SelectedOptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AttemptAnswerOptions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AttemptAnswerOptions_AttemptAnswers_AttemptAnswerId",
-                        column: x => x.AttemptAnswerId,
-                        principalTable: "AttemptAnswers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AttemptAnswerOptions_QuestionOptions_SelectedOptionId",
-                        column: x => x.SelectedOptionId,
-                        principalTable: "QuestionOptions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -577,16 +567,6 @@ namespace ExaminationSystem.Persistence.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AttemptAnswerOptions_AttemptAnswerId",
-                table: "AttemptAnswerOptions",
-                column: "AttemptAnswerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AttemptAnswerOptions_SelectedOptionId",
-                table: "AttemptAnswerOptions",
-                column: "SelectedOptionId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AttemptAnswers_AttemptId",
                 table: "AttemptAnswers",
                 column: "AttemptId");
@@ -595,6 +575,17 @@ namespace ExaminationSystem.Persistence.Migrations
                 name: "IX_AttemptAnswers_QuestionId",
                 table: "AttemptAnswers",
                 column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AttemptAnswers_SelectedOptionId",
+                table: "AttemptAnswers",
+                column: "SelectedOptionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AttemptResults_AttemptId",
+                table: "AttemptResults",
+                column: "AttemptId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Enrollments_DiplomaId",
@@ -681,7 +672,7 @@ namespace ExaminationSystem.Persistence.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "AttemptAnswerOptions");
+                name: "AttemptAnswers");
 
             migrationBuilder.DropTable(
                 name: "AttemptResults");
@@ -703,9 +694,6 @@ namespace ExaminationSystem.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "AttemptAnswers");
 
             migrationBuilder.DropTable(
                 name: "QuestionOptions");

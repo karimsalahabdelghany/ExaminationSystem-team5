@@ -10,15 +10,23 @@ public sealed class AttemptResultConfiguration : IEntityTypeConfiguration<Attemp
     {
         builder.ToTable("AttemptResults");
 
-        builder.HasKey(x => x.AttemptId);
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+            .ValueGeneratedOnAdd()
+            .HasDefaultValueSql("NEWSEQUENTIALID()");
 
         builder.Property(x => x.AttemptId).IsRequired();
-        builder.Property(x => x.Score).IsRequired();
-        builder.Property(x => x.TotalQuestions).IsRequired();
-        builder.Property(x => x.CorrectAnswers).IsRequired();
-        builder.Property(x => x.Percentage)
-            .HasColumnType("real")
+        builder.Property(x => x.Score)
+            .HasColumnType("decimal(9,2)")
             .IsRequired();
+        builder.Property(x => x.Passed).IsRequired();
+        builder.Property(x => x.TotalQuestions).IsRequired();
+        builder.Property(x => x.CorrectCount).IsRequired();
+        builder.Property(x => x.CalculatedAt)
+            .HasColumnType("datetime2")
+            .IsRequired();
+
+        builder.HasIndex(x => x.AttemptId).IsUnique();
 
         builder.HasQueryFilter(x => !x.Attempt.IsDeleted);
     }

@@ -16,9 +16,9 @@ public class Diploma : BaseEntity
         Duration = duration;
     }
 
-    public string Name { get; private set; } = string.Empty;
-    public string Description { get; private set; } = string.Empty;
-    public int Duration { get; private set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public int Duration { get; set; }
 
     public IReadOnlyCollection<Enrollment> Enrollments => _enrollments;
     public IReadOnlyCollection<Quiz> Quizzes => _quizzes;
