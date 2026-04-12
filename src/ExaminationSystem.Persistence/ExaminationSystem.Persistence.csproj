@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExaminationSystem.Application\ExaminationSystem.Application.csproj" />
-    <ProjectReference Include="..\ExaminationSystem.Domain\ExaminationSystem.Domain.csproj" />
   </ItemGroup>
 
 </Project>
