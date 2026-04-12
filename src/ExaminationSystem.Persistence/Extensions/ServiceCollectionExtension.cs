@@ -30,7 +30,6 @@ public static class ServiceCollectionExtension
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationContext>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

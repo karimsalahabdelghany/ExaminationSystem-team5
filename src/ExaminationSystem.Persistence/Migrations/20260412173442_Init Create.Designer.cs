@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExaminationSystem.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20260412125426_AddRowVersion")]
-    partial class AddRowVersion
+    [Migration("20260412173442_Init Create")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,9 @@ namespace ExaminationSystem.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<DateTime>("AnsweredAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("AttemptId")
                         .HasColumnType("uniqueidentifier");
@@ -62,6 +65,9 @@ namespace ExaminationSystem.Persistence.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<Guid>("SelectedOptionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -75,80 +81,40 @@ namespace ExaminationSystem.Persistence.Migrations
 
                     b.HasIndex("QuestionId");
 
+                    b.HasIndex("SelectedOptionId");
+
                     b.ToTable("AttemptAnswers", (string)null);
                 });
 
-            modelBuilder.Entity("ExaminationSystem.Domain.Entities.AttemptAnswerOption", b =>
+            modelBuilder.Entity("ExaminationSystem.Domain.Entities.AttemptResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
-                    b.Property<Guid>("AttemptAnswerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<Guid>("SelectedOptionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttemptAnswerId");
-
-                    b.HasIndex("SelectedOptionId");
-
-                    b.ToTable("AttemptAnswerOptions", (string)null);
-                });
-
-            modelBuilder.Entity("ExaminationSystem.Domain.Entities.AttemptResult", b =>
-                {
                     b.Property<Guid>("AttemptId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("CorrectAnswers")
+                    b.Property<DateTime>("CalculatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
-                    b.Property<float>("Percentage")
-                        .HasColumnType("real");
+                    b.Property<bool>("Passed")
+                        .HasColumnType("bit");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Score")
+                        .HasColumnType("decimal(9,2)");
 
                     b.Property<int>("TotalQuestions")
                         .HasColumnType("int");
 
-                    b.HasKey("AttemptId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttemptId")
+                        .IsUnique();
 
                     b.ToTable("AttemptResults", (string)null);
                 });
@@ -174,9 +140,8 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("Duration")
                         .HasColumnType("int");
@@ -186,16 +151,22 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<int>("QuizCount")
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -217,7 +188,9 @@ namespace ExaminationSystem.Persistence.Migrations
                             Description = "A foundational backend program covering architecture, APIs, and persistence.",
                             Duration = 24,
                             IsDeleted = false,
-                            Name = "Backend Engineering Diploma"
+                            QuizCount = 1,
+                            Status = 0,
+                            Title = "Backend Engineering Diploma"
                         },
                         new
                         {
@@ -227,7 +200,9 @@ namespace ExaminationSystem.Persistence.Migrations
                             Description = "A practical cloud engineering track with CI/CD, IaC, and monitoring.",
                             Duration = 20,
                             IsDeleted = false,
-                            Name = "Cloud & DevOps Diploma"
+                            QuizCount = 1,
+                            Status = 0,
+                            Title = "Cloud & DevOps Diploma"
                         });
                 });
 
@@ -336,11 +311,6 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -358,10 +328,13 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
-                    b.Property<string>("Code")
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CodeHash")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -376,13 +349,16 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpiryDate")
+                    b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
 
                     b.Property<byte>("Purpose")
                         .HasColumnType("tinyint");
@@ -430,13 +406,16 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpiryDate")
+                    b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -488,10 +467,17 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Explanation")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("QuizId")
                         .HasColumnType("uniqueidentifier");
@@ -552,6 +538,9 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
 
@@ -603,8 +592,13 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<Guid>("DiplomaId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Duration")
+                    b.Property<int>("DurationMinutes")
                         .HasColumnType("int");
+
+                    b.Property<string>("Instructions")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -614,11 +608,17 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<int>("MaxAttempts")
                         .HasColumnType("int");
 
+                    b.Property<int>("PassScore")
+                        .HasColumnType("int");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -637,6 +637,36 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("DiplomaId");
 
                     b.ToTable("Quizzes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"),
+                            DurationMinutes = 30,
+                            Instructions = "Answer all questions within the time limit.",
+                            IsDeleted = false,
+                            MaxAttempts = 3,
+                            PassScore = 60,
+                            Status = (byte)0,
+                            Title = "C# Fundamentals Quiz"
+                        },
+                        new
+                        {
+                            Id = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"),
+                            DurationMinutes = 20,
+                            Instructions = "Choose the best answer for each question.",
+                            IsDeleted = false,
+                            MaxAttempts = 5,
+                            PassScore = 70,
+                            Status = (byte)0,
+                            Title = "Docker Basics Quiz"
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.QuizAttempt", b =>
@@ -656,10 +686,10 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<DateTime?>("DeletedAt")
+                    b.Property<DateTime>("Deadline")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EndTime")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
@@ -681,6 +711,9 @@ namespace ExaminationSystem.Persistence.Migrations
 
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -721,21 +754,16 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpiryDate")
+                    b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -802,12 +830,20 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<DateTime?>("LastLoginAt")
+                    b.Property<DateTime?>("LockedUntil")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("LockoutEnabled")
@@ -843,6 +879,9 @@ namespace ExaminationSystem.Persistence.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -1010,7 +1049,7 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasOne("ExaminationSystem.Domain.Entities.QuizAttempt", "Attempt")
                         .WithMany("Answers")
                         .HasForeignKey("AttemptId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ExaminationSystem.Domain.Entities.Question", "Question")
@@ -1019,26 +1058,15 @@ namespace ExaminationSystem.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Attempt");
-
-                    b.Navigation("Question");
-                });
-
-            modelBuilder.Entity("ExaminationSystem.Domain.Entities.AttemptAnswerOption", b =>
-                {
-                    b.HasOne("ExaminationSystem.Domain.Entities.AttemptAnswer", "AttemptAnswer")
-                        .WithMany("SelectedOptions")
-                        .HasForeignKey("AttemptAnswerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ExaminationSystem.Domain.Entities.QuestionOption", "SelectedOption")
-                        .WithMany("AttemptAnswerOptions")
+                        .WithMany("AttemptAnswers")
                         .HasForeignKey("SelectedOptionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("AttemptAnswer");
+                    b.Navigation("Attempt");
+
+                    b.Navigation("Question");
 
                     b.Navigation("SelectedOption");
                 });
@@ -1078,7 +1106,7 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasOne("ExaminationSystem.Domain.Entities.User", "User")
                         .WithMany("LoginLogs")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1220,11 +1248,6 @@ namespace ExaminationSystem.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ExaminationSystem.Domain.Entities.AttemptAnswer", b =>
-                {
-                    b.Navigation("SelectedOptions");
-                });
-
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.Diploma", b =>
                 {
                     b.Navigation("Enrollments");
@@ -1241,7 +1264,7 @@ namespace ExaminationSystem.Persistence.Migrations
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.QuestionOption", b =>
                 {
-                    b.Navigation("AttemptAnswerOptions");
+                    b.Navigation("AttemptAnswers");
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.Quiz", b =>
@@ -1255,8 +1278,7 @@ namespace ExaminationSystem.Persistence.Migrations
                 {
                     b.Navigation("Answers");
 
-                    b.Navigation("Result")
-                        .IsRequired();
+                    b.Navigation("Result");
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.User", b =>

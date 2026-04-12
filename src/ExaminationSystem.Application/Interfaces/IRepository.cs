@@ -16,4 +16,8 @@ public interface IRepository<T> where T : BaseEntity
         params Expression<Func<T, object>>[] updatedProperties);
 
     Task DeleteAsync(T entity, CancellationToken ct = default);
+    void Update(T entity);
+    Task<T?> GetByIdAsync(Guid id);
+    Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+    Task<T?> FindAsync(Expression<Func<T, bool>> predicate);
 }
