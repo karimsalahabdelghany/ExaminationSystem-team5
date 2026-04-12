@@ -45,6 +45,8 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         var entry = _context.Entry(entity);
         foreach (var prop in updatedProperties)
             entry.Property(prop).IsModified = true;
+        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedBy = "system";
         await _context.SaveChangesAsync(ct); // ← interceptors fire automatically
     }
 
