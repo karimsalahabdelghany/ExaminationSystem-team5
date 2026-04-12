@@ -1,4 +1,5 @@
 using ExaminationSystem.Domain.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace ExaminationSystem.Domain.Entities;
 
@@ -11,5 +12,7 @@ public abstract class BaseEntity
     public string? UpdatedBy { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
+    [Timestamp]
+    public byte[] RowVersion { get; set; }
 }
 
