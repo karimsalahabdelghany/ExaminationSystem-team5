@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ExaminationSystem.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDatabaseDesign : Migration
+    public partial class InitalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,9 +67,11 @@ namespace ExaminationSystem.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Duration = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    QuizCount = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -514,11 +516,20 @@ namespace ExaminationSystem.Persistence.Migrations
 
             migrationBuilder.InsertData(
                 table: "Diplomas",
-                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "Description", "Duration", "Name", "UpdatedAt", "UpdatedBy" },
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "Description", "Duration", "QuizCount", "Status", "Title", "UpdatedAt", "UpdatedBy" },
                 values: new object[,]
                 {
-                    { new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A foundational backend program covering architecture, APIs, and persistence.", 24, "Backend Engineering Diploma", null, null },
-                    { new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A practical cloud engineering track with CI/CD, IaC, and monitoring.", 20, "Cloud & DevOps Diploma", null, null }
+                    { new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A foundational backend program covering architecture, APIs, and persistence.", 24, 1, 0, "Backend Engineering Diploma", null, null },
+                    { new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A practical cloud engineering track with CI/CD, IaC, and monitoring.", 20, 1, 0, "Cloud & DevOps Diploma", null, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Quizzes",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "DiplomaId", "DurationMinutes", "Instructions", "MaxAttempts", "PassScore", "Status", "Title", "UpdatedAt", "UpdatedBy" },
+                values: new object[,]
+                {
+                    { new Guid("a1111111-1111-1111-1111-111111111111"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), 30, "Answer all questions within the time limit.", 3, 60, (byte)0, "C# Fundamentals Quiz", null, null },
+                    { new Guid("b2222222-2222-2222-2222-222222222222"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), 20, "Choose the best answer for each question.", 5, 70, (byte)0, "Docker Basics Quiz", null, null }
                 });
 
             migrationBuilder.CreateIndex(
