@@ -32,7 +32,6 @@ public static class ServiceCollectionExtension
             .AddEntityFrameworkStores<ApplicationContext>();
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDbSession, DbSession>();
 
         return services;

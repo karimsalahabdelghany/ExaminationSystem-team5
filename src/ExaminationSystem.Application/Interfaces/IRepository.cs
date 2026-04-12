@@ -7,7 +7,7 @@ public interface IRepository<T> where T : BaseEntity, new()
 {
     IQueryable<T> GetAll();
     IQueryable<T> GetAll(Expression<Func<T, bool>> predicate);
-    void Add(T entity);
+    T Add(T entity);
     void AddRange(IEnumerable<T> entities);
 
     Task PatchAsync(

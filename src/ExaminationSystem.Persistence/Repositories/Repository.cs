@@ -14,9 +14,11 @@ public class Repository<T> : IRepository<T> where T : BaseEntity, new()
         _dbSet = _context.Set<T>();
     }
 
-    public void Add(T entity)
+    public T Add(T entity)
     {
+        entity.Id = Guid.CreateVersion7();
         _dbSet.Add(entity);
+        return entity;
     }
 
     public void AddRange(IEnumerable<T> entities)
