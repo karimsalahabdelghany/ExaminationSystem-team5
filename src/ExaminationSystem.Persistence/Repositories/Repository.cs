@@ -51,4 +51,9 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         return await _dbSet.FirstOrDefaultAsync(predicate);
     }
+
+    public Task<T?> GetByIdWithNoTracking(Guid id)
+    {
+        return _dbSet.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+    }
 }
