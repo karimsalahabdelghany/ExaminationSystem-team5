@@ -1,6 +1,7 @@
 using ExaminationSystem.Application.Extensions;
 using Scalar.AspNetCore;
 using ExaminationSystem.Persistence.Extensions;
+using ExaminationSystem.API.Middleware;
 
 namespace ExaminationSystem.API;
 
@@ -19,7 +20,7 @@ public class Program
         builder.Services.AddPersistence(builder.Configuration);
 
         var app = builder.Build();
-
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {

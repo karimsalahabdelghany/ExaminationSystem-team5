@@ -3,6 +3,9 @@ using ExaminationSystem.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.VisualBasic;
+using System.Linq.Expressions;
 
 namespace ExaminationSystem.Persistence;
 
@@ -31,6 +34,37 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole<Guid>, Gu
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationContext).Assembly);
         base.OnModelCreating(modelBuilder);
+        // Configure concurrency tokens for entities implementing IConcurrencyEntity
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(IBaseEntity).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder.Entity(entityType.ClrType)
+                    .HasQueryFilter(BuildIsDeletedFilter(entityType.ClrType));
+            }
+            if (typeof(IBaseEntity).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder.Entity(entityType.ClrType).Property<byte[]>("RowVersion")
+                    .IsRowVersion()
+                    .IsConcurrencyToken()
+                    .ValueGeneratedOnAddOrUpdate();
+            }
+        }
+    }
+    private static LambdaExpression BuildIsDeletedFilter(Type entityType)
+    {
+        var param = Expression.Parameter(entityType, "e");
+
+        var body = Expression.Equal(
+            Expression.Call(
+                typeof(EF),
+                nameof(EF.Property),
+                [typeof(bool)],
+                param,
+                Expression.Constant("IsDeleted")),
+            Expression.Constant(false));
+
+        return Expression.Lambda(body, param);
     }
 
     public override int SaveChanges()

@@ -25,5 +25,7 @@ public class User : IdentityUser<Guid>, IBaseEntity
     public IReadOnlyCollection<LoginLog> LoginLogs => _loginLogs;
     public IReadOnlyCollection<Enrollment> Enrollments => _enrollments;
     public IReadOnlyCollection<QuizAttempt> QuizAttempts => _quizAttempts;
+
+    public byte[] RowVersion { get ; set ; }
 }
 
