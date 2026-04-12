@@ -1,5 +1,3 @@
-using ExaminationSystem.Domain.Enums;
-
 namespace ExaminationSystem.Domain.Entities;
 
 public class Enrollment : BaseEntity
@@ -16,12 +14,11 @@ public class Enrollment : BaseEntity
         Status = status;
     }
 
-    public Guid UserId { get; private set; }
-    public Guid DiplomaId { get; private set; }
-    public DateTime EnrolledAt { get; private set; }
-    public EnrollmentStatus Status { get; private set; }
+    public Guid UserId { get; set; }
+    public Guid DiplomaId { get; set; }
+    public DateTime EnrolledAt { get; set; }
+    public EnrollmentStatus Status { get; set; }
 
-    public User User { get; private set; } = null!;
-    public Diploma Diploma { get; private set; } = null!;
+    public User User { get; set; } = null!;
+    public Diploma Diploma { get; set; } = null!;
 }
-

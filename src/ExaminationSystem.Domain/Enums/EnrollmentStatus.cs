@@ -2,7 +2,7 @@ namespace ExaminationSystem.Domain.Enums;
 
 public enum EnrollmentStatus : byte
 {
-    Active = 1,
-    Completed = 2,
-    Suspended = 3
+    Active = 0,
+    Completed = 1,
+    Withdrawn = 2,
 }

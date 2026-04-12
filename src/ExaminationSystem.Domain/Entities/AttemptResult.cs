@@ -6,21 +6,23 @@ public class AttemptResult
     {
     }
 
-    public AttemptResult(Guid attemptId, int score, int totalQuestions, int correctAnswers, float percentage)
+    public AttemptResult(Guid attemptId, decimal score, bool passed, int totalQuestions, int correctCount, DateTime calculatedAt)
     {
         AttemptId = attemptId;
         Score = score;
+        Passed = passed;
         TotalQuestions = totalQuestions;
-        CorrectAnswers = correctAnswers;
-        Percentage = percentage;
+        CorrectCount = correctCount;
+        CalculatedAt = calculatedAt;
     }
 
-    public Guid AttemptId { get; private set; }
-    public int Score { get; private set; }
-    public int TotalQuestions { get; private set; }
-    public int CorrectAnswers { get; private set; }
-    public float Percentage { get; private set; }
+    public Guid Id { get; set; }
+    public Guid AttemptId { get; set; }
+    public decimal Score { get; set; }
+    public bool Passed { get; set; }
+    public int TotalQuestions { get; set; }
+    public int CorrectCount { get; set; }
+    public DateTime CalculatedAt { get; set; }
 
-    public QuizAttempt Attempt { get; private set; } = null!;
+    public QuizAttempt Attempt { get; set; } = null!;
 }
-

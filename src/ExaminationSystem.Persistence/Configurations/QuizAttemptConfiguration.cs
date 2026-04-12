@@ -12,15 +12,18 @@ public sealed class QuizAttemptConfiguration : BaseEntityConfiguration<QuizAttem
 
         builder.Property(x => x.UserId).IsRequired();
         builder.Property(x => x.QuizId).IsRequired();
-        builder.Property(x => x.StartTime)
-            .HasColumnType("datetime2")
-            .IsRequired();
-        builder.Property(x => x.EndTime)
-            .HasColumnType("datetime2");
         builder.Property(x => x.Status)
             .HasConversion<byte>()
             .HasColumnType("tinyint")
             .IsRequired();
+        builder.Property(x => x.StartTime)
+            .HasColumnType("datetime2")
+            .IsRequired();
+        builder.Property(x => x.Deadline)
+            .HasColumnType("datetime2")
+            .IsRequired();
+        builder.Property(x => x.SubmittedAt)
+            .HasColumnType("datetime2");
 
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.QuizId);
@@ -38,7 +41,6 @@ public sealed class QuizAttemptConfiguration : BaseEntityConfiguration<QuizAttem
         builder.HasOne(x => x.Result)
             .WithOne(x => x.Attempt)
             .HasForeignKey<AttemptResult>(x => x.AttemptId)
-            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

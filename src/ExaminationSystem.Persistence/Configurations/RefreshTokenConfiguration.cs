@@ -14,13 +14,9 @@ public sealed class RefreshTokenConfiguration : BaseEntityConfiguration<RefreshT
         builder.Property(x => x.TokenHash)
             .HasMaxLength(512)
             .IsRequired();
-        builder.Property(x => x.ExpiryDate)
+        builder.Property(x => x.IsRevoked).IsRequired();
+        builder.Property(x => x.ExpiresAt)
             .HasColumnType("datetime2")
-            .IsRequired();
-        builder.Property(x => x.RevokedAt)
-            .HasColumnType("datetime2");
-        builder.Property(x => x.IpAddress)
-            .HasMaxLength(64)
             .IsRequired();
 
         builder.HasIndex(x => x.UserId);

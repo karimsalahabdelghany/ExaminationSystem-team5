@@ -6,19 +6,16 @@ public class LoginLog : BaseEntity
     {
     }
 
-    public LoginLog(Guid userId, string ipAddress, string userAgent, bool success)
+    public LoginLog(Guid userId, string ipAddress, bool success)
     {
         UserId = userId;
         IpAddress = ipAddress;
-        UserAgent = userAgent;
         Success = success;
     }
 
-    public Guid UserId { get; private set; }
-    public string IpAddress { get; private set; } = string.Empty;
-    public string UserAgent { get; private set; } = string.Empty;
-    public bool Success { get; private set; }
+    public Guid UserId { get; set; }
+    public string IpAddress { get; set; } = string.Empty;
+    public bool Success { get; set; }
 
-    public User User { get; private set; } = null!;
+    public User User { get; set; } = null!;
 }
-

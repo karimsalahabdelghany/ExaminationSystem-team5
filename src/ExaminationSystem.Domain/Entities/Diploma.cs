@@ -9,16 +9,20 @@ public class Diploma : BaseEntity
     {
     }
 
-    public Diploma(string name, string description, int duration)
+    public Diploma(string title,  int duration , int quizCount, string? description = null)
     {
-        Name = name;
+        Title = title;
         Description = description;
         Duration = duration;
+        Status = DiplomaStatus.Draft;
+        QuizCount = quizCount;
     }
 
-    public string Name { get; private set; } = string.Empty;
-    public string Description { get; private set; } = string.Empty;
+    public string Title { get; private set; } = string.Empty;
+    public string? Description { get; private set; }
     public int Duration { get; private set; }
+    public DiplomaStatus Status { get; private set; }
+    public int QuizCount { get; private set; }
 
     public IReadOnlyCollection<Enrollment> Enrollments => _enrollments;
     public IReadOnlyCollection<Quiz> Quizzes => _quizzes;

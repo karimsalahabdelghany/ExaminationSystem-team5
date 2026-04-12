@@ -14,7 +14,8 @@ public sealed class PasswordResetTokenConfiguration : BaseEntityConfiguration<Pa
         builder.Property(x => x.TokenHash)
             .HasMaxLength(512)
             .IsRequired();
-        builder.Property(x => x.ExpiryDate)
+        builder.Property(x => x.IsUsed).IsRequired();
+        builder.Property(x => x.ExpiresAt)
             .HasColumnType("datetime2")
             .IsRequired();
 

@@ -1,6 +1,4 @@
-using ExaminationSystem.Domain.Entities;
 using ExaminationSystem.Domain.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -27,7 +25,6 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole<Guid>, Gu
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
     public DbSet<QuizAttempt> QuizAttempts => Set<QuizAttempt>();
     public DbSet<AttemptAnswer> AttemptAnswers => Set<AttemptAnswer>();
-    public DbSet<AttemptAnswerOption> AttemptAnswerOptions => Set<AttemptAnswerOption>();
     public DbSet<AttemptResult> AttemptResults => Set<AttemptResult>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

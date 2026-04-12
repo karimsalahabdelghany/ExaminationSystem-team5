@@ -1,5 +1,3 @@
-using ExaminationSystem.Domain.Enums;
-
 namespace ExaminationSystem.Domain.Entities;
 
 public class OtpCode : BaseEntity
@@ -8,19 +6,20 @@ public class OtpCode : BaseEntity
     {
     }
 
-    public OtpCode(Guid userId, string code, OtpPurpose purpose, DateTime expiryDate)
+    public OtpCode(Guid userId, string codeHash, OtpPurpose purpose, DateTime expiresAt)
     {
         UserId = userId;
-        Code = code;
+        CodeHash = codeHash;
         Purpose = purpose;
-        ExpiryDate = expiryDate;
+        ExpiresAt = expiresAt;
     }
 
-    public Guid UserId { get; private set; }
-    public string Code { get; private set; } = string.Empty;
-    public OtpPurpose Purpose { get; private set; }
-    public DateTime ExpiryDate { get; private set; }
+    public Guid UserId { get; set; }
+    public string CodeHash { get; set; } = string.Empty;
+    public OtpPurpose Purpose { get; set; }
+    public int AttemptCount { get; set; }
+    public bool IsUsed { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
-    public User User { get; private set; } = null!;
+    public User User { get; set; } = null!;
 }
-

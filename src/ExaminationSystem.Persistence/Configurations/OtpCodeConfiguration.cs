@@ -11,14 +11,16 @@ public sealed class OtpCodeConfiguration : BaseEntityConfiguration<OtpCode>
         builder.ToTable("OtpCodes");
 
         builder.Property(x => x.UserId).IsRequired();
-        builder.Property(x => x.Code)
-            .HasMaxLength(16)
+        builder.Property(x => x.CodeHash)
+            .HasMaxLength(512)
             .IsRequired();
         builder.Property(x => x.Purpose)
             .HasConversion<byte>()
             .HasColumnType("tinyint")
             .IsRequired();
-        builder.Property(x => x.ExpiryDate)
+        builder.Property(x => x.AttemptCount).IsRequired();
+        builder.Property(x => x.IsUsed).IsRequired();
+        builder.Property(x => x.ExpiresAt)
             .HasColumnType("datetime2")
             .IsRequired();
 
