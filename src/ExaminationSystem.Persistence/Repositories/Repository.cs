@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace ExaminationSystem.Persistence.Repositories;
 
-public class Repository<T> : IRepository<T> where T : BaseEntity, new()
+public class Repository<T> : IRepository<T> where T : BaseEntity
 {
     private readonly ApplicationContext _context;
     private readonly DbSet<T> _dbSet;
