@@ -580,6 +580,36 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("DiplomaId");
 
                     b.ToTable("Quizzes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"),
+                            DurationMinutes = 30,
+                            Instructions = "Answer all questions within the time limit.",
+                            IsDeleted = false,
+                            MaxAttempts = 3,
+                            PassScore = 60,
+                            Status = (byte)0,
+                            Title = "C# Fundamentals Quiz"
+                        },
+                        new
+                        {
+                            Id = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"),
+                            DurationMinutes = 20,
+                            Instructions = "Choose the best answer for each question.",
+                            IsDeleted = false,
+                            MaxAttempts = 5,
+                            PassScore = 70,
+                            Status = (byte)0,
+                            Title = "Docker Basics Quiz"
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.QuizAttempt", b =>

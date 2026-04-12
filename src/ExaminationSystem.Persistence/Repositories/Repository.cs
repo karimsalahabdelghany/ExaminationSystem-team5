@@ -30,4 +30,25 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         return _dbSet.Where(predicate);
     }
+
+    public void Update(T entity)
+    {
+        entity.UpdatedAt = DateTime.UtcNow;
+        _dbSet.Update(entity);
+    }
+
+    public async Task<T?> GetByIdAsync(Guid id)
+    {
+        return await _dbSet.FirstOrDefaultAsync(e => e.Id == id);
+    }
+
+    public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.AnyAsync(predicate);
+    }
+
+    public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.FirstOrDefaultAsync(predicate);
+    }
 }
