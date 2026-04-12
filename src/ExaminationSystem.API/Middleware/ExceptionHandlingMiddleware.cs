@@ -35,6 +35,18 @@ public class ExceptionHandlingMiddleware
             var response = JsonConvert.SerializeObject(vex.Failure); ;
             await context.Response.WriteAsync(response);
         }
+
+        catch (NotFoundException nex)
+        {
+            _logger.LogWarning(nex, "Resource not found: {Message}", nex.Message);
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            context.Response.ContentType = "application/json";
+            var apiResponse = ApiResponse<object>
+                .Failure(nex.Message, HttpStatusCode.NotFound);
+            var response = JsonConvert.SerializeObject(apiResponse);
+            await context.Response.WriteAsync(response);
+        }
+
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred: {Message}", ex.Message);
