@@ -1,13 +1,17 @@
-using ExaminationSystem.Application.Features.Quizzes.CreateQuiz;
-using ExaminationSystem.Application.Features.Quizzes.UpdateQuiz;
 using ExaminationSystem.Application.Features.Quizzes;
+using ExaminationSystem.Application.Features.Quizzes.CreateQuiz;
+using ExaminationSystem.Application.Features.Quizzes.DeleteQuiz;
+using ExaminationSystem.Application.Features.Quizzes.UpdateQuiz;
 using ExaminationSystem.Application.Responses;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using System.Net;
 
 namespace ExaminationSystem.API.Controllers;
 
 [Route("api/admin/quizzes")]
+// TODO: Uncomment when Identity setup is complete
+//[Authorize(Roles = "Admin")]
 public class QuizzesController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost]
@@ -24,6 +28,14 @@ public class QuizzesController(IMediator mediator) : BaseController(mediator)
     {
         var result = await _mediator.Send(command with { QuizId = id });
         return Ok(ApiResponse<QuizResponse>.Success(result));
+    }
+
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await _mediator.Send(new DeleteQuizCommand(id));
+        return NoContent();
     }
 }
 
