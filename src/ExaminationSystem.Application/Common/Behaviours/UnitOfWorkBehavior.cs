@@ -8,7 +8,7 @@ namespace ExaminationSystem.Application.Common.Behaviours;
 
 // Application/Common/Behaviours/UnitOfWorkBehavior.cs
 public class UnitOfWorkBehavior<TRequest, TResponse>(
-    IDbSession session,
+    IUnitOfWork session,
     TransactionScope scope,
     ILogger<UnitOfWorkBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>

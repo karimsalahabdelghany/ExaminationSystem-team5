@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ExaminationSystem.Domain.Entities;
 
-public abstract class BaseEntity 
+public abstract class BaseEntity :IBaseEntity
 {
     public Guid Id { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -12,7 +12,6 @@ public abstract class BaseEntity
     public string? UpdatedBy { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
-    [Timestamp]
-    public byte[] RowVersion { get; set; }
+
 }
 

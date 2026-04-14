@@ -11,11 +11,13 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ConcurrencyInterceptor>();
+        services.AddScoped<AuditableEntityInterceptor>();
         services.AddDbContext<ApplicationContext>((serviceProvider, options) =>
         {
             var concurrencyInterceptor = serviceProvider.GetRequiredService<ConcurrencyInterceptor>();
+            var auditableEntityInterceptor = serviceProvider.GetRequiredService<AuditableEntityInterceptor>();
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-            options.AddInterceptors(concurrencyInterceptor);
+            //options.AddInterceptors(concurrencyInterceptor/*,auditableEntityInterceptor*/);
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }).AddLogging(c => c.SetMinimumLevel(LogLevel.Information));
 
@@ -32,8 +34,8 @@ public static class ServiceCollectionExtension
             .AddEntityFrameworkStores<ApplicationContext>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped<IDbSession, DbSession>();
+        //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

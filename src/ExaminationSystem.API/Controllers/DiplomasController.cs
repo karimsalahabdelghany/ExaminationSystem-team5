@@ -1,5 +1,7 @@
 ﻿
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Diplomas.CreateDiploma;
+using ExaminationSystem.Application.Features.Diplomas.DeleteDiploma;
 using ExaminationSystem.Application.Features.Diplomas.UpdateDiploma;
 using ExaminationSystem.Application.Responses;
 using MediatR;
@@ -15,7 +17,7 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
         var result =await _mediator.Send(command);
         if (result is null)
             return BadRequest(ApiResponse<CreateDiplomaResponse>.Failure("Can't Create this diploma!"));
-        return Created($"/Diplomas/{result.Id}", ApiResponse<CreateDiplomaResponse>.Success(result,HttpStatusCode.Created));
+        return Created($"/Diplomas/{result.Result.Id}", ApiResponse<CreateDiplomaResponse>.Success(result.Result,HttpStatusCode.Created));
     }
 
     [HttpPut("{id}")]
@@ -24,6 +26,17 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
         var result = await _mediator.Send(command);
         if (result is null)
             return BadRequest(ApiResponse<UpdateDiplomaResult>.Failure("Can't update this diploma!"));
-        return Ok(ApiResponse<UpdateDiplomaResult>.Success(result, HttpStatusCode.OK));
+        return Ok(ApiResponse<UpdateDiplomaResult>.Success(result.Result, HttpStatusCode.OK));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _mediator.Send(new DeleteDiplomaCommand(id));
+        if (!result.Success && result.Code == ResultCode.DiplomaNotFound)
+            return NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound));
+        if (!result.Success && result.Code == ResultCode.DiplomaHasActiveEnrollmentsOrPublished)
+            return Conflict(ApiResponse<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict));
+        return Ok(ApiResponse<bool>.Success(true, HttpStatusCode.OK));
     }
 }

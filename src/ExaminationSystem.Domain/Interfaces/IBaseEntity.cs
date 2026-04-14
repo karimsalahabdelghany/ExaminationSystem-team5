@@ -10,6 +10,4 @@ public interface IBaseEntity
     string? UpdatedBy { get; set; }
     bool IsDeleted { get; set; }
     DateTime? DeletedAt { get; set; }
-    [Timestamp]
-    byte[] RowVersion { get; set; }
 }

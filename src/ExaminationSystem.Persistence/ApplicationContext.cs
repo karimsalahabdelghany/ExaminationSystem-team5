@@ -39,13 +39,13 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole<Guid>, Gu
                 modelBuilder.Entity(entityType.ClrType)
                     .HasQueryFilter(BuildIsDeletedFilter(entityType.ClrType));
             }
-            if (typeof(IBaseEntity).IsAssignableFrom(entityType.ClrType))
-            {
-                modelBuilder.Entity(entityType.ClrType).Property<byte[]>("RowVersion")
-                    .IsRowVersion()
-                    .IsConcurrencyToken()
-                    .ValueGeneratedOnAddOrUpdate();
-            }
+            //if (typeof(IBaseEntity).IsAssignableFrom(entityType.ClrType))
+            //{
+            //    modelBuilder.Entity(entityType.ClrType).Property<byte[]>("RowVersion")
+            //        .IsRowVersion()
+            //        .IsConcurrencyToken()
+            //        .ValueGeneratedOnAddOrUpdate();
+            //}
         }
     }
     private static LambdaExpression BuildIsDeletedFilter(Type entityType)

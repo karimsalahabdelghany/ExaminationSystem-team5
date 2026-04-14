@@ -1,14 +1,16 @@
 ﻿using ExaminationSystem.Application.Interfaces;
+using ExaminationSystem.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ExaminationSystem.Persistence.Services;
 
-public class DbSession : IDbSession
+public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationContext _context;
     private IDbContextTransaction? _transaction;
+    private readonly Dictionary<Type, object> _repositories = new();
 
-    public DbSession(ApplicationContext context) => _context = context;
+    public UnitOfWork(ApplicationContext context) => _context = context;
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);
@@ -45,5 +47,16 @@ public class DbSession : IDbSession
     {
         await DisposeTransactionAsync();
         await _context.DisposeAsync();
+    }
+
+    public IRepository<T> Repository<T>() where T : BaseEntity
+    {
+        var type = typeof(T);
+        if (!_repositories.TryGetValue(type, out var repo))
+        {
+            repo = new Repository<T>(_context);
+            _repositories[type] = repo;
+        }
+        return (IRepository<T>)repo;
     }
 }
