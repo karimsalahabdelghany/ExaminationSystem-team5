@@ -9,9 +9,9 @@ public record CreateQuizCommand(
     string Title,
     Guid DiplomaId,
     int DurationMinutes,
-    int PassScore,
     int MaxAttempts,
-    string? Instructions
+    string? Instructions,
+    int PassScore = 60
 ) : ICommand<QuizResponse>;
 
 

@@ -47,6 +47,17 @@ public class ExceptionHandlingMiddleware
             await context.Response.WriteAsync(response);
         }
 
+        catch (ConflictException cex)
+        {
+            _logger.LogWarning(cex, "Conflict: {Message}", cex.Message);
+            context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+            context.Response.ContentType = "application/json";
+            var apiResponse = ApiResponse<object>
+                .Failure(cex.Message, HttpStatusCode.Conflict);
+            var response = JsonConvert.SerializeObject(apiResponse);
+            await context.Response.WriteAsync(response);
+        }
+
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred: {Message}", ex.Message);
