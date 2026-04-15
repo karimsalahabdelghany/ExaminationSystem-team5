@@ -68,5 +68,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(x => x.Email).IsUnique();
         builder.HasQueryFilter(x => !x.IsDeleted);
+        
     }
 }

@@ -1,6 +1,6 @@
 namespace ExaminationSystem.Domain.Entities;
 
-public class AttemptResult
+public class AttemptResult : BaseEntity
 {
     private AttemptResult()
     {

@@ -111,4 +111,24 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         entity.IsDeleted = true;
         SaveInclude(entity, nameof(entity.DeletedAt), nameof(entity.IsDeleted));
     }
+    public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate)
+    {
+
+        return await _dbSet.CountAsync(predicate);
+    }
+    public async Task<int> CountAsync()
+    {
+        return await _dbSet.CountAsync();
+    }
+    // Translates to: SELECT COUNT(DISTINCT [selector]) FROM [T] WHERE [filter]
+    // Used by GetActiveUsersTodayQueryHandler — never loads rows into memory
+    public async Task<int> CountDistinctAsync<TKey>(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<T, TKey>> selector,
+        CancellationToken ct = default)
+        => await _dbSet
+               .Where(filter)
+               .Select(selector)
+               .Distinct()
+               .CountAsync(ct);
 }
