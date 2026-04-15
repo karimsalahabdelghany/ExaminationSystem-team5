@@ -26,6 +26,9 @@ public sealed class AttemptResultConfiguration : IEntityTypeConfiguration<Attemp
         builder.Property(x => x.CalculatedAt)
             .HasColumnType("datetime2")
             .IsRequired();
+        builder.Property(x => x.QuestionBreakdownJson)
+            .HasColumnType("nvarchar(max)")
+            .IsRequired();
 
         builder.HasIndex(x => x.AttemptId).IsUnique();
 

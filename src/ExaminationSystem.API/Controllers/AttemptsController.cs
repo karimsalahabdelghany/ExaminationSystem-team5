@@ -1,6 +1,7 @@
-﻿
+
 using ExaminationSystem.API.DTOs;
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
+using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -36,6 +37,30 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
                 .Failure("Time has expired. Your attempt has been auto-submitted.", (HttpStatusCode)410));
 
         return Ok(ApiResponse<AnswerQuestionResponse>.Success(result));
+    }
+
+    [HttpPost("{attemptId:guid}/submit")]
+    public async Task<IActionResult> Submit(Guid attemptId)
+    {
+        var studentIdClaim = User.FindFirstValue("user_id");
+        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var studentId))
+        {
+            return Unauthorized(
+                ApiResponse<SubmitAttemptResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+        }
+
+        var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, studentId));
+        if (result.AlreadySubmitted)
+        {
+            return Conflict(new ApiResponse<SubmitAttemptResponse>(
+                success: false,
+                value: result.Value,
+                errors: ["Attempt already submitted"],
+                statusCode: HttpStatusCode.Conflict
+            ));
+        }
+
+        return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Value));
     }
 }
 
