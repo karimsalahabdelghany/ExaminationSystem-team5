@@ -1,7 +1,9 @@
-﻿
+﻿using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Diplomas.CreateDiploma;
 using ExaminationSystem.Application.Features.Diplomas.DeleteDiploma;
+using ExaminationSystem.Application.Features.Diplomas.GetDiplomaQuizez;
+using ExaminationSystem.Application.Features.Diplomas.GetDiplomas;
 using ExaminationSystem.Application.Features.Diplomas.UpdateDiploma;
 using ExaminationSystem.Application.Responses;
 using MediatR;
@@ -38,5 +40,21 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
         if (!result.Success && result.Code == ResultCode.DiplomaHasActiveEnrollmentsOrPublished)
             return Conflict(ApiResponse<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict));
         return Ok(ApiResponse<bool>.Success(true, HttpStatusCode.OK));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetDiplomas([FromQuery] GetDiplomasQuery query)
+    {
+        var result = await _mediator.Send(query);
+        if (result is null)
+            return NotFound(ApiResponse<PaginationResult<GetDiplomaResponse>>.Failure("No diplomas found"));
+        return Ok(ApiResponse<PaginationResult<GetDiplomaResponse>>.Success(result.Result, HttpStatusCode.OK));
+    }
+
+    [HttpGet("{id}/quizzes")]
+    public async Task<IActionResult> GetDiplomaQuizzes(Guid id, Guid studentId)
+    {
+        var result = await _mediator.Send(new GetDiplomaQuizezQuery(id, studentId));
+        return Ok(result.Result);
     }
 }
