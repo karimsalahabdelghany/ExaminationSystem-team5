@@ -2,6 +2,7 @@
 using ExaminationSystem.API.DTOs;
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
+using ExaminationSystem.Application.Features.Attempts.Timer;
 using ExaminationSystem.Application.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -11,19 +12,22 @@ using System.Security.Claims;
 namespace ExaminationSystem.API.Controllers;
 
 [Route("api/attempts")]
-// TODO: Uncomment
-// [Authorize]
+// TODO: Uncomment when Identity setup is complete
+[Authorize]
 public class AttemptsController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost("{attemptId:guid}/answer")]
     public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionDto request)
     {
-        // TODO: uncomment, will be replaced with actual user claim when Identity is ready
-       // var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
-        //var parsedStudentId = Guid.TryParse(studentId, out var sid) ? sid : Guid.Empty; 
-
-        //TODO: remove
-        var parsedStudentId = Guid.Parse("88888888-8888-8888-8888-888888888888");
+        // TODO: replace with finalized claim mapping if auth token contract changes
+        // var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // var parsedStudentId = Guid.TryParse(studentId, out var sid) ? sid : Guid.Empty;
+        var studentIdClaim = User.FindFirstValue("user_id");
+        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var parsedStudentId))
+        {
+            return Unauthorized(
+                ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+        }
 
         var result = await _mediator.Send(new AnswerQuestionOrchestrator(
             AttemptId: attemptId,
@@ -50,6 +54,16 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
         }
 
         var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, studentId));
+        if (result.TimedOut)
+        {
+            return StatusCode(410, new ApiResponse<SubmitAttemptResponse>(
+                success: false,
+                value: result.Value,
+                errors: ["Time has expired. Your attempt has been auto-submitted."],
+                statusCode: (HttpStatusCode)410
+            ));
+        }
+
         if (result.AlreadySubmitted)
         {
             return Conflict(new ApiResponse<SubmitAttemptResponse>(
@@ -61,6 +75,20 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
         }
 
         return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Value));
+    }
+
+    [HttpGet("{attemptId:guid}/timer")]
+    public async Task<IActionResult> Timer(Guid attemptId)
+    {
+        var studentIdClaim = User.FindFirstValue("user_id");
+        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var studentId))
+        {
+            return Unauthorized(
+                ApiResponse<GetAttemptTimerResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+        }
+
+        var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId, studentId));
+        return Ok(ApiResponse<GetAttemptTimerResponse>.Success(result));
     }
 }
 

@@ -13,6 +13,7 @@ public record SubmitAttemptOrchestrator(
 
 public record SubmitAttemptResult(
     bool AlreadySubmitted,
+    bool TimedOut,
     SubmitAttemptResponse Value
 );
 
@@ -51,7 +52,10 @@ public class SubmitAttemptOrchestratorHandler(
                         "Submit skipped for attempt {AttemptId}; already submitted with existing result.",
                         request.AttemptId);
                     await unitOfWork.CommitAsync(cancellationToken);
-                    return new SubmitAttemptResult(true, existingResult);
+                    return new SubmitAttemptResult(
+                        AlreadySubmitted: true,
+                        TimedOut: attempt.Status == QuizAttemptStatus.Expired,
+                        Value: existingResult);
                 }
 
                 throw new ConflictException("Attempt", "Attempt is already submitted.");
@@ -87,6 +91,7 @@ public class SubmitAttemptOrchestratorHandler(
 
             return new SubmitAttemptResult(
                 AlreadySubmitted: false,
+                TimedOut: isTimedOut,
                 Value: new SubmitAttemptResponse(
                     AttemptId: attempt.Id,
                     Score: scorePayload.Score,
@@ -103,7 +108,12 @@ public class SubmitAttemptOrchestratorHandler(
                 logger.LogInformation(
                     "Concurrent submit handled by returning existing result for attempt {AttemptId}.",
                     request.AttemptId);
-                return new SubmitAttemptResult(true, existingResult);
+                var attemptRepository = unitOfWork.Repository<QuizAttempt>();
+                var attempt = await attemptRepository.GetByIdAsync(request.AttemptId);
+                return new SubmitAttemptResult(
+                    AlreadySubmitted: true,
+                    TimedOut: attempt?.Status == QuizAttemptStatus.Expired,
+                    Value: existingResult);
             }
 
             throw new ConflictException("Attempt", "Attempt is already submitted.");

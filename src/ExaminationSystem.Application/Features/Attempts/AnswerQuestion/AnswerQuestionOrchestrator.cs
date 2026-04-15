@@ -1,6 +1,7 @@
 using ExaminationSystem.Application.Common.Exceptions;
 using ExaminationSystem.Application.Features.Attempts.Commands;
 using ExaminationSystem.Application.Features.Attempts.Queries;
+using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Questions.Queries;
 using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Enums;
@@ -16,7 +17,8 @@ public record AnswerQuestionOrchestrator(
 
 
 public class AnswerQuestionOrchestratorHandler(
-    IMediator mediator) : IRequestHandler<AnswerQuestionOrchestrator, AnswerQuestionResponse>
+    IMediator mediator,
+    IDateTimeProvider dateTimeProvider) : IRequestHandler<AnswerQuestionOrchestrator, AnswerQuestionResponse>
 {
     public async Task<AnswerQuestionResponse> Handle(
         AnswerQuestionOrchestrator request, CancellationToken cancellationToken)
@@ -30,13 +32,18 @@ public class AnswerQuestionOrchestratorHandler(
         if (attempt.UserId != request.StudentId)
             throw new ForbiddenException("You do not own this attempt.");
 
+        if (attempt.Status == QuizAttemptStatus.Expired)
+            return new AnswerQuestionResponse(Saved: false, TimedOut: true);
+
         if (attempt.Status != QuizAttemptStatus.InProgress)
             throw new ConflictException("Attempt", "Attempt is already submitted or expired.");
 
-        if (DateTime.UtcNow > attempt.Deadline)
+        if (dateTimeProvider.UtcNow > attempt.Deadline)
         {
-            await mediator.Send(
-                new MarkAttemptTimedOutCommand(request.AttemptId), cancellationToken);
+            await mediator.Send(new SubmitAttemptOrchestrator(
+                AttemptId: request.AttemptId,
+                StudentId: request.StudentId
+            ), cancellationToken);
 
             return new AnswerQuestionResponse(Saved: false, TimedOut: true);
         }
