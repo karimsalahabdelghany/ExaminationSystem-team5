@@ -11,10 +11,12 @@ public record UpsertAnswerCommand(
 
 
 public class UpsertAnswerCommandHandler(
-    IRepository<AttemptAnswer> answerRepository) : IRequestHandler<UpsertAnswerCommand, Unit>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpsertAnswerCommand, Unit>
 {
     public async Task<Unit> Handle(UpsertAnswerCommand request, CancellationToken cancellationToken)
     {
+        var answerRepository = unitOfWork.Repository<AttemptAnswer>();
+
         var existing = await answerRepository
             .FindAsync(a => a.AttemptId == request.AttemptId && a.QuestionId == request.QuestionId);
 
@@ -33,6 +35,8 @@ public class UpsertAnswerCommandHandler(
                 answeredAt: DateTime.UtcNow
             ));
         }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

@@ -16,10 +16,12 @@ public record CreateQuizCommand(
 
 
 public class CreateQuizCommandHandler(
-    IRepository<Quiz> quizRepository) : IRequestHandler<CreateQuizCommand, QuizResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateQuizCommand, QuizResponse>
 {
     public async Task<QuizResponse> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
     {
+        var quizRepository = unitOfWork.Repository<Quiz>();
+
         var quiz = new Quiz(
             diplomaId: request.DiplomaId,
             title: request.Title,
@@ -31,6 +33,7 @@ public class CreateQuizCommandHandler(
         );
 
         quizRepository.Add(quiz);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return quiz.Adapt<QuizResponse>();
     }

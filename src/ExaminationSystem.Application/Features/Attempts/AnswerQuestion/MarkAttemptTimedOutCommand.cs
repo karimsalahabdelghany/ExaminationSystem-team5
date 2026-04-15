@@ -9,10 +9,12 @@ public record MarkAttemptTimedOutCommand(Guid AttemptId) : ICommand<Unit>;
 
 
 public class MarkAttemptTimedOutCommandHandler(
-    IRepository<QuizAttempt> attemptRepository) : IRequestHandler<MarkAttemptTimedOutCommand, Unit>
+    IUnitOfWork unitOfWork) : IRequestHandler<MarkAttemptTimedOutCommand, Unit>
 {
     public async Task<Unit> Handle(MarkAttemptTimedOutCommand request, CancellationToken cancellationToken)
     {
+        var attemptRepository = unitOfWork.Repository<QuizAttempt>();
+
         var attempt = await attemptRepository.GetByIdAsync(request.AttemptId);
 
         if (attempt is null)
@@ -21,6 +23,8 @@ public class MarkAttemptTimedOutCommandHandler(
         attempt.Status = QuizAttemptStatus.Expired;
         attempt.SubmittedAt = DateTime.UtcNow;
         attemptRepository.Update(attempt);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }
