@@ -35,5 +35,9 @@ public sealed class AttemptAnswerConfiguration : BaseEntityConfiguration<Attempt
             .WithMany(x => x.AttemptAnswers)
             .HasForeignKey(x => x.SelectedOptionId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // NOTE: Removed static seed for AttemptAnswers to avoid FK insertion order issues.
+        // Seed AttemptAnswers only after QuestionOptions exist (via a new migration),
+        // or insert them at runtime (test seed script) to guarantee FK referential integrity.
     }
 }

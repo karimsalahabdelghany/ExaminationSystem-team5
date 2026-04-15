@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ExaminationSystem.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -522,12 +522,31 @@ namespace ExaminationSystem.Persistence.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "CreatedBy", "DeletedAt", "Email", "EmailConfirmed", "FailedLoginAttempts", "FullName", "LockedUntil", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "RowVersion", "SecurityStamp", "Status", "TwoFactorEnabled", "UpdatedAt", "UpdatedBy", "UserName" },
+                values: new object[,]
+                {
+                    { new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567890"), 0, "A1B2C3D4-E5F6-7890-ABCD-EF1234567890", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "admin@system.com", true, 0, "System Administrator", null, true, null, "ADMIN@SYSTEM.COM", "ADMIN@SYSTEM.COM", "AQAAAAIAAYagAAAAEJ5tQaHbHsOFCiMfQHvFAAFcQUQxkMECnxU2TlxRFiHjlRl3T5UdqKQqTuJdxZw2dA==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "A1B2C3D4E5F6789012345678901234AB", (byte)0, false, null, null, "admin@system.com" },
+                    { new Guid("b2c3d4e5-f6a7-8901-bcde-f12345678901"), 0, "B2C3D4E5-F6A7-8901-BCDE-F12345678901", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "instructor@system.com", true, 0, "Default Instructor", null, true, null, "INSTRUCTOR@SYSTEM.COM", "INSTRUCTOR@SYSTEM.COM", "AQAAAAIAAYagAAAAEHmR2VKQJzLkQrN5t3nGWP+4FqvGYj7YGLGv2mN3b8D1oNqNTL2tKfHqR6kPw5wA==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "B2C3D4E5F6A789012345678901234BCD", (byte)0, false, null, null, "instructor@system.com" },
+                    { new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012"), 0, "C3D4E5F6-A7B8-9012-CDEF-123456789012", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "student@system.com", true, 0, "Default Student", null, true, null, "STUDENT@SYSTEM.COM", "STUDENT@SYSTEM.COM", "AQAAAAIAAYagAAAAEK5GJ3Nk8bHfRqM2p7vYWT+9GrwHZk8ZHMHw3pO4c9E2pOqOUM3uLgIrS7lQx6xB==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "C3D4E5F6A7B890123456789012345CDE", (byte)0, false, null, null, "student@system.com" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Diplomas",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "Description", "Duration", "QuizCount", "Status", "Title", "UpdatedAt", "UpdatedBy" },
                 values: new object[,]
                 {
                     { new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A foundational backend program covering architecture, APIs, and persistence.", 24, 1, 0, "Backend Engineering Diploma", null, null },
                     { new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A practical cloud engineering track with CI/CD, IaC, and monitoring.", 20, 1, 0, "Cloud & DevOps Diploma", null, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Enrollments",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "DiplomaId", "EnrolledAt", "Status", "UpdatedAt", "UpdatedBy", "UserId" },
+                values: new object[,]
+                {
+                    { new Guid("d4e5f6a7-b8c9-0123-defa-234567890123"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), (byte)0, null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") },
+                    { new Guid("e5f6a7b8-c9d0-1234-efab-345678901234"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), (byte)0, null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") }
                 });
 
             migrationBuilder.InsertData(
@@ -538,6 +557,33 @@ namespace ExaminationSystem.Persistence.Migrations
                     { new Guid("a1111111-1111-1111-1111-111111111111"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), 30, "Answer all questions within the time limit.", 3, 60, (byte)0, "C# Fundamentals Quiz", null, null },
                     { new Guid("b2222222-2222-2222-2222-222222222222"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), 20, "Choose the best answer for each question.", 5, 70, (byte)0, "Docker Basics Quiz", null, null }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Questions",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "Explanation", "OrderIndex", "QuizId", "Text", "Type", "UpdatedAt", "UpdatedBy" },
+                values: new object[,]
+                {
+                    { new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "Statelessness and uniform interface are both core REST constraints defined by Fielding.", 3, new Guid("a1111111-1111-1111-1111-111111111111"), "Which of the following are valid REST constraints?", (byte)0, null, null },
+                    { new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A liveness probe tells Kubernetes whether to restart a container.", 1, new Guid("b2222222-2222-2222-2222-222222222222"), "What is the primary purpose of a Kubernetes liveness probe?", (byte)2, null, null },
+                    { new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "Terraform by HashiCorp uses HCL and supports multiple cloud providers.", 2, new Guid("b2222222-2222-2222-2222-222222222222"), "Which IaC tool uses a declarative HCL syntax and is cloud-agnostic?", (byte)2, null, null },
+                    { new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "Kubernetes and Docker Swarm are both container orchestration platforms.", 3, new Guid("b2222222-2222-2222-2222-222222222222"), "Which of the following are container orchestration platforms?", (byte)0, null, null },
+                    { new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "PUT is idempotent — calling it multiple times produces the same result.", 1, new Guid("a1111111-1111-1111-1111-111111111111"), "Which HTTP method is idempotent and should be used to fully replace a resource?", (byte)2, null, null },
+                    { new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "D stands for Dependency Inversion — high-level modules should not depend on low-level modules.", 2, new Guid("a1111111-1111-1111-1111-111111111111"), "What does the SOLID principle 'D' stand for?", (byte)2, null, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "QuizAttempts",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "Deadline", "DeletedAt", "QuizId", "StartTime", "Status", "SubmittedAt", "UpdatedAt", "UpdatedBy", "UserId" },
+                values: new object[,]
+                {
+                    { new Guid("a7b8c9d0-e1f2-3456-abcd-567890123456"), new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc), "seed", new DateTime(2026, 2, 10, 9, 20, 0, 0, DateTimeKind.Utc), null, new Guid("b2222222-2222-2222-2222-222222222222"), new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc), (byte)1, null, null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") },
+                    { new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"), new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc), "seed", new DateTime(2026, 2, 1, 10, 30, 0, 0, DateTimeKind.Utc), null, new Guid("a1111111-1111-1111-1111-111111111111"), new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc), (byte)2, new DateTime(2026, 2, 1, 10, 25, 0, 0, DateTimeKind.Utc), null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AttemptResults",
+                columns: new[] { "Id", "AttemptId", "CalculatedAt", "CorrectCount", "CreatedAt", "CreatedBy", "DeletedAt", "IsDeleted", "Passed", "Score", "TotalQuestions", "UpdatedAt", "UpdatedBy" },
+                values: new object[] { new Guid("e1f2a3b4-c5d6-7891-efa1-901234567891"), new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"), new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc), 2, new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc), "seed", null, false, true, 66.67m, 3, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

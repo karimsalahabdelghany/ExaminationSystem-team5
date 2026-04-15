@@ -14,9 +14,8 @@ public class CheckUserEnrollmentQueryHandler(IUnitOfWork unitOfWork) : IRequestH
     {
         var _repository = _unitOfWork.Repository<Diploma>();
         var enrollmentExists = await _repository.GetAll(d => d.Id == request.DiplomaId
-                                                          && d.Enrollments
-                                                              .Any(e => e.UserId == request.StudentId))
-                                                .AnyAsync(cancellationToken);
+                                                   /*&& d.Enrollments.Any(e => e.UserId == request.StudentId)*/)
+                                                .AnyAsync(d => d.Enrollments.Any(e => e.UserId == request.StudentId) ,cancellationToken);
 
         if (!enrollmentExists)
             return RequestResult<bool>.Failure(false, ResultCode.UserNotEnrolledInDiploma);

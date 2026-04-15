@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExaminationSystem.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20260415131145_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260415172852_Inital Create")]
+    partial class InitalCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -130,6 +130,21 @@ namespace ExaminationSystem.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("AttemptResults", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e1f2a3b4-c5d6-7891-efa1-901234567891"),
+                            AttemptId = new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"),
+                            CalculatedAt = new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc),
+                            CorrectCount = 2,
+                            CreatedAt = new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsDeleted = false,
+                            Passed = true,
+                            Score = 66.67m,
+                            TotalQuestions = 3
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.Diploma", b =>
@@ -264,6 +279,30 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Enrollments", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d4e5f6a7-b8c9-0123-defa-234567890123"),
+                            CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"),
+                            EnrolledAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            Status = (byte)0,
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        },
+                        new
+                        {
+                            Id = new Guid("e5f6a7b8-c9d0-1234-efab-345678901234"),
+                            CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"),
+                            EnrolledAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            Status = (byte)0,
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.LoginLog", b =>
@@ -485,6 +524,80 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("Questions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "PUT is idempotent — calling it multiple times produces the same result.",
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            Text = "Which HTTP method is idempotent and should be used to fully replace a resource?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "D stands for Dependency Inversion — high-level modules should not depend on low-level modules.",
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            Text = "What does the SOLID principle 'D' stand for?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "Statelessness and uniform interface are both core REST constraints defined by Fielding.",
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            Text = "Which of the following are valid REST constraints?",
+                            Type = (byte)0
+                        },
+                        new
+                        {
+                            Id = new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "A liveness probe tells Kubernetes whether to restart a container.",
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            Text = "What is the primary purpose of a Kubernetes liveness probe?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "Terraform by HashiCorp uses HCL and supports multiple cloud providers.",
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            Text = "Which IaC tool uses a declarative HCL syntax and is cloud-agnostic?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "Kubernetes and Docker Swarm are both container orchestration platforms.",
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            Text = "Which of the following are container orchestration platforms?",
+                            Type = (byte)0
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.QuestionOption", b =>
@@ -691,6 +804,33 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("QuizAttempts", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"),
+                            CreatedAt = new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Deadline = new DateTime(2026, 2, 1, 10, 30, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            StartTime = new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Status = (byte)2,
+                            SubmittedAt = new DateTime(2026, 2, 1, 10, 25, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        },
+                        new
+                        {
+                            Id = new Guid("a7b8c9d0-e1f2-3456-abcd-567890123456"),
+                            CreatedAt = new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Deadline = new DateTime(2026, 2, 10, 9, 20, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            StartTime = new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Status = (byte)1,
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.RefreshToken", b =>
@@ -862,6 +1002,77 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "admin@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "System Administrator",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "ADMIN@SYSTEM.COM",
+                            NormalizedUserName = "ADMIN@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJ5tQaHbHsOFCiMfQHvFAAFcQUQxkMECnxU2TlxRFiHjlRl3T5UdqKQqTuJdxZw2dA==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "A1B2C3D4E5F6789012345678901234AB",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "admin@system.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("b2c3d4e5-f6a7-8901-bcde-f12345678901"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "B2C3D4E5-F6A7-8901-BCDE-F12345678901",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "instructor@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "Default Instructor",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "INSTRUCTOR@SYSTEM.COM",
+                            NormalizedUserName = "INSTRUCTOR@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHmR2VKQJzLkQrN5t3nGWP+4FqvGYj7YGLGv2mN3b8D1oNqNTL2tKfHqR6kPw5wA==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "B2C3D4E5F6A789012345678901234BCD",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "instructor@system.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "C3D4E5F6-A7B8-9012-CDEF-123456789012",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "student@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "Default Student",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "STUDENT@SYSTEM.COM",
+                            NormalizedUserName = "STUDENT@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEK5GJ3Nk8bHfRqM2p7vYWT+9GrwHZk8ZHMHw3pO4c9E2pOqOUM3uLgIrS7lQx6xB==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "C3D4E5F6A7B890123456789012345CDE",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "student@system.com"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
