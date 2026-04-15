@@ -12,12 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExaminationSystem.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-<<<<<<<< HEAD:src/ExaminationSystem.Persistence/Migrations/20260414043959_Inital Create.Designer.cs
-    [Migration("20260414043959_Inital Create")]
-========
-    [Migration("20260415053839_Inital Create")]
->>>>>>>> origin/main-testing:src/ExaminationSystem.Persistence/Migrations/20260415053839_Inital Create.Designer.cs
-    partial class InitalCreate
+    [Migration("20260415104229_Initial Create")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -866,6 +862,77 @@ namespace ExaminationSystem.Persistence.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "admin@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "System Administrator",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "ADMIN@SYSTEM.COM",
+                            NormalizedUserName = "ADMIN@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJ5tQaHbHsOFCiMfQHvFAAFcQUQxkMECnxU2TlxRFiHjlRl3T5UdqKQqTuJdxZw2dA==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "A1B2C3D4E5F6789012345678901234AB",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "admin@system.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("b2c3d4e5-f6a7-8901-bcde-f12345678901"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "B2C3D4E5-F6A7-8901-BCDE-F12345678901",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "instructor@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "Default Instructor",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "INSTRUCTOR@SYSTEM.COM",
+                            NormalizedUserName = "INSTRUCTOR@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHmR2VKQJzLkQrN5t3nGWP+4FqvGYj7YGLGv2mN3b8D1oNqNTL2tKfHqR6kPw5wA==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "B2C3D4E5F6A789012345678901234BCD",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "instructor@system.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "C3D4E5F6-A7B8-9012-CDEF-123456789012",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "student@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "Default Student",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "STUDENT@SYSTEM.COM",
+                            NormalizedUserName = "STUDENT@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEK5GJ3Nk8bHfRqM2p7vYWT+9GrwHZk8ZHMHw3pO4c9E2pOqOUM3uLgIrS7lQx6xB==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "C3D4E5F6A7B890123456789012345CDE",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "student@system.com"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>

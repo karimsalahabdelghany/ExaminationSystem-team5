@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ExaminationSystem.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -519,6 +519,16 @@ namespace ExaminationSystem.Persistence.Migrations
                         principalTable: "QuizAttempts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "CreatedBy", "DeletedAt", "Email", "EmailConfirmed", "FailedLoginAttempts", "FullName", "LockedUntil", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "RowVersion", "SecurityStamp", "Status", "TwoFactorEnabled", "UpdatedAt", "UpdatedBy", "UserName" },
+                values: new object[,]
+                {
+                    { new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567890"), 0, "A1B2C3D4-E5F6-7890-ABCD-EF1234567890", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "admin@system.com", true, 0, "System Administrator", null, true, null, "ADMIN@SYSTEM.COM", "ADMIN@SYSTEM.COM", "AQAAAAIAAYagAAAAEJ5tQaHbHsOFCiMfQHvFAAFcQUQxkMECnxU2TlxRFiHjlRl3T5UdqKQqTuJdxZw2dA==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "A1B2C3D4E5F6789012345678901234AB", (byte)0, false, null, null, "admin@system.com" },
+                    { new Guid("b2c3d4e5-f6a7-8901-bcde-f12345678901"), 0, "B2C3D4E5-F6A7-8901-BCDE-F12345678901", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "instructor@system.com", true, 0, "Default Instructor", null, true, null, "INSTRUCTOR@SYSTEM.COM", "INSTRUCTOR@SYSTEM.COM", "AQAAAAIAAYagAAAAEHmR2VKQJzLkQrN5t3nGWP+4FqvGYj7YGLGv2mN3b8D1oNqNTL2tKfHqR6kPw5wA==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "B2C3D4E5F6A789012345678901234BCD", (byte)0, false, null, null, "instructor@system.com" },
+                    { new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012"), 0, "C3D4E5F6-A7B8-9012-CDEF-123456789012", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "student@system.com", true, 0, "Default Student", null, true, null, "STUDENT@SYSTEM.COM", "STUDENT@SYSTEM.COM", "AQAAAAIAAYagAAAAEK5GJ3Nk8bHfRqM2p7vYWT+9GrwHZk8ZHMHw3pO4c9E2pOqOUM3uLgIrS7lQx6xB==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "C3D4E5F6A7B890123456789012345CDE", (byte)0, false, null, null, "student@system.com" }
                 });
 
             migrationBuilder.InsertData(
