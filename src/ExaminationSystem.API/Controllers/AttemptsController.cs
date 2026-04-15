@@ -16,7 +16,7 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
     public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionRequest request)
     {
         // TODO: uncomment, will be replaced with actual user claim when Identity is ready
-        var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+       // var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
         //var parsedStudentId = Guid.TryParse(studentId, out var sid) ? sid : Guid.Empty; 
 
         //TODO: remove
@@ -33,4 +33,4 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
     }
 }
 
-public record AnswerQuestionRequest(Guid QuestionId, Guid SelectedOptionId);
+
