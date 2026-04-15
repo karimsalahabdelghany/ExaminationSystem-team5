@@ -10,11 +10,13 @@ public record DeleteQuizCommand(Guid QuizId) : ICommand<Unit>;
 
 
 public class DeleteQuizCommandHandler(
-    IRepository<Quiz> quizRepository,
+    IUnitOfWork unitOfWork,
     IMediator mediator) : IRequestHandler<DeleteQuizCommand, Unit>
 {
     public async Task<Unit> Handle(DeleteQuizCommand request, CancellationToken cancellationToken)
     {
+        var quizRepository = unitOfWork.Repository<Quiz>();
+
         var quiz = await quizRepository.GetByIdAsync(request.QuizId);
 
         if (quiz is null)
@@ -29,9 +31,8 @@ public class DeleteQuizCommandHandler(
         if (hasActiveAttempts)
             throw new ConflictException("Quiz", "Cannot delete quiz while students have in-progress attempts.");
 
-        quiz.IsDeleted = true;
-        quiz.DeletedAt = DateTime.UtcNow;
-        quizRepository.Update(quiz);
+        quizRepository.Delete(quiz);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

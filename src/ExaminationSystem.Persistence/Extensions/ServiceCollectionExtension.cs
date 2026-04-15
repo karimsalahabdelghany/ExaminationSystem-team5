@@ -11,11 +11,11 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ConcurrencyInterceptor>();
-        services.AddScoped<AuditableEntityInterceptor>();
+        ////services.AddScoped<AuditableEntityInterceptor>();
         services.AddDbContext<ApplicationContext>((serviceProvider, options) =>
         {
             var concurrencyInterceptor = serviceProvider.GetRequiredService<ConcurrencyInterceptor>();
-            var auditableEntityInterceptor = serviceProvider.GetRequiredService<AuditableEntityInterceptor>();
+            ////var auditableEntityInterceptor = serviceProvider.GetRequiredService<AuditableEntityInterceptor>();
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             //options.AddInterceptors(concurrencyInterceptor/*,auditableEntityInterceptor*/);
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
