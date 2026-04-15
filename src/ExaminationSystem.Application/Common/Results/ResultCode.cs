@@ -11,4 +11,7 @@ public enum ResultCode
     DiplomaHasActiveEnrollments = 1006,
     DiplomaHasActiveEnrollmentsOrPublished = 1007,
     DiplomaExist = 1008,
+    DiplomasRetrievedSuccessfully = 1009,
+    UserNotEnrolledInDiploma = 1010,
+    UserEnrolledInDiploma = 1011,
 }
