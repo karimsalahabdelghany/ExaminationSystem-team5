@@ -1,6 +1,7 @@
 using ExaminationSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace ExaminationSystem.Persistence.Configurations;
 
@@ -29,5 +30,6 @@ public sealed class AttemptResultConfiguration : IEntityTypeConfiguration<Attemp
         builder.HasIndex(x => x.AttemptId).IsUnique();
 
         builder.HasQueryFilter(x => !x.Attempt.IsDeleted);
+        
     }
 }

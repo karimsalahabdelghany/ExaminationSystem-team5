@@ -2,7 +2,7 @@ using ExaminationSystem.Domain.Interfaces;
 
 namespace ExaminationSystem.Domain.Entities;
 
-public class User : IdentityUser<Guid>, IBaseEntity
+public class User : IdentityUser<Guid> ,IBaseEntity
 {
     private readonly List<OtpCode> _otpCodes = [];
     private readonly List<PasswordResetToken> _passwordResetTokens = [];
@@ -28,6 +28,6 @@ public class User : IdentityUser<Guid>, IBaseEntity
     public IReadOnlyCollection<LoginLog> LoginLogs => _loginLogs;
     public IReadOnlyCollection<Enrollment> Enrollments => _enrollments;
     public IReadOnlyCollection<QuizAttempt> QuizAttempts => _quizAttempts;
-
+    
     public byte[] RowVersion { get ; set ; }
 }

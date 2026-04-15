@@ -10,11 +10,16 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddApiDependencies(builder.Configuration);
-        
+        builder.Services.AddApplication();
+        builder.Services.AddPersistence(builder.Configuration);
+        // builder.Services.AddPersistence(builder.Configuration);
+        builder.Services.AddMemoryCache();
+
         var app = builder.Build();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         app.ApplyDatabaseMigrations();
+
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

@@ -463,7 +463,13 @@ namespace ExaminationSystem.Persistence.Migrations
                     Passed = table.Column<bool>(type: "bit", nullable: false),
                     TotalQuestions = table.Column<int>(type: "int", nullable: false),
                     CorrectCount = table.Column<int>(type: "int", nullable: false),
-                    CalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {

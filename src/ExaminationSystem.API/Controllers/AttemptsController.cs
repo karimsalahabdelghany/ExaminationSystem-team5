@@ -1,8 +1,10 @@
 ﻿
+using ExaminationSystem.API.DTOs;
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
 using ExaminationSystem.Application.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using System.Net;
 using System.Security.Claims;
 
 namespace ExaminationSystem.API.Controllers;
@@ -13,10 +15,10 @@ namespace ExaminationSystem.API.Controllers;
 public class AttemptsController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost("{attemptId:guid}/answer")]
-    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionRequest request)
+    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionDto request)
     {
         // TODO: uncomment, will be replaced with actual user claim when Identity is ready
-        var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+       // var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
         //var parsedStudentId = Guid.TryParse(studentId, out var sid) ? sid : Guid.Empty; 
 
         //TODO: remove
@@ -29,8 +31,12 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
             StudentId: parsedStudentId
         ));
 
+        if (result.TimedOut)
+            return StatusCode(410, ApiResponse<AnswerQuestionResponse>
+                .Failure("Time has expired. Your attempt has been auto-submitted.", (HttpStatusCode)410));
+
         return Ok(ApiResponse<AnswerQuestionResponse>.Success(result));
     }
 }
 
-public record AnswerQuestionRequest(Guid QuestionId, Guid SelectedOptionId);
+

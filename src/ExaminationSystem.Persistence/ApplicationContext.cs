@@ -46,6 +46,7 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole<Guid>, Gu
             //        .IsConcurrencyToken()
             //        .ValueGeneratedOnAddOrUpdate();
             //}
+            
         }
     }
     private static LambdaExpression BuildIsDeletedFilter(Type entityType)

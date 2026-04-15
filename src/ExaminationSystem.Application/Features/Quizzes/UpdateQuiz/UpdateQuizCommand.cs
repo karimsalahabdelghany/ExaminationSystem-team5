@@ -16,10 +16,12 @@ public record UpdateQuizCommand(
 
 
 public class UpdateQuizCommandHandler(
-    IRepository<Quiz> quizRepository) : IRequestHandler<UpdateQuizCommand, QuizResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateQuizCommand, QuizResponse>
 {
     public async Task<QuizResponse> Handle(UpdateQuizCommand request, CancellationToken cancellationToken)
     {
+        var quizRepository = unitOfWork.Repository<Quiz>();
+
         var quiz = await quizRepository.GetByIdAsync(request.QuizId);
 
         if (quiz is null)
@@ -32,6 +34,7 @@ public class UpdateQuizCommandHandler(
         quiz.Instructions = request.Instructions ?? string.Empty;
 
         quizRepository.Update(quiz);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return quiz.Adapt<QuizResponse>();
     }
