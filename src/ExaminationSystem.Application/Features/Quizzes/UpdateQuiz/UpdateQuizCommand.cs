@@ -33,7 +33,9 @@ public class UpdateQuizCommandHandler(
         quiz.MaxAttempts = request.MaxAttempts;
         quiz.Instructions = request.Instructions ?? string.Empty;
 
-        quizRepository.Update(quiz);
+        //quizRepository.Update(quiz);
+        quizRepository.SaveInclude(quiz,nameof(quiz.Title),nameof(quiz.DurationMinutes), 
+            nameof(quiz.PassScore), nameof(quiz.MaxAttempts), nameof(quiz.Instructions));
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return quiz.Adapt<QuizResponse>();

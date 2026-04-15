@@ -12,12 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExaminationSystem.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-<<<<<<<< HEAD:src/ExaminationSystem.Persistence/Migrations/20260414043959_Inital Create.Designer.cs
-    [Migration("20260414043959_Inital Create")]
-========
-    [Migration("20260415053839_Inital Create")]
->>>>>>>> origin/main-testing:src/ExaminationSystem.Persistence/Migrations/20260415053839_Inital Create.Designer.cs
-    partial class InitalCreate
+    [Migration("20260415131145_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
