@@ -1,6 +1,7 @@
-﻿using ExaminationSystem.Application.Interfaces;
+using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace ExaminationSystem.Persistence.Services;
 
@@ -15,10 +16,10 @@ public class UnitOfWork : IUnitOfWork
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);
 
-    public async Task BeginTransactionAsync(CancellationToken ct = default)
+    public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken ct = default)
     {
         _transaction ??= await _context.Database
-            .BeginTransactionAsync(ct);
+            .BeginTransactionAsync(isolationLevel, ct);
     }
 
     public async Task CommitAsync(CancellationToken ct = default)

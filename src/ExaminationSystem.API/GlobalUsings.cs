@@ -1,4 +1,9 @@
 global using ExaminationSystem.API.Extensions;
 global using ExaminationSystem.Application.Extensions;
+global using ExaminationSystem.Application.Responses;
 global using ExaminationSystem.Persistence.Extensions;
+global using MediatR;
+global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+global using System.Net;
+global using System.Security.Claims;

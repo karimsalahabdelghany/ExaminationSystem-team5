@@ -687,6 +687,11 @@ namespace ExaminationSystem.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId", "QuizId", "Status")
+                        .IsUnique()
+                        .HasDatabaseName("UX_QuizAttempts_UserId_QuizId_InProgress")
+                        .HasFilter("[Status] = 1 AND [IsDeleted] = 0");
+
                     b.ToTable("QuizAttempts", (string)null);
                 });
 

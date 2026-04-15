@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Helper;
+using ExaminationSystem.Application.Common.Helper;
 using ExaminationSystem.Application.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -25,7 +25,7 @@ public class UnitOfWorkBehavior<TRequest, TResponse>(
         if (!isRoot)
             return await next();
 
-        await session.BeginTransactionAsync(ct);
+        await session.BeginTransactionAsync(ct: ct);
 
         try
         {

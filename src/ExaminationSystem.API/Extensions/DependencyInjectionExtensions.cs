@@ -1,3 +1,6 @@
+using ExaminationSystem.API.Services;
+using ExaminationSystem.Application.Interfaces;
+
 namespace ExaminationSystem.API.Extensions;
 
 public static class DependencyInjectionExtensions
@@ -8,6 +11,7 @@ public static class DependencyInjectionExtensions
         services.AddOpenApi();
         services.AddApplication();
         services.AddPersistence(configuration);
+        services.AddSingleton<IDateTimeProvider, UtcDateTimeProvider>();
 
         return services;
     }
