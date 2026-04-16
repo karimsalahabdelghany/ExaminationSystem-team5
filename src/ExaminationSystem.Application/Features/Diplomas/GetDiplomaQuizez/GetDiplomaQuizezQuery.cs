@@ -20,7 +20,7 @@ public class GetDiplomaQuizezQueryHandler(IUnitOfWork unitOfWork ,IMediator medi
 
     public async Task<RequestResult<List<GetDiplomaQuizezResponse>>> Handle(GetDiplomaQuizezQuery request, CancellationToken cancellationToken)
     {
-        var isEnrolled = await _mediator.Send(new CheckUserEnrollmentQuery(request.studentId, request.dipolmaId), cancellationToken);
+        var isEnrolled = await _mediator.Send(new CheckUserEnrollmentQuery(request.dipolmaId, request.studentId), cancellationToken);
         if (!isEnrolled.Result)
             throw new ForbiddenException("You are not enrolled in this diploma.");
         var _repository = _unitOfWork.Repository<Diploma>();

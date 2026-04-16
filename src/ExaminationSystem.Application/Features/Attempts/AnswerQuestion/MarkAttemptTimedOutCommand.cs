@@ -22,7 +22,10 @@ public class MarkAttemptTimedOutCommandHandler(
 
         attempt.Status = QuizAttemptStatus.Expired;
         attempt.SubmittedAt = DateTime.UtcNow;
-        attemptRepository.Update(attempt);
+
+
+        //attemptRepository.Update(attempt);
+        attemptRepository.SaveInclude(attempt, nameof(attempt.Status), nameof(attempt.SubmittedAt));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
