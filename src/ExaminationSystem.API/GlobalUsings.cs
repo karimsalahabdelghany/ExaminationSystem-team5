@@ -1,4 +1,5 @@
 global using ExaminationSystem.API.Extensions;
+global using ExaminationSystem.Application.Common.Results;
 global using ExaminationSystem.Application.Extensions;
 global using ExaminationSystem.Application.Responses;
 global using ExaminationSystem.Persistence.Extensions;
