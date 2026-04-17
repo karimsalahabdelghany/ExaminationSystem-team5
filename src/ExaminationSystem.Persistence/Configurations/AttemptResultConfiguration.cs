@@ -44,6 +44,7 @@ public sealed class AttemptResultConfiguration : IEntityTypeConfiguration<Attemp
         TotalQuestions = 3,
         CorrectCount = 2, // Q1 ✓  Q2 ✓  Q3 partial (only one option selected)
         CalculatedAt = new DateTime(2026, 2, 1, 10, 25, 30, DateTimeKind.Utc),
+        QuestionBreakdownJson = "[]",
         CreatedAt = new DateTime(2026, 2, 1, 10, 25, 30, DateTimeKind.Utc),
         CreatedBy = "seed",
         UpdatedAt = (DateTime?)null,
