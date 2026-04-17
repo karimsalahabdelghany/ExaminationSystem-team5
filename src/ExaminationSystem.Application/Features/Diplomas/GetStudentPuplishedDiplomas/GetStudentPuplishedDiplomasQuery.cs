@@ -1,16 +1,17 @@
 ﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Domain.Enums;
 
 namespace ExaminationSystem.Application.Features.Diplomas.GetStudentDiplomas;
 
 public record GetStudentPuplishedDiplomasQuery
-(Guid userId , int pageNumber, int pageSize) : IRequest<PaginationResult<GetStudentPuplishedDiplomasResponse>>;
+(Guid userId , int pageNumber, int pageSize) : IRequest<RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>>;
 
 public class GetStudentPuplishedDiplomasQueryHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<GetStudentPuplishedDiplomasQuery, PaginationResult<GetStudentPuplishedDiplomasResponse>>
+    : IRequestHandler<GetStudentPuplishedDiplomasQuery, RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>>
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    public async Task<PaginationResult<GetStudentPuplishedDiplomasResponse>> Handle(GetStudentPuplishedDiplomasQuery request, CancellationToken cancellationToken)
+    public async Task<RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>> Handle(GetStudentPuplishedDiplomasQuery request, CancellationToken cancellationToken)
     {
         var _repository = _unitOfWork.Repository<Diploma>();
         var diplomasQuery = _repository.GetAll(d => d.Status == DiplomaStatus.Published
@@ -29,6 +30,6 @@ public class GetStudentPuplishedDiplomasQueryHandler(IUnitOfWork unitOfWork)
                                             .Average(qa => (decimal?)qa.Result.Score)
                                       ));
         var diplomas = await diplomasQuery.PaginateAsync(request.pageNumber, request.pageSize,cancellationToken);
-        return diplomas;
+        return RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>.succeeded(diplomas, ResultCode.DiplomasRetrievedSuccessfully);
     }
 }

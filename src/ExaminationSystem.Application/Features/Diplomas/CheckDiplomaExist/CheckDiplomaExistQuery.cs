@@ -1,7 +1,4 @@
 ﻿using ExaminationSystem.Application.Common.Results;
-using ExaminationSystem.Application.Interfaces;
-using ExaminationSystem.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace ExaminationSystem.Application.Features.Diplomas.CheckDiplomaExist;
 
@@ -14,7 +11,7 @@ public class CheckDiplomaExistQueryHandler(IUnitOfWork unitOfWork) : IRequestHan
     {
         var _repository = _unitOfWork.Repository<Diploma>();
         var diplomaExists = await _repository.GetAll(d => d.Id == request.DiplomaId)
-                                           .AnyAsync(cancellationToken);
+                                            .AnyAsync(cancellationToken);
         return RequestResult<bool>.succeeded(diplomaExists, ResultCode.DiplomaExist);
     }
 }
