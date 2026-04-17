@@ -10,27 +10,28 @@ namespace ExaminationSystem.API.Controllers;
 public class DiplomasController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreateDiplomaCommand command)
+
+    public async Task<IActionResult> Create(CreateDiplomaCommand command , CancellationToken cancellationToken)
     {
-        var result =await _mediator.Send(command);
+        var result = await _mediator.Send(command ,cancellationToken);
         if (result is null)
             return BadRequest(ApiResponse<CreateDiplomaResponse>.Failure("Can't Create this diploma!"));
-        return Created($"/Diplomas/{result.Result.Id}", ApiResponse<CreateDiplomaResponse>.Success(result.Result,HttpStatusCode.Created));
+        return Created($"/Diplomas/{result?.Result?.Id}", ApiResponse<CreateDiplomaResponse>.Success(result?.Result,HttpStatusCode.Created));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, UpdateDiplomaCommand command)
+    public async Task<IActionResult> Update(Guid id, UpdateDiplomaCommand command , CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command , cancellationToken);
         if (result is null)
             return BadRequest(ApiResponse<UpdateDiplomaResult>.Failure("Can't update this diploma!"));
         return Ok(ApiResponse<UpdateDiplomaResult>.Success(result.Result, HttpStatusCode.OK));
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id , CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeleteDiplomaCommand(id));
+        var result = await _mediator.Send(new DeleteDiplomaCommand(id) ,cancellationToken);
         return result.Code switch
         {
             ResultCode.DiplomaNotFound => NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),
@@ -40,16 +41,16 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStudentPublishedDiplomas([FromQuery] GetStudentPuplishedDiplomasQuery query)
+    public async Task<IActionResult> GetStudentPublishedDiplomas([FromQuery] GetStudentPuplishedDiplomasQuery query, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(query);
+        var result = await _mediator.Send(query, cancellationToken);
         return Ok(ApiResponse<PaginationResult<GetStudentPuplishedDiplomasResponse>>.Success(result.Result, HttpStatusCode.OK));
     }
 
     [HttpGet("{id}/quizzes")]
-    public async Task<IActionResult> GetDiplomaQuizzes(Guid id, Guid studentId)
+    public async Task<IActionResult> GetDiplomaQuizzes(Guid id, Guid studentId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetPublishedDiplomaQuizezQuery(id, studentId));
+        var result = await _mediator.Send(new GetPublishedDiplomaQuizezQuery(id, studentId), cancellationToken );
         return result.Code switch
         {
             ResultCode.DiplomaNotFound => NotFound(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Failure("Diploma not found", HttpStatusCode.NotFound)),
