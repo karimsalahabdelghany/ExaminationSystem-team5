@@ -8,7 +8,11 @@ namespace ExaminationSystem.Application.Interfaces
     {
     }
 
-    ///
+    /// <summary>
+    /// 
+    /// 
+    /// </summary>
+    /// <typeparam name="TResponse"></typeparam>
     public interface IQuery<TResponse> : IRequest<TResponse>
     {
     }
