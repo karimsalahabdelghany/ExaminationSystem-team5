@@ -1,5 +1,4 @@
 using ExaminationSystem.Application.Common.Exceptions;
-using ExaminationSystem.Application.Features.Attempts.Commands;
 using ExaminationSystem.Application.Features.Attempts.Queries;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Questions.Queries;
