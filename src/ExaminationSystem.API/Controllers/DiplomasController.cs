@@ -10,6 +10,7 @@ namespace ExaminationSystem.API.Controllers;
 public class DiplomasController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost]
+
     public async Task<IActionResult> Create(CreateDiplomaCommand command)
     {
         var result =await _mediator.Send(command);
