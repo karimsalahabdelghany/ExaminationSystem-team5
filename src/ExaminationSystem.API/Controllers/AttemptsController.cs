@@ -1,5 +1,3 @@
-
-using ExaminationSystem.API.DTOs;
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Attempts.Timer;
@@ -13,28 +11,20 @@ namespace ExaminationSystem.API.Controllers;
 
 [Route("api/attempts")]
 // TODO: Uncomment when Identity setup is complete
-[Authorize]
+//[Authorize]
 public class AttemptsController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost("{attemptId:guid}/answer")]
-    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionDto request)
+    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionOrchestrator command)
     {
-        // TODO: replace with finalized claim mapping if auth token contract changes
-        // var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // var parsedStudentId = Guid.TryParse(studentId, out var sid) ? sid : Guid.Empty;
-        var studentIdClaim = User.FindFirstValue("user_id");
-        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var parsedStudentId))
-        {
-            return Unauthorized(
-                ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
-        }
+        // TODO: replace StudentId to come from JWT claims once Identity is ready
+        // var studentIdClaim = User.FindFirstValue("user_id");
+        // if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var parsedStudentId))
+        //     return Unauthorized(
+        //         ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+        // command = command with { StudentId = parsedStudentId };
 
-        var result = await _mediator.Send(new AnswerQuestionOrchestrator(
-            AttemptId: attemptId,
-            QuestionId: request.QuestionId,
-            SelectedOptionId: request.SelectedOptionId,
-            StudentId: parsedStudentId
-        ));
+        var result = await _mediator.Send(command with { AttemptId = attemptId });
 
         if (result.TimedOut)
             return StatusCode(410, ApiResponse<AnswerQuestionResponse>

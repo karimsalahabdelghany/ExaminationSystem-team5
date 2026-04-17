@@ -24,7 +24,7 @@ public sealed class EnrollmentConfiguration : BaseEntityConfiguration<Enrollment
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.DiplomaId);
 
-        builder.HasOne(x => x.User)
+        builder.HasOne(x => x.Student)
             .WithMany(x => x.Enrollments)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Restrict);

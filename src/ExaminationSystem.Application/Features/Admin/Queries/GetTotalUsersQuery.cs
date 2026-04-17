@@ -10,9 +10,9 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
     public record GetTotalUsersQuery : IQuery<int>;
     public class GetTotalUsersQueryHandler : IRequestHandler<GetTotalUsersQuery, int>
     {
-        private readonly UserManager<Domain.Entities.User> _userManager;
+        private readonly UserManager<Domain.Entities.AppUser> _userManager;
 
-        public GetTotalUsersQueryHandler(UserManager<Domain.Entities.User> userManager)
+        public GetTotalUsersQueryHandler(UserManager<Domain.Entities.AppUser> userManager)
         {
             _userManager = userManager;
         }
@@ -20,7 +20,7 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
         public async Task<int> Handle(
             GetTotalUsersQuery request,
             CancellationToken cancellationToken)
-            => await  _userManager.Users.CountAsync<ExaminationSystem.Domain.Entities.User>();
+            => await  _userManager.Users.CountAsync<ExaminationSystem.Domain.Entities.AppUser>();
     }
 
 }

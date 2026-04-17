@@ -7,13 +7,14 @@ using System.Linq.Expressions;
 
 namespace ExaminationSystem.Persistence;
 
-public class ApplicationContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class ApplicationContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 {
     public ApplicationContext(DbContextOptions<ApplicationContext> options)
         : base(options)
     {
     }
 
+    public DbSet<Student> Students => Set<Student>();
     public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -34,7 +35,8 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole<Guid>, Gu
         // Configure concurrency tokens for entities implementing IConcurrencyEntity
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(IBaseEntity).IsAssignableFrom(entityType.ClrType))
+            if (typeof(IBaseEntity).IsAssignableFrom(entityType.ClrType)
+                && entityType.BaseType == null)
             {
                 modelBuilder.Entity(entityType.ClrType)
                     .HasQueryFilter(BuildIsDeletedFilter(entityType.ClrType));
