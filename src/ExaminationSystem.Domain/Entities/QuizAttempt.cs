@@ -23,8 +23,7 @@ public class QuizAttempt : BaseEntity
     public DateTime StartTime { get; set; }
     public DateTime Deadline { get; set; }
     public DateTime? SubmittedAt { get; set; }
-
-    public User User { get; set; } = null!;
+    public Student Student { get; set; } = null!;
     public Quiz Quiz { get; set; } = null!;
     public IReadOnlyCollection<AttemptAnswer> Answers => _answers;
     public AttemptResult? Result { get; set; }

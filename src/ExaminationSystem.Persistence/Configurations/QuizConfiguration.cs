@@ -43,7 +43,7 @@ public sealed class QuizConfiguration : BaseEntityConfiguration<Quiz>
                 DurationMinutes = 30,
                 PassScore = 60,
                 MaxAttempts = 3,
-                Status = QuizStatus.Draft,
+                Status = QuizStatus.Published,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "seed",
                 UpdatedAt = (DateTime?)null,

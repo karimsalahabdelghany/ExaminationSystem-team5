@@ -22,6 +22,149 @@ namespace ExaminationSystem.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ExaminationSystem.Domain.Entities.AppUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("LockedUntil")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+
+                    b.UseTptMappingStrategy();
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "admin@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "System Administrator",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "ADMIN@SYSTEM.COM",
+                            NormalizedUserName = "ADMIN@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJ5tQaHbHsOFCiMfQHvFAAFcQUQxkMECnxU2TlxRFiHjlRl3T5UdqKQqTuJdxZw2dA==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "A1B2C3D4E5F6789012345678901234AB",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "admin@system.com"
+                        });
+                });
+
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.AttemptAnswer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -109,6 +252,10 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Property<bool>("Passed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("QuestionBreakdownJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("Score")
                         .HasColumnType("decimal(9,2)");
 
@@ -127,6 +274,22 @@ namespace ExaminationSystem.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("AttemptResults", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e1f2a3b4-c5d6-7891-efa1-901234567891"),
+                            AttemptId = new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"),
+                            CalculatedAt = new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc),
+                            CorrectCount = 2,
+                            CreatedAt = new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsDeleted = false,
+                            Passed = true,
+                            QuestionBreakdownJson = "[]",
+                            Score = 66.67m,
+                            TotalQuestions = 3
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.Diploma", b =>
@@ -193,7 +356,7 @@ namespace ExaminationSystem.Persistence.Migrations
                             Duration = 24,
                             IsDeleted = false,
                             QuizCount = 1,
-                            Status = 0,
+                            Status = 1,
                             Title = "Backend Engineering Diploma"
                         },
                         new
@@ -261,6 +424,30 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Enrollments", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d4e5f6a7-b8c9-0123-defa-234567890123"),
+                            CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"),
+                            EnrolledAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            Status = (byte)0,
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        },
+                        new
+                        {
+                            Id = new Guid("e5f6a7b8-c9d0-1234-efab-345678901234"),
+                            CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            DiplomaId = new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"),
+                            EnrolledAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            Status = (byte)0,
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.LoginLog", b =>
@@ -482,6 +669,80 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("Questions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "PUT is idempotent — calling it multiple times produces the same result.",
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            Text = "Which HTTP method is idempotent and should be used to fully replace a resource?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "D stands for Dependency Inversion — high-level modules should not depend on low-level modules.",
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            Text = "What does the SOLID principle 'D' stand for?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "Statelessness and uniform interface are both core REST constraints defined by Fielding.",
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            Text = "Which of the following are valid REST constraints?",
+                            Type = (byte)0
+                        },
+                        new
+                        {
+                            Id = new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "A liveness probe tells Kubernetes whether to restart a container.",
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            Text = "What is the primary purpose of a Kubernetes liveness probe?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "Terraform by HashiCorp uses HCL and supports multiple cloud providers.",
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            Text = "Which IaC tool uses a declarative HCL syntax and is cloud-agnostic?",
+                            Type = (byte)2
+                        },
+                        new
+                        {
+                            Id = new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Explanation = "Kubernetes and Docker Swarm are both container orchestration platforms.",
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            Text = "Which of the following are container orchestration platforms?",
+                            Type = (byte)0
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.QuestionOption", b =>
@@ -535,6 +796,272 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("QuestionId");
 
                     b.ToTable("QuestionOptions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a9b0c1d2-e3f4-5678-abc9-789012345678"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = true,
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuestionId = new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"),
+                            Text = "PUT"
+                        },
+                        new
+                        {
+                            Id = new Guid("a9b0c1d2-e3f4-5678-abc9-789012345679"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuestionId = new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"),
+                            Text = "POST"
+                        },
+                        new
+                        {
+                            Id = new Guid("a9b0c1d2-e3f4-5678-abc9-78901234567a"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuestionId = new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"),
+                            Text = "PATCH"
+                        },
+                        new
+                        {
+                            Id = new Guid("a9b0c1d2-e3f4-5678-abc9-78901234567b"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 4,
+                            QuestionId = new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"),
+                            Text = "DELETE"
+                        },
+                        new
+                        {
+                            Id = new Guid("d2e3f4a5-b6c7-8901-def2-012345678902"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = true,
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuestionId = new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"),
+                            Text = "Dependency Inversion"
+                        },
+                        new
+                        {
+                            Id = new Guid("d2e3f4a5-b6c7-8901-def2-012345678903"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuestionId = new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"),
+                            Text = "Data Driven"
+                        },
+                        new
+                        {
+                            Id = new Guid("d2e3f4a5-b6c7-8901-def2-012345678904"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuestionId = new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"),
+                            Text = "Domain Driven"
+                        },
+                        new
+                        {
+                            Id = new Guid("d2e3f4a5-b6c7-8901-def2-012345678905"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 4,
+                            QuestionId = new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"),
+                            Text = "Decorator Pattern"
+                        },
+                        new
+                        {
+                            Id = new Guid("a5b6c7d8-e9f0-1234-abc5-345678901235"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = true,
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuestionId = new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"),
+                            Text = "Statelessness"
+                        },
+                        new
+                        {
+                            Id = new Guid("a5b6c7d8-e9f0-1234-abc5-345678901236"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuestionId = new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"),
+                            Text = "Persistent sessions"
+                        },
+                        new
+                        {
+                            Id = new Guid("a5b6c7d8-e9f0-1234-abc5-345678901237"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuestionId = new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"),
+                            Text = "Server-side rendering"
+                        },
+                        new
+                        {
+                            Id = new Guid("a5b6c7d8-e9f0-1234-abc5-345678901238"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 4,
+                            QuestionId = new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"),
+                            Text = "Tight coupling"
+                        },
+                        new
+                        {
+                            Id = new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890124"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = true,
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuestionId = new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"),
+                            Text = "Tells Kubernetes whether to restart a container"
+                        },
+                        new
+                        {
+                            Id = new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890125"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuestionId = new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"),
+                            Text = "Measures CPU usage"
+                        },
+                        new
+                        {
+                            Id = new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890126"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuestionId = new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"),
+                            Text = "Configures ingress routing"
+                        },
+                        new
+                        {
+                            Id = new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890127"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 4,
+                            QuestionId = new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"),
+                            Text = "Authenticates users"
+                        },
+                        new
+                        {
+                            Id = new Guid("c5d6e7f8-a9b0-1235-cde5-345678901235"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = true,
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuestionId = new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"),
+                            Text = "Terraform"
+                        },
+                        new
+                        {
+                            Id = new Guid("c5d6e7f8-a9b0-1235-cde5-345678901236"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuestionId = new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"),
+                            Text = "Ansible"
+                        },
+                        new
+                        {
+                            Id = new Guid("c5d6e7f8-a9b0-1235-cde5-345678901237"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuestionId = new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"),
+                            Text = "CloudFormation"
+                        },
+                        new
+                        {
+                            Id = new Guid("c5d6e7f8-a9b0-1235-cde5-345678901238"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 4,
+                            QuestionId = new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"),
+                            Text = "Puppet"
+                        },
+                        new
+                        {
+                            Id = new Guid("d6e7f8a9-b0c1-2346-def6-456789012346"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = true,
+                            IsDeleted = false,
+                            OrderIndex = 1,
+                            QuestionId = new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"),
+                            Text = "Kubernetes"
+                        },
+                        new
+                        {
+                            Id = new Guid("d6e7f8a9-b0c1-2346-def6-456789012347"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 2,
+                            QuestionId = new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"),
+                            Text = "Git"
+                        },
+                        new
+                        {
+                            Id = new Guid("d6e7f8a9-b0c1-2346-def6-456789012348"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 3,
+                            QuestionId = new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"),
+                            Text = "Jenkins"
+                        },
+                        new
+                        {
+                            Id = new Guid("d6e7f8a9-b0c1-2346-def6-456789012349"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            IsCorrect = false,
+                            IsDeleted = false,
+                            OrderIndex = 4,
+                            QuestionId = new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"),
+                            Text = "Nginx"
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.Quiz", b =>
@@ -612,7 +1139,7 @@ namespace ExaminationSystem.Persistence.Migrations
                             IsDeleted = false,
                             MaxAttempts = 3,
                             PassScore = 60,
-                            Status = (byte)0,
+                            Status = (byte)1,
                             Title = "C# Fundamentals Quiz"
                         },
                         new
@@ -687,12 +1214,46 @@ namespace ExaminationSystem.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId", "QuizId", "Status")
-                        .IsUnique()
-                        .HasDatabaseName("UX_QuizAttempts_UserId_QuizId_InProgress")
-                        .HasFilter("[Status] = 1 AND [IsDeleted] = 0");
-
                     b.ToTable("QuizAttempts", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"),
+                            CreatedAt = new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Deadline = new DateTime(2026, 2, 1, 10, 30, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            StartTime = new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Status = (byte)2,
+                            SubmittedAt = new DateTime(2026, 2, 1, 10, 25, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        },
+                        new
+                        {
+                            Id = new Guid("a7b8c9d0-e1f2-3456-abcd-567890123456"),
+                            CreatedAt = new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Deadline = new DateTime(2026, 2, 10, 9, 20, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            QuizId = new Guid("b2222222-2222-2222-2222-222222222222"),
+                            StartTime = new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Status = (byte)1,
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        },
+                        new
+                        {
+                            Id = new Guid("b8c9d0e1-f2a3-4567-bcde-678901234567"),
+                            CreatedAt = new DateTime(2027, 1, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Deadline = new DateTime(2027, 12, 31, 23, 59, 59, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
+                            QuizId = new Guid("a1111111-1111-1111-1111-111111111111"),
+                            StartTime = new DateTime(2027, 1, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Status = (byte)1,
+                            UserId = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012")
+                        });
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.RefreshToken", b =>
@@ -748,122 +1309,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens", (string)null);
-                });
-
-            modelBuilder.Entity("ExaminationSystem.Domain.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("FailedLoginAttempts")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime?>("LockedUntil")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte>("Status")
-                        .HasColumnType("tinyint");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -997,6 +1442,38 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ExaminationSystem.Domain.Entities.Student", b =>
+                {
+                    b.HasBaseType("ExaminationSystem.Domain.Entities.AppUser");
+
+                    b.ToTable("Students", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "C3D4E5F6-A7B8-9012-CDEF-123456789012",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "seed",
+                            Email = "student@system.com",
+                            EmailConfirmed = true,
+                            FailedLoginAttempts = 0,
+                            FullName = "Default Student",
+                            IsDeleted = false,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "STUDENT@SYSTEM.COM",
+                            NormalizedUserName = "STUDENT@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEK5GJ3Nk8bHfRqM2p7vYWT+9GrwHZk8ZHMHw3pO4c9E2pOqOUM3uLgIrS7lQx6xB==",
+                            PhoneNumberConfirmed = false,
+                            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 },
+                            SecurityStamp = "C3D4E5F6A7B890123456789012345CDE",
+                            Status = (byte)0,
+                            TwoFactorEnabled = false,
+                            UserName = "student@system.com"
+                        });
+                });
+
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.AttemptAnswer", b =>
                 {
                     b.HasOne("ExaminationSystem.Domain.Entities.QuizAttempt", "Attempt")
@@ -1043,7 +1520,7 @@ namespace ExaminationSystem.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", "User")
+                    b.HasOne("ExaminationSystem.Domain.Entities.Student", "Student")
                         .WithMany("Enrollments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1051,12 +1528,12 @@ namespace ExaminationSystem.Persistence.Migrations
 
                     b.Navigation("Diploma");
 
-                    b.Navigation("User");
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.LoginLog", b =>
                 {
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", "User")
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", "User")
                         .WithMany("LoginLogs")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1067,7 +1544,7 @@ namespace ExaminationSystem.Persistence.Migrations
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.OtpCode", b =>
                 {
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", "User")
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", "User")
                         .WithMany("OtpCodes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1078,7 +1555,7 @@ namespace ExaminationSystem.Persistence.Migrations
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.PasswordResetToken", b =>
                 {
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", "User")
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", "User")
                         .WithMany("PasswordResetTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1128,7 +1605,7 @@ namespace ExaminationSystem.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", "User")
+                    b.HasOne("ExaminationSystem.Domain.Entities.Student", "Student")
                         .WithMany("QuizAttempts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1136,12 +1613,12 @@ namespace ExaminationSystem.Persistence.Migrations
 
                     b.Navigation("Quiz");
 
-                    b.Navigation("User");
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.RefreshToken", b =>
                 {
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", "User")
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1161,7 +1638,7 @@ namespace ExaminationSystem.Persistence.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", null)
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1170,7 +1647,7 @@ namespace ExaminationSystem.Persistence.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", null)
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1185,7 +1662,7 @@ namespace ExaminationSystem.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", null)
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1194,11 +1671,31 @@ namespace ExaminationSystem.Persistence.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("ExaminationSystem.Domain.Entities.User", null)
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ExaminationSystem.Domain.Entities.Student", b =>
+                {
+                    b.HasOne("ExaminationSystem.Domain.Entities.AppUser", null)
+                        .WithOne()
+                        .HasForeignKey("ExaminationSystem.Domain.Entities.Student", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ExaminationSystem.Domain.Entities.AppUser", b =>
+                {
+                    b.Navigation("LoginLogs");
+
+                    b.Navigation("OtpCodes");
+
+                    b.Navigation("PasswordResetTokens");
+
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("ExaminationSystem.Domain.Entities.Diploma", b =>
@@ -1234,19 +1731,11 @@ namespace ExaminationSystem.Persistence.Migrations
                     b.Navigation("Result");
                 });
 
-            modelBuilder.Entity("ExaminationSystem.Domain.Entities.User", b =>
+            modelBuilder.Entity("ExaminationSystem.Domain.Entities.Student", b =>
                 {
                     b.Navigation("Enrollments");
 
-                    b.Navigation("LoginLogs");
-
-                    b.Navigation("OtpCodes");
-
-                    b.Navigation("PasswordResetTokens");
-
                     b.Navigation("QuizAttempts");
-
-                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

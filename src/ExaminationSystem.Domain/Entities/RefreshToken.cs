@@ -18,5 +18,5 @@ public class RefreshToken : BaseEntity
     public bool IsRevoked { get; set; }
     public DateTime ExpiresAt { get; set; }
 
-    public User User { get; set; } = null!;
+    public AppUser User { get; set; } = null!;
 }

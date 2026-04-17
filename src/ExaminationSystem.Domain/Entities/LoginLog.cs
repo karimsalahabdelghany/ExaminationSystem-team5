@@ -17,5 +17,5 @@ public class LoginLog : BaseEntity
     public string IpAddress { get; set; } = string.Empty;
     public bool Success { get; set; }
 
-    public User User { get; set; } = null!;
+    public AppUser User { get; set; } = null!;
 }

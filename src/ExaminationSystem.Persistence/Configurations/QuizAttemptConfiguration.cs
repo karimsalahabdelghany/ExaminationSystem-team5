@@ -29,7 +29,7 @@ public sealed class QuizAttemptConfiguration : BaseEntityConfiguration<QuizAttem
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.QuizId);
 
-        builder.HasOne(x => x.User)
+        builder.HasOne(x => x.Student)
             .WithMany(x => x.QuizAttempts)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -71,6 +71,22 @@ public sealed class QuizAttemptConfiguration : BaseEntityConfiguration<QuizAttem
         Deadline = new DateTime(2026, 2, 10, 9, 20, 0, DateTimeKind.Utc),
         SubmittedAt = (DateTime?)null,
         CreatedAt = new DateTime(2026, 2, 10, 9, 0, 0, DateTimeKind.Utc),
+        CreatedBy = "seed",
+        UpdatedAt = (DateTime?)null,
+        UpdatedBy = (string?)null,
+        IsDeleted = false,
+        DeletedAt = (DateTime?)null
+    },
+    new
+    {
+        Id = Guid.Parse("B8C9D0E1-F2A3-4567-BCDE-678901234567"),
+        UserId = Guid.Parse("C3D4E5F6-A7B8-9012-CDEF-123456789012"), // Default Student
+        QuizId = Guid.Parse("A1111111-1111-1111-1111-111111111111"), // C# Fundamentals Quiz
+        Status = QuizAttemptStatus.InProgress,
+        StartTime = new DateTime(2027, 1, 1, 10, 0, 0, DateTimeKind.Utc),
+        Deadline = new DateTime(2027, 12, 31, 23, 59, 59, DateTimeKind.Utc), // Open-ended deadline for testing
+        SubmittedAt = (DateTime?)null,
+        CreatedAt = new DateTime(2027, 1, 1, 10, 0, 0, DateTimeKind.Utc),
         CreatedBy = "seed",
         UpdatedAt = (DateTime?)null,
         UpdatedBy = (string?)null,

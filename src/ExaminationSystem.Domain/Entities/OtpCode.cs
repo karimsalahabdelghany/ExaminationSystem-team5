@@ -21,5 +21,5 @@ public class OtpCode : BaseEntity
     public bool IsUsed { get; set; }
     public DateTime ExpiresAt { get; set; }
 
-    public User User { get; set; } = null!;
+    public AppUser User { get; set; } = null!;
 }
