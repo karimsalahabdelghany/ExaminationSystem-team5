@@ -55,6 +55,6 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
     public async Task<IActionResult> GetDiplomaQuizzes(Guid id, Guid studentId)
     {
         var result = await _mediator.Send(new GetDiplomaQuizezQuery(id, studentId));
-        return Ok(result.Result);
+        return Ok(ApiResponse<List<GetDiplomaQuizezResponse>>.Success(result.Result, HttpStatusCode.OK));
     }
 }
