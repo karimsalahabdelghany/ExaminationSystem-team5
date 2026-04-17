@@ -1,13 +1,9 @@
 ﻿using ExaminationSystem.Application.Common.Helper.Pagination;
-using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Diplomas.CreateDiploma;
 using ExaminationSystem.Application.Features.Diplomas.DeleteDiploma;
-using ExaminationSystem.Application.Features.Diplomas.GetDiplomaQuizez;
-using ExaminationSystem.Application.Features.Diplomas.GetDiplomas;
+using ExaminationSystem.Application.Features.Diplomas.GetPublishedDiplomaQuizez;
+using ExaminationSystem.Application.Features.Diplomas.GetStudentDiplomas;
 using ExaminationSystem.Application.Features.Diplomas.UpdateDiploma;
-using ExaminationSystem.Application.Responses;
-using MediatR;
-using System.Net;
 
 namespace ExaminationSystem.API.Controllers;
 
@@ -35,26 +31,30 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _mediator.Send(new DeleteDiplomaCommand(id));
-        if (!result.Success && result.Code == ResultCode.DiplomaNotFound)
-            return NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound));
-        if (!result.Success && result.Code == ResultCode.DiplomaHasActiveEnrollmentsOrPublished)
-            return Conflict(ApiResponse<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict));
-        return Ok(ApiResponse<bool>.Success(true, HttpStatusCode.OK));
+        return result.Code switch
+        {
+            ResultCode.DiplomaNotFound => NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),
+            ResultCode.DiplomaHasActiveEnrollmentsOrPublished => Conflict(ApiResponse<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict)),
+            _ => Ok(ApiResponse<bool>.Success(true, HttpStatusCode.OK))
+        };
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetDiplomas([FromQuery] GetDiplomasQuery query)
+    public async Task<IActionResult> GetStudentPublishedDiplomas([FromQuery] GetStudentPuplishedDiplomasQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result is null)
-            return NotFound(ApiResponse<PaginationResult<GetDiplomaResponse>>.Failure("No diplomas found"));
-        return Ok(ApiResponse<PaginationResult<GetDiplomaResponse>>.Success(result.Result, HttpStatusCode.OK));
+        return Ok(ApiResponse<PaginationResult<GetStudentPuplishedDiplomasResponse>>.Success(result.Result, HttpStatusCode.OK));
     }
 
     [HttpGet("{id}/quizzes")]
     public async Task<IActionResult> GetDiplomaQuizzes(Guid id, Guid studentId)
     {
-        var result = await _mediator.Send(new GetDiplomaQuizezQuery(id, studentId));
-        return Ok(result.Result);
+        var result = await _mediator.Send(new GetPublishedDiplomaQuizezQuery(id, studentId));
+        return result.Code switch
+        {
+            ResultCode.DiplomaNotFound => NotFound(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Failure("Diploma not found", HttpStatusCode.NotFound)),
+            ResultCode.StudentNotEnrolledInDiploma => Forbid("Student not enrolled in diploma"),
+            _ => Ok(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Success(result.Result, HttpStatusCode.OK))
+        };
     }
 }
