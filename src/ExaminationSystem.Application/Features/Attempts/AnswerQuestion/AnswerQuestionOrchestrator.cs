@@ -1,8 +1,6 @@
-using ExaminationSystem.Application.Common.Exceptions;
 using ExaminationSystem.Application.Features.Attempts.Queries;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Questions.Queries;
-using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Enums;
 
 namespace ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
@@ -25,19 +23,15 @@ public class AnswerQuestionOrchestratorHandler(
         var attempt = await mediator.Send(
             new GetAttemptByIdQuery(request.AttemptId), cancellationToken);
 
-        if (attempt is null)
-            throw new NotFoundException("Attempt", request.AttemptId);
+        EnsureAttemptExists(attempt, request.AttemptId);
+        EnsureAttemptOwnership(attempt!, request.StudentId);
 
-        if (attempt.UserId != request.StudentId)
-            throw new ForbiddenException("You do not own this attempt.");
-
-        if (attempt.Status == QuizAttemptStatus.Expired)
+        if (IsAttemptExpired(attempt!))
             return new AnswerQuestionResponse(Saved: false, TimedOut: true);
 
-        if (attempt.Status != QuizAttemptStatus.InProgress)
-            throw new ConflictException("Attempt", "Attempt is already submitted or expired.");
+        EnsureAttemptIsInProgress(attempt!);
 
-        if (dateTimeProvider.UtcNow > attempt.Deadline)
+        if (dateTimeProvider.UtcNow > attempt!.Deadline)
         {
             await mediator.Send(new SubmitAttemptOrchestrator(
                 AttemptId: request.AttemptId,
@@ -50,13 +44,43 @@ public class AnswerQuestionOrchestratorHandler(
         var questionBelongsToQuiz = await mediator.Send(
             new IsQuestionInQuizQuery(request.QuestionId, attempt.QuizId), cancellationToken);
 
-        if (!questionBelongsToQuiz)
-            throw new UnprocessableException("This question does not belong to this quiz.");
+        EnsureQuestionBelongsToQuiz(questionBelongsToQuiz);
 
         await mediator.Send(new UpsertAnswerCommand(
             request.AttemptId, request.QuestionId, request.SelectedOptionId
         ), cancellationToken);
 
         return new AnswerQuestionResponse(Saved: true);
+    }
+
+
+
+
+
+    private static void EnsureAttemptExists(QuizAttempt? attempt, Guid attemptId)
+    {
+        if (attempt is null)
+            throw new NotFoundException("Attempt", attemptId);
+    }
+
+    private static void EnsureAttemptOwnership(QuizAttempt attempt, Guid studentId)
+    {
+        if (attempt.UserId != studentId)
+            throw new ForbiddenException("You do not own this attempt.");
+    }
+
+    private static bool IsAttemptExpired(QuizAttempt attempt)
+        => attempt.Status == QuizAttemptStatus.Expired;
+
+    private static void EnsureAttemptIsInProgress(QuizAttempt attempt)
+    {
+        if (attempt.Status != QuizAttemptStatus.InProgress)
+            throw new ConflictException("Attempt", "Attempt is already submitted or expired.");
+    }
+
+    private static void EnsureQuestionBelongsToQuiz(bool belongs)
+    {
+        if (!belongs)
+            throw new UnprocessableException("This question does not belong to this quiz.");
     }
 }
