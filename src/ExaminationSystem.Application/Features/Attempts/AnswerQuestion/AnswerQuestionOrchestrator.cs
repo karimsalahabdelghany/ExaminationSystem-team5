@@ -1,3 +1,4 @@
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Attempts.Queries;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Questions.Queries;
@@ -10,26 +11,30 @@ public record AnswerQuestionOrchestrator(
     Guid QuestionId,
     Guid SelectedOptionId,
     Guid StudentId
-) : ICommand<AnswerQuestionResponse>;
+) : ICommand<RequestResult<AnswerQuestionResponse>>;
 
 
 public class AnswerQuestionOrchestratorHandler(
     IMediator mediator,
-    IDateTimeProvider dateTimeProvider) : IRequestHandler<AnswerQuestionOrchestrator, AnswerQuestionResponse>
+    IDateTimeProvider dateTimeProvider) : IRequestHandler<AnswerQuestionOrchestrator, RequestResult<AnswerQuestionResponse>>
 {
-    public async Task<AnswerQuestionResponse> Handle(
+    public async Task<RequestResult<AnswerQuestionResponse>> Handle(
         AnswerQuestionOrchestrator request, CancellationToken cancellationToken)
     {
         var attempt = await mediator.Send(
             new GetAttemptByIdQuery(request.AttemptId), cancellationToken);
 
-        EnsureAttemptExists(attempt, request.AttemptId);
-        EnsureAttemptOwnership(attempt!, request.StudentId);
+        var existsCheck = CheckAttemptExists(attempt);
+        if (existsCheck is not null) return existsCheck;
+
+        var ownershipCheck = CheckAttemptOwnership(attempt!, request.StudentId);
+        if (ownershipCheck is not null) return ownershipCheck;
 
         if (IsAttemptExpired(attempt!))
-            return new AnswerQuestionResponse(Saved: false, TimedOut: true);
+            return TimedOutResult();
 
-        EnsureAttemptIsInProgress(attempt!);
+        var progressCheck = CheckAttemptIsInProgress(attempt!);
+        if (progressCheck is not null) return progressCheck;
 
         if (dateTimeProvider.UtcNow > attempt!.Deadline)
         {
@@ -38,49 +43,60 @@ public class AnswerQuestionOrchestratorHandler(
                 StudentId: request.StudentId
             ), cancellationToken);
 
-            return new AnswerQuestionResponse(Saved: false, TimedOut: true);
+            return TimedOutResult();
         }
 
         var questionBelongsToQuiz = await mediator.Send(
             new IsQuestionInQuizQuery(request.QuestionId, attempt.QuizId), cancellationToken);
 
-        EnsureQuestionBelongsToQuiz(questionBelongsToQuiz);
+        var questionCheck = CheckQuestionBelongsToQuiz(questionBelongsToQuiz);
+        if (questionCheck is not null) return questionCheck;
 
         await mediator.Send(new UpsertAnswerCommand(
             request.AttemptId, request.QuestionId, request.SelectedOptionId
         ), cancellationToken);
 
-        return new AnswerQuestionResponse(Saved: true);
+        return RequestResult<AnswerQuestionResponse>.succeeded(
+            new AnswerQuestionResponse(Saved: true),
+            ResultCode.AnswerSavedSuccessfully);
     }
 
 
 
 
-
-    private static void EnsureAttemptExists(QuizAttempt? attempt, Guid attemptId)
+    private static RequestResult<AnswerQuestionResponse>? CheckAttemptExists(QuizAttempt? attempt)
     {
-        if (attempt is null)
-            throw new NotFoundException("Attempt", attemptId);
+        return attempt is null
+            ? RequestResult<AnswerQuestionResponse>.Failure(null!, ResultCode.AttemptNotFound)
+            : null;
     }
 
-    private static void EnsureAttemptOwnership(QuizAttempt attempt, Guid studentId)
+    private static RequestResult<AnswerQuestionResponse>? CheckAttemptOwnership(QuizAttempt attempt, Guid studentId)
     {
-        if (attempt.UserId != studentId)
-            throw new ForbiddenException("You do not own this attempt.");
+        return attempt.UserId != studentId
+            ? RequestResult<AnswerQuestionResponse>.Failure(null!, ResultCode.AttemptNotOwned)
+            : null;
     }
 
     private static bool IsAttemptExpired(QuizAttempt attempt)
         => attempt.Status == QuizAttemptStatus.Expired;
 
-    private static void EnsureAttemptIsInProgress(QuizAttempt attempt)
+    private static RequestResult<AnswerQuestionResponse>? CheckAttemptIsInProgress(QuizAttempt attempt)
     {
-        if (attempt.Status != QuizAttemptStatus.InProgress)
-            throw new ConflictException("Attempt", "Attempt is already submitted or expired.");
+        return attempt.Status != QuizAttemptStatus.InProgress
+            ? RequestResult<AnswerQuestionResponse>.Failure(null!, ResultCode.AttemptAlreadySubmitted)
+            : null;
     }
 
-    private static void EnsureQuestionBelongsToQuiz(bool belongs)
+    private static RequestResult<AnswerQuestionResponse>? CheckQuestionBelongsToQuiz(bool belongs)
     {
-        if (!belongs)
-            throw new UnprocessableException("This question does not belong to this quiz.");
+        return !belongs
+            ? RequestResult<AnswerQuestionResponse>.Failure(null!, ResultCode.QuestionNotInQuiz)
+            : null;
     }
+
+    private static RequestResult<AnswerQuestionResponse> TimedOutResult()
+        => RequestResult<AnswerQuestionResponse>.Failure(
+            new AnswerQuestionResponse(Saved: false, TimedOut: true),
+            ResultCode.AttemptTimedOut);
 }
