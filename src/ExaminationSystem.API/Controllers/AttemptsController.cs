@@ -1,11 +1,6 @@
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Attempts.Timer;
-using ExaminationSystem.Application.Responses;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using System.Net;
-using System.Security.Claims;
 
 namespace ExaminationSystem.API.Controllers;
 
@@ -14,8 +9,9 @@ namespace ExaminationSystem.API.Controllers;
 //[Authorize]
 public class AttemptsController(IMediator mediator) : BaseController(mediator)
 {
+
     [HttpPost("{attemptId:guid}/answer")]
-    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionOrchestrator command)
+    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionOrchestrator command, CancellationToken cancellationToken)
     {
         // TODO: replace StudentId to come from JWT claims once Identity is ready
         // var studentIdClaim = User.FindFirstValue("user_id");
@@ -24,13 +20,17 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
         //         ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         // command = command with { StudentId = parsedStudentId };
 
-        var result = await _mediator.Send(command with { AttemptId = attemptId });
+        var result = await _mediator.Send(command with { AttemptId = attemptId }, cancellationToken);
 
-        if (result.TimedOut)
-            return StatusCode(410, ApiResponse<AnswerQuestionResponse>
-                .Failure("Time has expired. Your attempt has been auto-submitted.", (HttpStatusCode)410));
-
-        return Ok(ApiResponse<AnswerQuestionResponse>.Success(result));
+        return result.Code switch
+        {
+            ResultCode.AttemptNotFound => NotFound(ApiResponse<AnswerQuestionResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            ResultCode.AttemptNotOwned => Forbid("You do not own this attempt"),
+            ResultCode.AttemptAlreadySubmitted => Conflict(ApiResponse<AnswerQuestionResponse>.Failure("Attempt is already submitted or expired", HttpStatusCode.Conflict)),
+            ResultCode.AttemptTimedOut => StatusCode(410, ApiResponse<AnswerQuestionResponse>.Failure("Time has expired. Your attempt has been auto-submitted", (HttpStatusCode)410)),
+            ResultCode.QuestionNotInQuiz => UnprocessableEntity(ApiResponse<AnswerQuestionResponse>.Failure("This question does not belong to this quiz", HttpStatusCode.UnprocessableEntity)),
+            _ => Ok(ApiResponse<AnswerQuestionResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
     }
 
     [HttpPost("{attemptId:guid}/submit")]
@@ -67,6 +67,7 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
         return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Value));
     }
 
+
     [HttpGet("{attemptId:guid}/timer")]
     public async Task<IActionResult> Timer(Guid attemptId)
     {
@@ -81,5 +82,3 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
         return Ok(ApiResponse<GetAttemptTimerResponse>.Success(result));
     }
 }
-
-
