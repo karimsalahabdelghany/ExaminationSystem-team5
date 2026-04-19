@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Features.Admin.Queries;
+using ExaminationSystem.Application.Features.Admin.Queries;
 using ExaminationSystem.Application.Features.AttemtResults.Queries;
 using ExaminationSystem.Application.Features.QuizAttempts.Queries;
 using ExaminationSystem.Application.Features.Quizzes.GetTotalQuizes;
@@ -6,6 +6,7 @@ using ExaminationSystem.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ExaminationSystem.Application.Features.Admin.Orchestrators
 {
@@ -34,12 +35,15 @@ namespace ExaminationSystem.Application.Features.Admin.Orchestrators
                 totalAttemptsTask,
                 avgPassRateTask);
 
+            var activeUsersToday = await activeUsersTodayTask;
+            var avgPassRate = await avgPassRateTask;
+
             return new GetAdminStatsResponse(
                 TotalUsers: await totalUsersTask,
-                ActiveUsersToday: await activeUsersTodayTask,
+                ActiveUsersToday: activeUsersToday.Result,
                 TotalQuizzes: await totalQuizzesTask,
                 TotalAttempts: await totalAttemptsTask,
-                AvgPassRate: await avgPassRateTask);
+                AvgPassRate: avgPassRate.Result);
         }
     }
 
