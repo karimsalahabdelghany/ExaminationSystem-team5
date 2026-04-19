@@ -7,6 +7,7 @@ public enum ResultCode
     AdminStatsQueryFiredSuccessfully = 3,
     AvgPassRateFailed = 4,
     AvgPassRateSuccessed = 5,
+    //User
     UserHasDiplomaEnrollments = 6,
     RecentQuizAttemptsloadedSuccessfuly = 7,
     OverAllStatsProgressQuerySucessful = 8,
