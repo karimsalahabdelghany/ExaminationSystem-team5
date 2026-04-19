@@ -47,6 +47,7 @@ public enum ResultCode
     AttemptTimedOut = 1203,
     QuestionNotInQuiz = 1204,
     AnswerSavedSuccessfully = 1205,
+    SubmitAttemptSuccessful = 1206,
 
     // Start quiz attempt (POST .../quizzes/{id}/start)
     QuizNotFoundOrNotPublished = 2000,

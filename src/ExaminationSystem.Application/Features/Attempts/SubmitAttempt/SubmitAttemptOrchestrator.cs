@@ -1,4 +1,4 @@
-using ExaminationSystem.Application.Common.Exceptions;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Enums;
 using System.Data;
@@ -9,13 +9,7 @@ namespace ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 public record SubmitAttemptOrchestrator(
     Guid AttemptId,
     Guid StudentId
-) : ICommand<SubmitAttemptResult>;
-
-public record SubmitAttemptResult(
-    bool AlreadySubmitted,
-    bool TimedOut,
-    SubmitAttemptResponse Value
-);
+) : ICommand<RequestResult<SubmitAttemptResponse>>;
 
 public record SubmitAttemptResponse(
     Guid AttemptId,
@@ -26,42 +20,100 @@ public record SubmitAttemptResponse(
 public class SubmitAttemptOrchestratorHandler(
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider,
+    IQuizAttemptAutoSubmitClaim submitClaim,
     ILogger<SubmitAttemptOrchestratorHandler> logger
-) : IRequestHandler<SubmitAttemptOrchestrator, SubmitAttemptResult>
+) : IRequestHandler<SubmitAttemptOrchestrator, RequestResult<SubmitAttemptResponse>>
 {
-    public async Task<SubmitAttemptResult> Handle(SubmitAttemptOrchestrator request, CancellationToken cancellationToken)
+    public async Task<RequestResult<SubmitAttemptResponse>> Handle(
+        SubmitAttemptOrchestrator request,
+        CancellationToken cancellationToken)
     {
         await unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         try
         {
             var attemptRepository = unitOfWork.Repository<QuizAttempt>();
-
             var attempt = await attemptRepository.GetByIdAsync(request.AttemptId);
             if (attempt is null)
-                throw new NotFoundException("Attempt", request.AttemptId);
+            {
+                await unitOfWork.RollbackAsync(cancellationToken);
+                return RequestResult<SubmitAttemptResponse>.Failure(null!, ResultCode.AttemptNotFound);
+            }
 
             if (attempt.UserId != request.StudentId)
-                throw new ForbiddenException("You do not own this attempt.");
-
-            if (attempt.Status != QuizAttemptStatus.InProgress)
             {
-                var existingResult = await GetExistingResult(request.AttemptId);
-                if (existingResult is not null)
-                {
-                    logger.LogInformation(
-                        "Submit skipped for attempt {AttemptId}; already submitted with existing result.",
-                        request.AttemptId);
-                    await unitOfWork.CommitAsync(cancellationToken);
-                    return new SubmitAttemptResult(
-                        AlreadySubmitted: true,
-                        TimedOut: attempt.Status == QuizAttemptStatus.Expired,
-                        Value: existingResult);
-                }
-
-                throw new ConflictException("Attempt", "Attempt is already submitted.");
+                await unitOfWork.RollbackAsync(cancellationToken);
+                return RequestResult<SubmitAttemptResponse>.Failure(null!, ResultCode.AttemptNotOwned);
             }
 
             var now = dateTimeProvider.UtcNow;
+
+            if (attempt.Status is QuizAttemptStatus.Submitted or QuizAttemptStatus.Expired)
+            {
+                var existing = await GetExistingResult(request.AttemptId);
+                if (existing is not null)
+                {
+                    await unitOfWork.RollbackAsync(cancellationToken);
+                    logger.LogInformation(
+                        "Submit idempotent success for attempt {AttemptId} (already finalized).",
+                        request.AttemptId);
+                    return RequestResult<SubmitAttemptResponse>.succeeded(
+                        existing,
+                        ResultCode.SubmitAttemptSuccessful);
+                }
+
+                await unitOfWork.RollbackAsync(cancellationToken);
+                return RequestResult<SubmitAttemptResponse>.Failure(null!, ResultCode.AttemptAlreadySubmitted);
+            }
+
+            if (attempt.Status == QuizAttemptStatus.Submitting)
+            {
+                var existingWhileSubmitting = await GetExistingResult(request.AttemptId);
+                if (existingWhileSubmitting is not null)
+                {
+                    await unitOfWork.RollbackAsync(cancellationToken);
+                    return RequestResult<SubmitAttemptResponse>.succeeded(
+                        existingWhileSubmitting,
+                        ResultCode.SubmitAttemptSuccessful);
+                }
+            }
+
+            if (attempt.Status == QuizAttemptStatus.InProgress && now > attempt.Deadline)
+            {
+                var claimed = await submitClaim.TryClaimInProgressOverdueAsync(
+                    request.AttemptId,
+                    now,
+                    cancellationToken);
+                if (claimed > 0)
+                {
+                    logger.LogDebug(
+                        "Claimed overdue attempt {AttemptId} for auto-submit (rows={Rows}).",
+                        request.AttemptId,
+                        claimed);
+                }
+
+                attempt = await attemptRepository.GetByIdAsync(request.AttemptId);
+                if (attempt is null)
+                {
+                    await unitOfWork.RollbackAsync(cancellationToken);
+                    return RequestResult<SubmitAttemptResponse>.Failure(null!, ResultCode.AttemptNotFound);
+                }
+            }
+
+            if (attempt.Status is not (QuizAttemptStatus.InProgress or QuizAttemptStatus.Submitting))
+            {
+                var lateExisting = await GetExistingResult(request.AttemptId);
+                if (lateExisting is not null)
+                {
+                    await unitOfWork.RollbackAsync(cancellationToken);
+                    return RequestResult<SubmitAttemptResponse>.succeeded(
+                        lateExisting,
+                        ResultCode.SubmitAttemptSuccessful);
+                }
+
+                await unitOfWork.RollbackAsync(cancellationToken);
+                return RequestResult<SubmitAttemptResponse>.Failure(null!, ResultCode.AttemptAlreadySubmitted);
+            }
+
             var isTimedOut = now > attempt.Deadline;
             attempt.Status = isTimedOut ? QuizAttemptStatus.Expired : QuizAttemptStatus.Submitted;
             attempt.SubmittedAt = now;
@@ -89,14 +141,10 @@ public class SubmitAttemptOrchestratorHandler(
                 scorePayload.Score,
                 isTimedOut);
 
-            return new SubmitAttemptResult(
-                AlreadySubmitted: false,
-                TimedOut: isTimedOut,
-                Value: new SubmitAttemptResponse(
-                    AttemptId: attempt.Id,
-                    Score: scorePayload.Score,
-                    Passed: scorePayload.Passed
-                ));
+            var response = new SubmitAttemptResponse(attempt.Id, scorePayload.Score, scorePayload.Passed);
+            return isTimedOut
+                ? RequestResult<SubmitAttemptResponse>.Failure(response, ResultCode.AttemptTimedOut)
+                : RequestResult<SubmitAttemptResponse>.succeeded(response, ResultCode.SubmitAttemptSuccessful);
         }
         catch (DbUpdateException ex) when (IsDuplicateAttemptResultViolation(ex))
         {
@@ -109,14 +157,12 @@ public class SubmitAttemptOrchestratorHandler(
                     "Concurrent submit handled by returning existing result for attempt {AttemptId}.",
                     request.AttemptId);
                 var attemptRepository = unitOfWork.Repository<QuizAttempt>();
-                var attempt = await attemptRepository.GetByIdAsync(request.AttemptId);
-                return new SubmitAttemptResult(
-                    AlreadySubmitted: true,
-                    TimedOut: attempt?.Status == QuizAttemptStatus.Expired,
-                    Value: existingResult);
+                return RequestResult<SubmitAttemptResponse>.succeeded(
+                    existingResult,
+                    ResultCode.SubmitAttemptSuccessful);
             }
 
-            throw new ConflictException("Attempt", "Attempt is already submitted.");
+            return RequestResult<SubmitAttemptResponse>.Failure(null!, ResultCode.AttemptAlreadySubmitted);
         }
         catch
         {
@@ -128,7 +174,7 @@ public class SubmitAttemptOrchestratorHandler(
     private async Task<SubmitAttemptResponse?> GetExistingResult(Guid attemptId)
     {
         var resultRepository = unitOfWork.Repository<AttemptResult>();
-        var existing = await resultRepository
+        return await resultRepository
             .GetAll(r => r.AttemptId == attemptId)
             .Select(r => new SubmitAttemptResponse(
                 r.AttemptId,
@@ -136,8 +182,6 @@ public class SubmitAttemptOrchestratorHandler(
                 r.Passed
             ))
             .FirstOrDefaultAsync();
-
-        return existing;
     }
 
     private async Task<ScorePayload> BuildScorePayload(
@@ -156,8 +200,10 @@ public class SubmitAttemptOrchestratorHandler(
                 q.PassScore,
                 QuestionIds = q.Questions.Select(question => question.Id).ToList()
             })
-            .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new NotFoundException("Quiz", quizId);
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (quizSnapshot is null)
+            throw new InvalidOperationException($"Quiz {quizId} not found while scoring attempt.");
 
         var answers = await answerRepository
             .GetAll(a => a.AttemptId == attemptId)

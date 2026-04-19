@@ -78,7 +78,9 @@ public class StartQuizAttemptCommandHandler(
 
     private Task<QuizAttempt?> GetExistingAttempt(Guid quizId, Guid studentId) =>
         unitOfWork.Repository<QuizAttempt>().FindAsync(a =>
-            a.QuizId == quizId && a.UserId == studentId && a.Status == QuizAttemptStatus.InProgress);
+            a.QuizId == quizId
+            && a.UserId == studentId
+            && (a.Status == QuizAttemptStatus.InProgress || a.Status == QuizAttemptStatus.Submitting));
 
     private StartQuizAttemptResponse ToResponse(
         QuizAttempt attempt, QuizStartProjection quiz, StartQuizAttemptCommand request, bool concurrentRecovery)

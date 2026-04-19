@@ -1,3 +1,4 @@
+using ExaminationSystem.API.Background;
 using ExaminationSystem.API.Services;
 using ExaminationSystem.Application.Interfaces;
 
@@ -12,6 +13,10 @@ public static class DependencyInjectionExtensions
         services.AddApplication();
         services.AddPersistence(configuration);
         services.AddSingleton<IDateTimeProvider, UtcDateTimeProvider>();
+
+        services.Configure<AttemptAutoSubmitOptions>(configuration.GetSection(AttemptAutoSubmitOptions.SectionName));
+        services.AddSingleton<AttemptAutoSubmitMetrics>();
+        services.AddHostedService<AttemptDeadlineBackgroundService>();
 
         return services;
     }
