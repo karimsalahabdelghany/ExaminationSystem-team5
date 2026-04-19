@@ -23,7 +23,7 @@ public sealed class DiplomaConfiguration : BaseEntityConfiguration<Diploma>
                 Description = "A foundational backend program covering architecture, APIs, and persistence.",
                 Duration = 24,
                 QuizCount = 1,
-                Status = DiplomaStatus.Draft,
+                Status = DiplomaStatus.Published,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "seed",
                 UpdatedAt = (DateTime?)null,

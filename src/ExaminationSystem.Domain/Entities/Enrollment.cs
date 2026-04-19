@@ -19,6 +19,6 @@ public class Enrollment : BaseEntity
     public DateTime EnrolledAt { get; set; }
     public EnrollmentStatus Status { get; set; }
 
-    public User User { get; set; } = null!;
+    public Student Student { get; set; } = null!;
     public Diploma Diploma { get; set; } = null!;
 }

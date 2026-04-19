@@ -24,7 +24,10 @@ public class UpsertAnswerCommandHandler(
         {
             existing.SelectedOptionId = request.SelectedOptionId;
             existing.AnsweredAt = DateTime.UtcNow;
-            answerRepository.Update(existing);
+
+            //answerRepository.Update(existing);
+            answerRepository.SaveInclude(existing, nameof(existing.SelectedOptionId), nameof(existing.AnsweredAt));
+
         }
         else
         {

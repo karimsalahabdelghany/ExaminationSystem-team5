@@ -1,5 +1,4 @@
-using ExaminationSystem.Application.Interfaces;
-using ExaminationSystem.Domain.Entities;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Domain.Enums;
 using Mapster;
 
@@ -12,16 +11,14 @@ public record CreateQuizCommand(
     int MaxAttempts,
     string? Instructions,
     int PassScore = 60
-) : ICommand<QuizResponse>;
+) : ICommand<RequestResult<QuizResponse>>;
 
 
 public class CreateQuizCommandHandler(
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateQuizCommand, QuizResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateQuizCommand, RequestResult<QuizResponse>>
 {
-    public async Task<QuizResponse> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
+    public async Task<RequestResult<QuizResponse>> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
     {
-        var quizRepository = unitOfWork.Repository<Quiz>();
-
         var quiz = new Quiz(
             diplomaId: request.DiplomaId,
             title: request.Title,
@@ -32,9 +29,11 @@ public class CreateQuizCommandHandler(
             status: QuizStatus.Draft
         );
 
-        quizRepository.Add(quiz);
+        unitOfWork.Repository<Quiz>().Add(quiz);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return quiz.Adapt<QuizResponse>();
+        return RequestResult<QuizResponse>.succeeded(
+            quiz.Adapt<QuizResponse>(),
+            ResultCode.QuizCreatedSuccessfully);
     }
 }

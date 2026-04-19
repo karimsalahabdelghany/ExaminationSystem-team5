@@ -42,7 +42,7 @@ namespace ExaminationSystem.Persistence.Migrations
                     UpdatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
@@ -73,7 +73,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     Duration = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     QuizCount = table.Column<int>(type: "int", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -200,7 +199,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IpAddress = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     Success = table.Column<bool>(type: "bit", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -230,7 +228,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     AttemptCount = table.Column<int>(type: "int", nullable: false),
                     IsUsed = table.Column<bool>(type: "bit", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -258,7 +255,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     TokenHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     IsUsed = table.Column<bool>(type: "bit", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -286,7 +282,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     TokenHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     IsRevoked = table.Column<bool>(type: "bit", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -306,35 +301,18 @@ namespace ExaminationSystem.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Enrollments",
+                name: "Students",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DiplomaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EnrolledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<byte>(type: "tinyint", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Enrollments", x => x.Id);
+                    table.PrimaryKey("PK_Students", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Enrollments_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Students_AspNetUsers_Id",
+                        column: x => x.Id,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Enrollments_Diplomas_DiplomaId",
-                        column: x => x.DiplomaId,
-                        principalTable: "Diplomas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -351,7 +329,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     PassScore = table.Column<int>(type: "int", nullable: false),
                     MaxAttempts = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<byte>(type: "tinyint", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -371,6 +348,39 @@ namespace ExaminationSystem.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Enrollments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DiplomaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EnrolledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<byte>(type: "tinyint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Enrollments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Enrollments_Diplomas_DiplomaId",
+                        column: x => x.DiplomaId,
+                        principalTable: "Diplomas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Enrollments_Students_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
@@ -380,7 +390,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     Type = table.Column<byte>(type: "tinyint", nullable: false),
                     Explanation = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
                     OrderIndex = table.Column<int>(type: "int", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -410,7 +419,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Deadline = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -422,17 +430,17 @@ namespace ExaminationSystem.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_QuizAttempts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QuizAttempts_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_QuizAttempts_Quizzes_QuizId",
                         column: x => x.QuizId,
                         principalTable: "Quizzes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_QuizAttempts_Students_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -444,7 +452,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     Text = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     IsCorrect = table.Column<bool>(type: "bit", nullable: false),
                     OrderIndex = table.Column<int>(type: "int", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -474,7 +481,7 @@ namespace ExaminationSystem.Persistence.Migrations
                     TotalQuestions = table.Column<int>(type: "int", nullable: false),
                     CorrectCount = table.Column<int>(type: "int", nullable: false),
                     CalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
+                    QuestionBreakdownJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -502,7 +509,6 @@ namespace ExaminationSystem.Persistence.Migrations
                     QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SelectedOptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AnsweredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     CreatedBy = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -534,11 +540,20 @@ namespace ExaminationSystem.Persistence.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "CreatedBy", "DeletedAt", "Email", "EmailConfirmed", "FailedLoginAttempts", "FullName", "LockedUntil", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "RowVersion", "SecurityStamp", "Status", "TwoFactorEnabled", "UpdatedAt", "UpdatedBy", "UserName" },
+                values: new object[,]
+                {
+                    { new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567890"), 0, "A1B2C3D4-E5F6-7890-ABCD-EF1234567890", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "admin@system.com", true, 0, "System Administrator", null, true, null, "ADMIN@SYSTEM.COM", "ADMIN@SYSTEM.COM", "AQAAAAIAAYagAAAAEJ5tQaHbHsOFCiMfQHvFAAFcQUQxkMECnxU2TlxRFiHjlRl3T5UdqKQqTuJdxZw2dA==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "A1B2C3D4E5F6789012345678901234AB", (byte)0, false, null, null, "admin@system.com" },
+                    { new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012"), 0, "C3D4E5F6-A7B8-9012-CDEF-123456789012", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "student@system.com", true, 0, "Default Student", null, true, null, "STUDENT@SYSTEM.COM", "STUDENT@SYSTEM.COM", "AQAAAAIAAYagAAAAEK5GJ3Nk8bHfRqM2p7vYWT+9GrwHZk8ZHMHw3pO4c9E2pOqOUM3uLgIrS7lQx6xB==", null, false, new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }, "C3D4E5F6A7B890123456789012345CDE", (byte)0, false, null, null, "student@system.com" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Diplomas",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "Description", "Duration", "QuizCount", "Status", "Title", "UpdatedAt", "UpdatedBy" },
                 values: new object[,]
                 {
-                    { new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A foundational backend program covering architecture, APIs, and persistence.", 24, 1, 0, "Backend Engineering Diploma", null, null },
+                    { new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A foundational backend program covering architecture, APIs, and persistence.", 24, 1, 1, "Backend Engineering Diploma", null, null },
                     { new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A practical cloud engineering track with CI/CD, IaC, and monitoring.", 20, 1, 0, "Cloud & DevOps Diploma", null, null }
                 });
 
@@ -547,8 +562,81 @@ namespace ExaminationSystem.Persistence.Migrations
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "DiplomaId", "DurationMinutes", "Instructions", "MaxAttempts", "PassScore", "Status", "Title", "UpdatedAt", "UpdatedBy" },
                 values: new object[,]
                 {
-                    { new Guid("a1111111-1111-1111-1111-111111111111"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), 30, "Answer all questions within the time limit.", 3, 60, (byte)0, "C# Fundamentals Quiz", null, null },
+                    { new Guid("a1111111-1111-1111-1111-111111111111"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), 30, "Answer all questions within the time limit.", 3, 60, (byte)1, "C# Fundamentals Quiz", null, null },
                     { new Guid("b2222222-2222-2222-2222-222222222222"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), 20, "Choose the best answer for each question.", 5, 70, (byte)0, "Docker Basics Quiz", null, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Students",
+                column: "Id",
+                value: new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012"));
+
+            migrationBuilder.InsertData(
+                table: "Enrollments",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "DiplomaId", "EnrolledAt", "Status", "UpdatedAt", "UpdatedBy", "UserId" },
+                values: new object[,]
+                {
+                    { new Guid("d4e5f6a7-b8c9-0123-defa-234567890123"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("2d21ae7d-d8a0-4f19-9509-f39b5b339a7f"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), (byte)0, null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") },
+                    { new Guid("e5f6a7b8-c9d0-1234-efab-345678901234"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, new Guid("8480d832-e7da-4f56-9a58-91d90a51e683"), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), (byte)0, null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Questions",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "Explanation", "OrderIndex", "QuizId", "Text", "Type", "UpdatedAt", "UpdatedBy" },
+                values: new object[,]
+                {
+                    { new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "Statelessness and uniform interface are both core REST constraints defined by Fielding.", 3, new Guid("a1111111-1111-1111-1111-111111111111"), "Which of the following are valid REST constraints?", (byte)0, null, null },
+                    { new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "A liveness probe tells Kubernetes whether to restart a container.", 1, new Guid("b2222222-2222-2222-2222-222222222222"), "What is the primary purpose of a Kubernetes liveness probe?", (byte)2, null, null },
+                    { new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "Terraform by HashiCorp uses HCL and supports multiple cloud providers.", 2, new Guid("b2222222-2222-2222-2222-222222222222"), "Which IaC tool uses a declarative HCL syntax and is cloud-agnostic?", (byte)2, null, null },
+                    { new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "Kubernetes and Docker Swarm are both container orchestration platforms.", 3, new Guid("b2222222-2222-2222-2222-222222222222"), "Which of the following are container orchestration platforms?", (byte)0, null, null },
+                    { new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "PUT is idempotent — calling it multiple times produces the same result.", 1, new Guid("a1111111-1111-1111-1111-111111111111"), "Which HTTP method is idempotent and should be used to fully replace a resource?", (byte)2, null, null },
+                    { new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, "D stands for Dependency Inversion — high-level modules should not depend on low-level modules.", 2, new Guid("a1111111-1111-1111-1111-111111111111"), "What does the SOLID principle 'D' stand for?", (byte)2, null, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "QuizAttempts",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "Deadline", "DeletedAt", "QuizId", "StartTime", "Status", "SubmittedAt", "UpdatedAt", "UpdatedBy", "UserId" },
+                values: new object[,]
+                {
+                    { new Guid("a7b8c9d0-e1f2-3456-abcd-567890123456"), new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc), "seed", new DateTime(2026, 2, 10, 9, 20, 0, 0, DateTimeKind.Utc), null, new Guid("b2222222-2222-2222-2222-222222222222"), new DateTime(2026, 2, 10, 9, 0, 0, 0, DateTimeKind.Utc), (byte)1, null, null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") },
+                    { new Guid("b8c9d0e1-f2a3-4567-bcde-678901234567"), new DateTime(2027, 1, 1, 10, 0, 0, 0, DateTimeKind.Utc), "seed", new DateTime(2027, 12, 31, 23, 59, 59, 0, DateTimeKind.Utc), null, new Guid("a1111111-1111-1111-1111-111111111111"), new DateTime(2027, 1, 1, 10, 0, 0, 0, DateTimeKind.Utc), (byte)1, null, null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") },
+                    { new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"), new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc), "seed", new DateTime(2026, 2, 1, 10, 30, 0, 0, DateTimeKind.Utc), null, new Guid("a1111111-1111-1111-1111-111111111111"), new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc), (byte)2, new DateTime(2026, 2, 1, 10, 25, 0, 0, DateTimeKind.Utc), null, null, new Guid("c3d4e5f6-a7b8-9012-cdef-123456789012") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AttemptResults",
+                columns: new[] { "Id", "AttemptId", "CalculatedAt", "CorrectCount", "CreatedAt", "CreatedBy", "DeletedAt", "IsDeleted", "Passed", "QuestionBreakdownJson", "Score", "TotalQuestions", "UpdatedAt", "UpdatedBy" },
+                values: new object[] { new Guid("e1f2a3b4-c5d6-7891-efa1-901234567891"), new Guid("f6a7b8c9-d0e1-2345-fabc-456789012345"), new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc), 2, new DateTime(2026, 2, 1, 10, 25, 30, 0, DateTimeKind.Utc), "seed", null, false, true, "[]", 66.67m, 3, null, null });
+
+            migrationBuilder.InsertData(
+                table: "QuestionOptions",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "IsCorrect", "OrderIndex", "QuestionId", "Text", "UpdatedAt", "UpdatedBy" },
+                values: new object[,]
+                {
+                    { new Guid("a5b6c7d8-e9f0-1234-abc5-345678901235"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, true, 1, new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"), "Statelessness", null, null },
+                    { new Guid("a5b6c7d8-e9f0-1234-abc5-345678901236"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 2, new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"), "Persistent sessions", null, null },
+                    { new Guid("a5b6c7d8-e9f0-1234-abc5-345678901237"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 3, new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"), "Server-side rendering", null, null },
+                    { new Guid("a5b6c7d8-e9f0-1234-abc5-345678901238"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 4, new Guid("a3b4c5d6-e7f8-9012-abc3-123456789012"), "Tight coupling", null, null },
+                    { new Guid("a9b0c1d2-e3f4-5678-abc9-789012345678"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, true, 1, new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"), "PUT", null, null },
+                    { new Guid("a9b0c1d2-e3f4-5678-abc9-789012345679"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 2, new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"), "POST", null, null },
+                    { new Guid("a9b0c1d2-e3f4-5678-abc9-78901234567a"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 3, new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"), "PATCH", null, null },
+                    { new Guid("a9b0c1d2-e3f4-5678-abc9-78901234567b"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 4, new Guid("e1f2a3b4-c5d6-7890-efa1-901234567890"), "DELETE", null, null },
+                    { new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890124"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, true, 1, new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"), "Tells Kubernetes whether to restart a container", null, null },
+                    { new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890125"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 2, new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"), "Measures CPU usage", null, null },
+                    { new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890126"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 3, new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"), "Configures ingress routing", null, null },
+                    { new Guid("b4c5d6e7-f8a9-0124-bcd4-234567890127"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 4, new Guid("b4c5d6e7-f8a9-0123-bcd4-234567890123"), "Authenticates users", null, null },
+                    { new Guid("c5d6e7f8-a9b0-1235-cde5-345678901235"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, true, 1, new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"), "Terraform", null, null },
+                    { new Guid("c5d6e7f8-a9b0-1235-cde5-345678901236"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 2, new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"), "Ansible", null, null },
+                    { new Guid("c5d6e7f8-a9b0-1235-cde5-345678901237"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 3, new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"), "CloudFormation", null, null },
+                    { new Guid("c5d6e7f8-a9b0-1235-cde5-345678901238"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 4, new Guid("c5d6e7f8-a9b0-1234-cde5-345678901234"), "Puppet", null, null },
+                    { new Guid("d2e3f4a5-b6c7-8901-def2-012345678902"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, true, 1, new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"), "Dependency Inversion", null, null },
+                    { new Guid("d2e3f4a5-b6c7-8901-def2-012345678903"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 2, new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"), "Data Driven", null, null },
+                    { new Guid("d2e3f4a5-b6c7-8901-def2-012345678904"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 3, new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"), "Domain Driven", null, null },
+                    { new Guid("d2e3f4a5-b6c7-8901-def2-012345678905"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 4, new Guid("f2a3b4c5-d6e7-8901-fab2-012345678901"), "Decorator Pattern", null, null },
+                    { new Guid("d6e7f8a9-b0c1-2346-def6-456789012346"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, true, 1, new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"), "Kubernetes", null, null },
+                    { new Guid("d6e7f8a9-b0c1-2346-def6-456789012347"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 2, new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"), "Git", null, null },
+                    { new Guid("d6e7f8a9-b0c1-2346-def6-456789012348"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 3, new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"), "Jenkins", null, null },
+                    { new Guid("d6e7f8a9-b0c1-2346-def6-456789012349"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "seed", null, false, 4, new Guid("d6e7f8a9-b0c1-2345-def6-456789012345"), "Nginx", null, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -735,10 +823,13 @@ namespace ExaminationSystem.Persistence.Migrations
                 name: "Questions");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "Quizzes");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Diplomas");

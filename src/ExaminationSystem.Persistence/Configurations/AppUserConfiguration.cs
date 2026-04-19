@@ -1,19 +1,20 @@
 using ExaminationSystem.Domain.Entities;
+using ExaminationSystem.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ExaminationSystem.Persistence.Configurations;
 
-public sealed class UserConfiguration : IEntityTypeConfiguration<User>
+public sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<AppUser> builder)
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id)
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("NEWSEQUENTIALID()");
 
-        builder.ToTable("Users");
+        builder.ToTable("AppUsers");
 
         builder.Property(x => x.Email)
             .HasMaxLength(256)
@@ -67,7 +68,37 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType("datetime2");
 
         builder.HasIndex(x => x.Email).IsUnique();
-        builder.HasQueryFilter(x => !x.IsDeleted);
-        
+
+        builder.HasData(
+            new
+            {
+                Id = Guid.Parse("A1B2C3D4-E5F6-7890-ABCD-EF1234567890"),
+                UserName = "admin@system.com",
+                NormalizedUserName = "ADMIN@SYSTEM.COM",
+                Email = "admin@system.com",
+                NormalizedEmail = "ADMIN@SYSTEM.COM",
+                EmailConfirmed = true,
+                PasswordHash = "AQAAAAIAAYagAAAAEJ5tQaHbHsOFCiMfQHvFAAFcQUQxkMECnxU2TlxRFiHjlRl3T5UdqKQqTuJdxZw2dA==",
+                SecurityStamp = "A1B2C3D4E5F6789012345678901234AB",
+                ConcurrencyStamp = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+                PhoneNumber = (string?)null,
+                PhoneNumberConfirmed = false,
+                TwoFactorEnabled = false,
+                LockoutEnd = (DateTimeOffset?)null,
+                LockoutEnabled = true,
+                AccessFailedCount = 0,
+                FullName = "System Administrator",
+                Status = AccountStatus.Active,
+                FailedLoginAttempts = 0,
+                LockedUntil = (DateTime?)null,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                CreatedBy = "seed",
+                UpdatedAt = (DateTime?)null,
+                UpdatedBy = (string?)null,
+                IsDeleted = false,
+                DeletedAt = (DateTime?)null,
+                RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }
+            }
+        );
     }
 }

@@ -21,7 +21,7 @@ public static class ServiceCollectionExtension
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }).AddLogging(c => c.SetMinimumLevel(LogLevel.Information));
 
-        services.AddIdentityCore<User>(options =>
+        services.AddIdentityCore<AppUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;
                 options.Password.RequireDigit = true;

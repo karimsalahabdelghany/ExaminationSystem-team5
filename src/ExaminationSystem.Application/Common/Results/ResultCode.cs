@@ -20,4 +20,23 @@ public enum ResultCode
     DiplomaHasActiveEnrollments = 1006,
     DiplomaHasActiveEnrollmentsOrPublished = 1007,
     DiplomaExist = 1008,
+    DiplomasRetrievedSuccessfully = 1009,
+    StudentNotEnrolledInDiploma = 1010,
+    StudentEnrolledInDiploma = 1011,
+
+    // Quizzes (1100-1199)
+    QuizNotFound = 1100,
+    QuizCreatedSuccessfully = 1101,
+    QuizUpdatedSuccessfully = 1102,
+    QuizDeletedSuccessfully = 1103,
+    QuizIsPublished = 1104,
+    QuizHasActiveAttempts = 1105,
+
+    // Attempts (1200-1299)
+    AttemptNotFound = 1200,
+    AttemptNotOwned = 1201,
+    AttemptAlreadySubmitted = 1202,
+    AttemptTimedOut = 1203,
+    QuestionNotInQuiz = 1204,
+    AnswerSavedSuccessfully = 1205,
 }

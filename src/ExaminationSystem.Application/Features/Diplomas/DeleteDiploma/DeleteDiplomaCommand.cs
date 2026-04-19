@@ -1,9 +1,6 @@
 ﻿using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Diplomas.CheckDiplomaExist;
-using ExaminationSystem.Application.Features.Diplomas.HasActiveEnrollmentsQuery;
-using ExaminationSystem.Application.Interfaces;
-using ExaminationSystem.Domain.Entities;
-using ExaminationSystem.Domain.Enums;
+using ExaminationSystem.Application.Features.Diplomas.CheckDiplomaHasActiveEnrollmentsOrPublished;
 
 namespace ExaminationSystem.Application.Features.Diplomas.DeleteDiploma;
 

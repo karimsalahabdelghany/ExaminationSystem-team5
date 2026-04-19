@@ -6,7 +6,14 @@ public class AttemptResult : BaseEntity
     {
     }
 
-    public AttemptResult(Guid attemptId, decimal score, bool passed, int totalQuestions, int correctCount, DateTime calculatedAt)
+    public AttemptResult(
+        Guid attemptId,
+        decimal score,
+        bool passed,
+        int totalQuestions,
+        int correctCount,
+        DateTime calculatedAt,
+        string questionBreakdownJson)
     {
         AttemptId = attemptId;
         Score = score;
@@ -14,6 +21,7 @@ public class AttemptResult : BaseEntity
         TotalQuestions = totalQuestions;
         CorrectCount = correctCount;
         CalculatedAt = calculatedAt;
+        QuestionBreakdownJson = questionBreakdownJson;
     }
 
     public Guid Id { get; set; }
@@ -23,6 +31,7 @@ public class AttemptResult : BaseEntity
     public int TotalQuestions { get; set; }
     public int CorrectCount { get; set; }
     public DateTime CalculatedAt { get; set; }
+    public string QuestionBreakdownJson { get; set; } = "[]";
 
     public QuizAttempt Attempt { get; set; } = null!;
 }

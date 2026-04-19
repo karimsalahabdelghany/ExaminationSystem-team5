@@ -1,15 +1,13 @@
 ﻿using ExaminationSystem.Application.Common.Results;
-using ExaminationSystem.Application.Interfaces;
-using ExaminationSystem.Domain.Entities;
 using ExaminationSystem.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
-namespace ExaminationSystem.Application.Features.Diplomas.HasActiveEnrollmentsQuery;
+
+namespace ExaminationSystem.Application.Features.Diplomas.CheckDiplomaHasActiveEnrollmentsOrPublished;
 
 public record CheckDiplomaHasActiveEnrollmentsOrPublishedQuery(Guid DiplomaId) : IRequest<RequestResult<bool>>;
 
 
-public class HasActiveEnrollmentsQueryHandler(IUnitOfWork unitOfWork) : IRequestHandler<CheckDiplomaHasActiveEnrollmentsOrPublishedQuery, RequestResult<bool>>
+public class CheckDiplomaHasActiveEnrollmentsOrPublishedQueryHandler(IUnitOfWork unitOfWork) : IRequestHandler<CheckDiplomaHasActiveEnrollmentsOrPublishedQuery, RequestResult<bool>>
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     public async Task<RequestResult<bool>> Handle(CheckDiplomaHasActiveEnrollmentsOrPublishedQuery request, CancellationToken cancellationToken)

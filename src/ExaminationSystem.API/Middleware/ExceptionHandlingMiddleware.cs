@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Exceptions;
+using ExaminationSystem.Application.Common.Exceptions;
 using ExaminationSystem.Application.Responses;
 using Newtonsoft.Json;
 using System.Net;
