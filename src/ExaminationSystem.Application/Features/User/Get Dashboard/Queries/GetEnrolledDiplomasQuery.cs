@@ -10,74 +10,59 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
+using ExaminationSystem.Application.Common.Results;
 
 namespace ExaminationSystem.Application.Features.Users.Get_Dashboard.Queries
 {
-    public record GetEnrolledDiplomasQuery(Guid StudentId) : IQuery<IEnumerable<EnrolledDiplomasResponse>>
+    public record GetEnrolledDiplomasQuery(Guid StudentId) : IQuery<RequestResult<IEnumerable<EnrolledDiplomasResponse>>>
     {
     }
-    // Eager-loads Diploma → Quizzes → Attempts in a single optimized query
-    // "Eager-load diploma progress in a single query"
-    //
-    // SQL produced (single round trip):
-    //   SELECT d.Id, d.Title, d.Description,
-    //          COUNT(DISTINCT q.Id)                              AS TotalQuizzes,
-    //          COUNT(DISTINCT a.Id WHERE a.Status != 'in_progress') AS CompletedQuizzes
-    //   FROM Enrollments e
-    //   JOIN Diplomas d    ON d.Id = e.DiplomaId
-    //   JOIN Quizzes q     ON q.DiplomaId = d.Id
-    //   LEFT JOIN QuizAttempts a ON a.QuizId = q.Id AND a.UserId = @StudentId
-    //   WHERE e.UserId = @StudentId
-    //   GROUP BY d.Id, d.Title, d.Description
-    //
-    // DEPENDS ON: POST /api/admin/diplomas + POST /api/diplomas/:id/enroll
+   
     public class GetEnrolledDiplomasQueryHandler
-        : IRequestHandler<GetEnrolledDiplomasQuery,IEnumerable<EnrolledDiplomasResponse>>
+        : IRequestHandler<GetEnrolledDiplomasQuery,RequestResult<IEnumerable<EnrolledDiplomasResponse>>>
     {
         private readonly IRepository<Enrollment> _enrollmentRepo;
 
         public GetEnrolledDiplomasQueryHandler(IRepository<Enrollment> enrollmentRepo)
             => _enrollmentRepo = enrollmentRepo;
 
-       
-        public async Task<IEnumerable<EnrolledDiplomasResponse>> Handle(
-            GetEnrolledDiplomasQuery request,
-            CancellationToken cancellationToken)
+
+        public async Task<RequestResult<IEnumerable<EnrolledDiplomasResponse>>> Handle(
+        GetEnrolledDiplomasQuery request,
+        CancellationToken cancellationToken)
         {
-            // Single query — eager loads diploma + quizzes + attempts
-            // GroupBy pushes all aggregation to SQL — no in-memory counting
-            var result = await _enrollmentRepo
-                .GetAll(e => e.UserId == request.StudentId)
-                .Include(e => e.Diploma)
-                    .ThenInclude(d => d.Quizzes)
-                        .ThenInclude(q => q.QuizAttempts.Where(a => a.UserId == request.StudentId))
-                .Where(e => e.Diploma.Status == DiplomaStatus.Published)
-
-                .Select(e => new EnrolledDiplomasResponse(
-                    DiplomaId: e.DiplomaId,
-                    Title: e.Diploma.Title,
-                    Description: e.Diploma.Description ?? string.Empty,
-
-                    TotalQuizzes: e.Diploma.Quizzes.Count(q => q.Status == QuizStatus.Published),
-                    CompletedQuizzes: e.Diploma.Quizzes
-                        .Count(q => q.QuizAttempts
-                            .Any(a => a.UserId == request.StudentId
-                                   && a.Status != QuizAttemptStatus.InProgress)),
-
-                    ProgressPercent: e.Diploma.Quizzes.Count(q => q.Status == QuizStatus.Published) == 0
-                        ? 0m
-                        : Math.Round(
-                            (decimal)e.Diploma.Quizzes
-                                .Count(q => q.QuizAttempts
-                                    .Any(a => a.UserId == request.StudentId
-                                           && a.Status != QuizAttemptStatus.InProgress)) // quiz which completed for user 
-                            / e.Diploma.Quizzes.Count(q => q.Status == QuizStatus.Published) * 100, 2)
-                ))
+            var enrollments = await _enrollmentRepo
+                .GetAll(e => e.UserId == request.StudentId && e.Diploma.Status == DiplomaStatus.Published)
+                .Select(e => new
+                {
+                    e.DiplomaId,
+                    e.Diploma.Title,
+                    e.Diploma.Description,
+                    Quizzes = e.Diploma.Quizzes.Where(q => q.Status == QuizStatus.Published)
+                })
                 .ToListAsync(cancellationToken);
 
-            return result;
+            var result = enrollments.Select(e => {
+                var totalQuizzes = e.Quizzes.Count();
+
+                var completedQuizzes = e.Quizzes.Count(q => q.QuizAttempts
+                                                .Any(a => a.UserId == request.StudentId
+                                                       && a.Status != QuizAttemptStatus.InProgress));
+
+                return new EnrolledDiplomasResponse(
+                    DiplomaId: e.DiplomaId,
+                    Title: e.Title,
+                    Description: e.Description ?? string.Empty,
+                    TotalQuizzes: totalQuizzes,
+                    CompletedQuizzes: completedQuizzes,
+                    ProgressPercent: totalQuizzes == 0 ? 0m : Math.Round((decimal)completedQuizzes / totalQuizzes * 100, 2)
+                );
+            });
+
+            return RequestResult<IEnumerable<EnrolledDiplomasResponse>>.succeeded(result, ResultCode.UserHasDiplomaEnrollments);
         }
+    }
 
         
-    }
+    
 }

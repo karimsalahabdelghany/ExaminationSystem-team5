@@ -10,14 +10,12 @@ namespace ExaminationSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentsController : ControllerBase
+    public class StudentsController : BaseController
     {
         private readonly IMediator _mediator;
 
-        public StudentsController(IMediator mediator)
+        public StudentsController(IMediator mediator) : base(mediator)
             => _mediator = mediator;
-
-
         
         /// 200 → { success, data: { enrolled_diplomas[], recent_quiz_attempts[], overall_stats } }
         /// 401 → JWT missing or invalid

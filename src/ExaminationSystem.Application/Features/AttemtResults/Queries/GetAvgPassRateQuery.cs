@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Interfaces;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -6,31 +7,44 @@ using System.Text;
 
 namespace ExaminationSystem.Application.Features.AttemtResults.Queries
 {
-    public record GetAvgPassRateQuery : IQuery<decimal>
+    public record GetAvgPassRateQuery : IQuery<RequestResult<decimal>>
     {
     }
-    public class GetAvgPassRateQueryHandler : IRequestHandler<GetAvgPassRateQuery, decimal>
+    public class GetAvgPassRateQueryHandler : IRequestHandler<GetAvgPassRateQuery, RequestResult<decimal>>
     {
-        private readonly IRepository<AttemptResult> _resultRepo;
+        private readonly IRepository<AttemptResult> _attemptresultRepo;
 
-        public GetAvgPassRateQueryHandler(IRepository<AttemptResult> resultRepo)
-            => _resultRepo = resultRepo;
+        public GetAvgPassRateQueryHandler(IRepository<AttemptResult> AttemptresultRepo)
+        {
 
-        public async Task<decimal> Handle(
+            _attemptresultRepo = AttemptresultRepo;
+        }
+
+        public async Task<RequestResult<decimal>> Handle(
             GetAvgPassRateQuery request,
             CancellationToken cancellationToken)
         {
-            var totalTask = _resultRepo.CountAsync(t => t.Passed);
-            var passedTask = _resultRepo.CountAsync();
+            var totalTask = _attemptresultRepo.CountAsync(t => t.Passed);
+            var passedTask = _attemptresultRepo.CountAsync();
 
             await Task.WhenAll(totalTask, passedTask);        // in parellel
 
             var total = await totalTask;
             var passed = await passedTask;
 
-            return total == 0
-                ? 0m
-                : Math.Round((decimal)passed / total * 100, 2);
+            if (total == 0)
+            {
+                return RequestResult<decimal>.Failure(0m, ResultCode.AvgPassRateFailed);
+            }
+
+            var avg = Math.Round((decimal)passed / total * 100, 2);
+
+            return RequestResult<decimal>.succeeded(avg, ResultCode.AvgPassRateSuccessed);
         }
     }
 }
+
+
+    
+
+

@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Features.Admin.Orchestrators;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Features.Admin.Orchestrators;
 using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Application.Responses;
 using Microsoft.Extensions.Caching.Memory;
@@ -8,11 +9,11 @@ using System.Text;
 
 namespace ExaminationSystem.Application.Features.Admin.Queries
 {
-    public record GetAdminStatsQuery : IQuery<ApiResponse<GetAdminStatsResponse>>
+    public record GetAdminStatsQuery : IQuery<RequestResult<GetAdminStatsResponse>>
     {
     }
     public class GetAdminStatsQueryHandler
-    : IRequestHandler<GetAdminStatsQuery, ApiResponse<GetAdminStatsResponse>>
+    : IRequestHandler<GetAdminStatsQuery, RequestResult<GetAdminStatsResponse>>
     {
         private readonly IMediator _mediator;
         private readonly IMemoryCache _cache;
@@ -27,24 +28,23 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
             _cache = cache;
         }
 
-        public async Task<ApiResponse<GetAdminStatsResponse>> Handle(
+        public async Task <RequestResult<GetAdminStatsResponse>> Handle(
             GetAdminStatsQuery request,
             CancellationToken cancellationToken)
         {
             // Serve from cache if still valid — avoids DB hit on every request
             if (_cache.TryGetValue(CacheKey, out GetAdminStatsResponse? cached) && cached is not null)
-                return ApiResponse<GetAdminStatsResponse>.Success(cached);
+                return RequestResult<GetAdminStatsResponse>.succeeded(cached,ResultCode.AdminStatsDataAlreadyCashedinMemory);
 
             GetAdminStatsResponse StatsDashboard = await _mediator.Send(new GetAdminStatsOrchestrator());
 
             if (StatsDashboard is null)
-                return ApiResponse<GetAdminStatsResponse>.Failure("Can't retrieve stats!");
+                return RequestResult<GetAdminStatsResponse>.Failure(null!,ResultCode.AdminStatsDataNotFound);
 
             // Cache result for 5 minutes 
             _cache.Set(CacheKey, StatsDashboard, CacheDuration);
 
-            return ApiResponse<GetAdminStatsResponse>.Success(StatsDashboard);
-
+            return RequestResult<GetAdminStatsResponse>.succeeded(StatsDashboard,ResultCode.AdminStatsQueryFiredSuccessfully);
         }
 
     }

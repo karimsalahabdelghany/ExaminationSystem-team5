@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Interfaces;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace ExaminationSystem.Application.Features.Admin.Queries
 {
-    public record GetTotalUsersQuery : IQuery<int>;
+    public record GetTotalUsersQuery :IQuery<int>;
     public class GetTotalUsersQueryHandler : IRequestHandler<GetTotalUsersQuery, int>
     {
         private readonly UserManager<Domain.Entities.User> _userManager;

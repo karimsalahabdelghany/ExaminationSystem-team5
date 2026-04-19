@@ -10,11 +10,11 @@ namespace ExaminationSystem.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Admin")]
-    public class AdminController : ControllerBase
+    public class AdminController : BaseController
     {
         private readonly IMediator _mediator;
 
-        public AdminController(IMediator mediator)
+        public AdminController(IMediator mediator) : base(mediator) 
         {
             _mediator = mediator;
         }
