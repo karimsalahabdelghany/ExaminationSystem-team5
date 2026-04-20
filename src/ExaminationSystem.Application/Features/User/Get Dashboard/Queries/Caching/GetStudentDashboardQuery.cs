@@ -1,19 +1,21 @@
-﻿using ExaminationSystem.Application.Features.User.Orchestrators;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Features.Admin.Queries;
+using ExaminationSystem.Application.Features.User.Orchestrators;
 using ExaminationSystem.Application.Responses;
 using Microsoft.Extensions.Caching.Memory;
-using System.Threading;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Caching
 {
-    public record GetStudentDashboardQuery(Guid StudentId) : IRequest<ApiResponse<GetStudentDashboardResponse>>;
+    public record GetStudentDashboardQuery(Guid StudentId) : IRequest<RequestResult<GetStudentDashboardResponse>>;
     // Handler 
     // Cache key is per-student (user_id) — as required by backend note
     // Cache dashboard response for 60 seconds per user_id
     public class GetStudentDashboardQueryHandler
-        : IRequestHandler<GetStudentDashboardQuery, ApiResponse<GetStudentDashboardResponse>>
+        : IRequestHandler<GetStudentDashboardQuery, RequestResult<GetStudentDashboardResponse>>
     {
         private readonly IMediator _mediator;
         private readonly IMemoryCache _cache;
@@ -30,26 +32,27 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Cach
             _cache = cache;
         }
 
-        public async Task<ApiResponse<GetStudentDashboardResponse>> Handle(
+        public async Task<RequestResult<GetStudentDashboardResponse>> Handle(
             GetStudentDashboardQuery request,
             CancellationToken cancellationToken)
         {
             var cacheKey = CacheKey(request.StudentId);
 
             // Per-student cache check — different students never share cache entries
-            if (_cache.TryGetValue(cacheKey, out GetStudentDashboardResponse? cached)
+            if (_cache.TryGetValue(cacheKey, out RequestResult<GetStudentDashboardResponse>? cached)
                 && cached is not null)
-                return ApiResponse<GetStudentDashboardResponse>.Success(cached);
+                return RequestResult<GetStudentDashboardResponse>.succeeded(cached.Result,ResultCode.StudentStatsDataAlreadyCachedinMemory);
 
-            var dashboard = await _mediator.Send(new GetStudentDashboardOrchestrator(request.StudentId));
+            var dashboard = await _mediator.Send(new GetStudentDashboardOrchestrator(request.StudentId), cancellationToken);
 
-            if (dashboard is null)
-                return ApiResponse<GetStudentDashboardResponse>.Failure("Could not load dashboard.");
+            if (!dashboard.Success)
+                return RequestResult<GetStudentDashboardResponse>
+                .Failure(dashboard.Result, ResultCode.StudentsDashoardQueryFalied);
 
             // Store per student_id for 60 seconds
-            _cache.Set(cacheKey, dashboard, CacheDuration);
+            _cache.Set(cacheKey, dashboard.Result, CacheDuration); // cach data
+            return RequestResult<GetStudentDashboardResponse>.succeeded(dashboard.Result,dashboard.Code);
 
-            return ApiResponse<GetStudentDashboardResponse>.Success(dashboard);
         }
     }
 }

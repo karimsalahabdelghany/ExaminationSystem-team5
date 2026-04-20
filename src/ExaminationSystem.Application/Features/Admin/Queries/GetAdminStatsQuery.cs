@@ -33,18 +33,22 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
             CancellationToken cancellationToken)
         {
             // Serve from cache if still valid — avoids DB hit on every request
-            if (_cache.TryGetValue(CacheKey, out GetAdminStatsResponse? cached) && cached is not null)
-                return RequestResult<GetAdminStatsResponse>.succeeded(cached,ResultCode.AdminStatsDataAlreadyCashedinMemory);
+            if (_cache.TryGetValue(CacheKey, out RequestResult<GetAdminStatsResponse>? cached) && cached is not null)
+                return cached;
 
-            GetAdminStatsResponse StatsDashboard = await _mediator.Send(new GetAdminStatsOrchestrator());
+            var statsDashboard = await _mediator.Send (new GetAdminStatsOrchestrator(),
+             cancellationToken);
 
-            if (StatsDashboard is null)
-                return RequestResult<GetAdminStatsResponse>.Failure(null!,ResultCode.AdminStatsDataNotFound);
+            if (!statsDashboard.Success)
+                return RequestResult<GetAdminStatsResponse>
+                .Failure(statsDashboard.Result, statsDashboard.Code);
+
 
             // Cache result for 5 minutes 
-            _cache.Set(CacheKey, StatsDashboard, CacheDuration);
+            _cache.Set(CacheKey, statsDashboard.Result, CacheDuration);
+            return RequestResult<GetAdminStatsResponse>.succeeded(statsDashboard.Result,statsDashboard.Code);
 
-            return RequestResult<GetAdminStatsResponse>.succeeded(StatsDashboard,ResultCode.AdminStatsQueryFiredSuccessfully);
+
         }
 
     }

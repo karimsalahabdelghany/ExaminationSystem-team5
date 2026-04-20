@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Interfaces;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,11 +7,11 @@ using System.Text;
 namespace ExaminationSystem.Application.Features.Admin.Queries
 {
     public record GetAdminStatsResponse(
-         int TotalUsers,
-         int ActiveUsersToday,
+         RequestResult<int> TotalUsers,
+         RequestResult<int> ActiveUsersToday,
          int TotalQuizzes,
          int TotalAttempts,
-         decimal AvgPassRate
+         RequestResult<decimal> AvgPassRate
         );
    
 }

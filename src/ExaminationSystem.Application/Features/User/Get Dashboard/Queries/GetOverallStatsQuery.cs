@@ -43,7 +43,7 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            await Task.WhenAll(totalTakenTask, scoreStatsTask);
+            //await Task.WhenAll(totalTakenTask, scoreStatsTask);
 
             var totalTaken = await totalTakenTask;
             var scoreStats = await scoreStatsTask;

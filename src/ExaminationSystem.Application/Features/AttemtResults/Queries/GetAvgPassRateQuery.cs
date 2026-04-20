@@ -27,7 +27,7 @@ namespace ExaminationSystem.Application.Features.AttemtResults.Queries
             var totalTask = _attemptresultRepo.CountAsync(t => t.Passed);
             var passedTask = _attemptresultRepo.CountAsync();
 
-            await Task.WhenAll(totalTask, passedTask);        // in parellel
+           /* await Task.WhenAll(totalTask, passedTask);*/        // in parellel
 
             var total = await totalTask;
             var passed = await passedTask;

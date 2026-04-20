@@ -2,20 +2,22 @@
 
 public enum ResultCode
 {   //Admin
-    AdminStatsDataAlreadyCashedinMemory = 1,
+    AdminStatsDataAlreadyCachedinMemory = 1,
     AdminStatsDataNotFound = 2,
     AdminStatsQueryFiredSuccessfully = 3,
     AvgPassRateFailed = 4,
     AvgPassRateSuccessed = 5,
-
-
+    UsersLoginTodaySuccessfully = 6,
+    GetTotalUsersQuerySuccessed = 7,
 
 
     //User
-    UserHasDiplomaEnrollments = 6,
-    RecentQuizAttemptsloadedSuccessfuly = 7,
-    OverAllStatsProgressQuerySucessful = 8,
-    UsersLoginTodaySuccessfully = 9,
+    UserHasDiplomaEnrollments = 10,
+    RecentQuizAttemptsloadedSuccessfuly = 11,
+    OverAllStatsProgressQuerySucessful = 12,
+    StudentsDashoardQuerySucessfull = 13,
+    StudentsDashoardQueryFalied = 14,
+    StudentStatsDataAlreadyCachedinMemory = 15,
 
 
     //Diploma
