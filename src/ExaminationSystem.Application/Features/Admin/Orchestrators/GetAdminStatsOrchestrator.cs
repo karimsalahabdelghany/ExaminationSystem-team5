@@ -22,21 +22,20 @@ namespace ExaminationSystem.Application.Features.Admin.Orchestrators
             => _mediator = mediator;
         public async Task<RequestResult<GetAdminStatsResponse>> Handle(GetAdminStatsOrchestrator request, CancellationToken ct )
         {
-            // All sub-queries fired in parallel — each hits only its own table
-            var totalUsersTask = _mediator.Send(new GetTotalUsersQuery(), ct);
-            var activeUsersTodayTask = _mediator.Send(new GetActiveUsersTodayQuery(), ct);
-            var totalQuizzesTask = _mediator.Send(new GetTotalQuizzesQuery(), ct);
-            var totalAttemptsTask = _mediator.Send(new GetTotalAttemptsQuery(), ct);
-            var avgPassRateTask = _mediator.Send(new GetAvgPassRateQuery(), ct);
+            var totalUsersTask =await _mediator.Send(new GetTotalUsersQuery(), ct);
+            var activeUsersTodayTask =await _mediator.Send(new GetActiveUsersTodayQuery(), ct);
+            var totalQuizzesTask = await _mediator.Send(new GetTotalQuizzesQuery(), ct);
+            var totalAttemptsTask = await _mediator.Send(new GetTotalAttemptsQuery(), ct);
+            var avgPassRateTask = await _mediator.Send(new GetAvgPassRateQuery(), ct);
 
             
 
             var  Result =  new GetAdminStatsResponse(
-                TotalUsers: await totalUsersTask,
-                ActiveUsersToday: activeUsersToday.Result,
-                TotalQuizzes: await totalQuizzesTask,
-                TotalAttempts: await totalAttemptsTask,
-                AvgPassRate: await avgPassRateTask);
+                TotalUsers:  totalUsersTask.Result,
+                ActiveUsersToday:activeUsersTodayTask.Result,
+                TotalQuizzes:  totalQuizzesTask.Result,
+                TotalAttempts:  totalAttemptsTask.Result,
+                AvgPassRate:  avgPassRateTask.Result);
 
             return RequestResult<GetAdminStatsResponse>.succeeded(Result, ResultCode.AdminStatsQueryFiredSuccessfully);
         }

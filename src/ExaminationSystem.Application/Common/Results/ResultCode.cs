@@ -18,6 +18,8 @@ public enum ResultCode
     StudentsDashoardQuerySucessfull = 13,
     StudentsDashoardQueryFalied = 14,
     StudentStatsDataAlreadyCachedinMemory = 15,
+    TotalAttemptsQuerySuccessfull = 16,
+    TotalQuzizesQuerySucessfull = 17,
 
 
     //Diploma
