@@ -7,4 +7,5 @@ public enum QuizAttemptStatus : byte
     Submitted = 2,
     Expired = 3,
     Graded = 4,
+    Submitting = 5,
 }

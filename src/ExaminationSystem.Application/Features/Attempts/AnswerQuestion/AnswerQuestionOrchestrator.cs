@@ -30,7 +30,10 @@ public class AnswerQuestionOrchestratorHandler(
         var ownershipCheck = CheckAttemptOwnership(attempt!, request.StudentId);
         if (ownershipCheck is not null) return ownershipCheck;
 
-        if (IsAttemptExpired(attempt!))
+        if (attempt!.Status == QuizAttemptStatus.Submitting)
+            return TimedOutResult();
+
+        if (IsAttemptExpired(attempt))
             return TimedOutResult();
 
         var progressCheck = CheckAttemptIsInProgress(attempt!);

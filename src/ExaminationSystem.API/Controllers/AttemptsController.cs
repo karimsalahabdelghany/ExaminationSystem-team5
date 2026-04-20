@@ -44,27 +44,29 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
         }
 
         var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, studentId));
-        if (result.TimedOut)
+
+        if (result.Success)
+            return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Result));
+
+        return result.Code switch
         {
-            return StatusCode(410, new ApiResponse<SubmitAttemptResponse>(
+            ResultCode.AttemptTimedOut => StatusCode(410, new ApiResponse<SubmitAttemptResponse>(
                 success: false,
-                value: result.Value,
+                value: result.Result,
                 errors: ["Time has expired. Your attempt has been auto-submitted."],
                 statusCode: (HttpStatusCode)410
-            ));
-        }
-
-        if (result.AlreadySubmitted)
-        {
-            return Conflict(new ApiResponse<SubmitAttemptResponse>(
+            )),
+            ResultCode.AttemptAlreadySubmitted => Conflict(new ApiResponse<SubmitAttemptResponse>(
                 success: false,
-                value: result.Value,
+                value: result.Result,
                 errors: ["Attempt already submitted"],
                 statusCode: HttpStatusCode.Conflict
-            ));
-        }
-
-        return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Value));
+            )),
+            ResultCode.AttemptNotFound => NotFound(
+                ApiResponse<SubmitAttemptResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            ResultCode.AttemptNotOwned => Forbid("You do not own this attempt."),
+            _ => BadRequest(ApiResponse<SubmitAttemptResponse>.Failure("Could not submit attempt."))
+        };
     }
 
 

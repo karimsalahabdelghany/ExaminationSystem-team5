@@ -1,4 +1,4 @@
-﻿namespace ExaminationSystem.Application.Common.Results;
+namespace ExaminationSystem.Application.Common.Results;
 
 public enum ResultCode
 {   //Admin
@@ -49,4 +49,12 @@ public enum ResultCode
     AttemptTimedOut = 1203,
     QuestionNotInQuiz = 1204,
     AnswerSavedSuccessfully = 1205,
+    SubmitAttemptSuccessful = 1206,
+
+    // Start quiz attempt (POST .../quizzes/{id}/start)
+    QuizNotFoundOrNotPublished = 2000,
+    QuizAttemptStartedSuccessfully = 2001,
+    AttemptAlreadyInProgress = 2002,
+    AttemptLimitReached = 2003,
+    AttemptStartConflict = 2004,
 }

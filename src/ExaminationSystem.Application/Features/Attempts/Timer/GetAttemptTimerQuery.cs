@@ -1,5 +1,4 @@
 using ExaminationSystem.Application.Common.Exceptions;
-using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Enums;
 
@@ -14,8 +13,7 @@ public record GetAttemptTimerResponse(int SecondsRemaining);
 
 public class GetAttemptTimerQueryHandler(
     IUnitOfWork unitOfWork,
-    IDateTimeProvider dateTimeProvider,
-    IMediator mediator
+    IDateTimeProvider dateTimeProvider
 ) : IRequestHandler<GetAttemptTimerQuery, GetAttemptTimerResponse>
 {
     public async Task<GetAttemptTimerResponse> Handle(GetAttemptTimerQuery request, CancellationToken cancellationToken)
@@ -29,11 +27,15 @@ public class GetAttemptTimerQueryHandler(
         if (attempt.UserId != request.StudentId)
             throw new ForbiddenException("You do not own this attempt.");
 
+        if (attempt.Status == QuizAttemptStatus.Submitting)
+            throw new GoneException(
+                "Your attempt is being finalized automatically; try again in a moment.");
+
         var now = dateTimeProvider.UtcNow;
         if (attempt.Status == QuizAttemptStatus.InProgress && now > attempt.Deadline)
         {
-            await mediator.Send(new SubmitAttemptOrchestrator(request.AttemptId, request.StudentId), cancellationToken);
-            throw new GoneException("Time has expired. Your attempt has been auto-submitted.");
+            throw new GoneException(
+                "Time has expired. Your attempt is being finalized automatically; refresh in a moment.");
         }
 
         if (attempt.Status == QuizAttemptStatus.Expired)
