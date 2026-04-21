@@ -10,7 +10,7 @@ public class AppUser : IdentityUser<Guid>, IBaseEntity
     private readonly List<LoginLog> _loginLogs = [];
 
     public string FullName { get; set; } = string.Empty;
-    public AccountStatus Status { get; set; } = AccountStatus.Active;
+    public AccountStatus Status { get; set; } = AccountStatus.PendingVerification;
     public int FailedLoginAttempts { get; set; }
     public DateTime? LockedUntil { get; set; }
 
@@ -25,6 +25,6 @@ public class AppUser : IdentityUser<Guid>, IBaseEntity
     public IReadOnlyCollection<PasswordResetToken> PasswordResetTokens => _passwordResetTokens;
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens;
     public IReadOnlyCollection<LoginLog> LoginLogs => _loginLogs;
-
+   
     public byte[] RowVersion { get; set; } = [];
 }

@@ -33,4 +33,6 @@ public interface IRepository<T> where T : BaseEntity
 
 
     void SaveInclude(T entity, params string[] includedProperties);
+
+
 }
