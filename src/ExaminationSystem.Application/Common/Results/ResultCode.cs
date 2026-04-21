@@ -43,6 +43,12 @@ public enum ResultCode
     QuizDeletedSuccessfully = 1103,
     QuizIsPublished = 1104,
     QuizHasActiveAttempts = 1105,
+    QuizAlreadyPublished = 1106,
+    QuizPublishedSuccessfully = 1107,
+    QuizHasNoQuestions = 1108,
+    QuizAlreadyDraft = 1109,
+    QuizUnpublishedSuccessfully = 1110,
+
 
     // Attempts (1200-1299)
     AttemptNotFound = 1200,

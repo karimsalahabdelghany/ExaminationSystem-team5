@@ -1,7 +1,4 @@
-using ExaminationSystem.Application.Interfaces;
-using ExaminationSystem.Domain.Entities;
 using ExaminationSystem.Domain.Enums;
-using MediatR;
 
 namespace ExaminationSystem.Application.Features.Quizzes.Queries;
 
