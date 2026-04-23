@@ -1,11 +1,14 @@
+using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
+using ExaminationSystem.Application.Features.Attempts.GetAttempDetails;
+using ExaminationSystem.Application.Features.Attempts.GetStudentAttemptsHistory;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Attempts.Timer;
 using ExaminationSystem.Application.Interfaces;
 
 namespace ExaminationSystem.API.Controllers;
 
-[Route("api/attempts")]
+//[Route("api/attempts")]
 // TODO: Uncomment when Identity setup is complete
 //[Authorize]
 public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : BaseController(mediator)
@@ -85,6 +88,23 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
         var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId,_currentUser.Id.Value));
         return Ok(ReqestResult<GetAttemptTimerResponse>.Success(result));
     }
-    
+
+    [HttpGet]
+    public async Task<IActionResult> GetStudentAttemptsHistory([FromQuery] GetStudentAttemptsHistoryQuery query , CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(ApiResponse<PaginationResult<GetStudentAttemptHistoryResponse>>.Success(result.Result));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetAttemptDetails(Guid id , CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetAttempDetailsQuery(id) , cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.AttemptNotFound => NotFound(ApiResponse<GetAttempDetailsResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            _ => Ok(ApiResponse<GetAttempDetailsResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
+    }
 
 }

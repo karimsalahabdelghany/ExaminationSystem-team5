@@ -1,6 +1,8 @@
 using ExaminationSystem.Application.Features.Quizzes;
 using ExaminationSystem.Application.Features.Quizzes.CreateQuiz;
 using ExaminationSystem.Application.Features.Quizzes.DeleteQuiz;
+using ExaminationSystem.Application.Features.Quizzes.PublishQuiz;
+using ExaminationSystem.Application.Features.Quizzes.UnpublishQuiz;
 using ExaminationSystem.Application.Features.Quizzes.UpdateQuiz;
 
 namespace ExaminationSystem.API.Controllers;
@@ -44,4 +46,34 @@ public class QuizzesController(IMediator mediator) : BaseController(mediator)
             _ => NoContent()
         };
     }
+
+
+    [HttpPatch("{id:guid}/publish")]
+    public async Task<IActionResult> Publish(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new PublishQuizCommand(id), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.QuizNotFound => NotFound(ApiResponse<QuizResponse>.Failure("Quiz not found", HttpStatusCode.NotFound)),
+            ResultCode.QuizAlreadyPublished => Conflict(ApiResponse<QuizResponse>.Failure("Quiz is already published", HttpStatusCode.Conflict)),
+            ResultCode.QuizHasNoQuestions => UnprocessableEntity(ApiResponse<QuizResponse>.Failure("Quiz must have at least one question", HttpStatusCode.UnprocessableEntity)),
+            _ => Ok(ApiResponse<QuizResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
+    }
+
+
+    [HttpPatch("{id:guid}/unpublish")]
+    public async Task<IActionResult> Unpublish(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new UnpublishQuizCommand(id), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.QuizNotFound => NotFound(ApiResponse<QuizResponse>.Failure("Quiz not found", HttpStatusCode.NotFound)),
+            ResultCode.QuizAlreadyDraft => Conflict(ApiResponse<QuizResponse>.Failure("Quiz is not currently published", HttpStatusCode.Conflict)),
+            ResultCode.QuizHasActiveAttempts => Conflict(ApiResponse<QuizResponse>.Failure("Cannot unpublish while active attempts exist", HttpStatusCode.Conflict)),
+            _ => Ok(ApiResponse<QuizResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
+    }
+
+
 }
