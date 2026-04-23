@@ -23,7 +23,7 @@ namespace ExaminationSystem.API.Controllers
         }
         /// GET /api/admin/stats
         [HttpGet("stats")]
-        [ProducesResponseType(typeof(ReqestResult<GetAdminStatsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<GetAdminStatsResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)] // no login 
         [ProducesResponseType(StatusCodes.Status403Forbidden)]   //unauthrized user is not admin
         public async Task<IActionResult> GetStats()
@@ -32,7 +32,7 @@ namespace ExaminationSystem.API.Controllers
 
             if (result is null)
                 return BadRequest(
-                    ReqestResult<GetAdminStatsResponse>.Failure("Can't retrieve stats!"));
+                    ApiResponse<GetAdminStatsResponse>.Failure("Can't retrieve stats!"));
 
             return Ok(result);
         }
@@ -51,16 +51,16 @@ namespace ExaminationSystem.API.Controllers
             ));
             if(result.Success)
             {
-                return Ok(ReqestResult<PaginatedResult<GetAdminAttemptsResponse>>.Success(result.Result, HttpStatusCode.OK));
+                return Ok(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>.Success(result.Result, HttpStatusCode.OK));
             }
 
             return result.Code switch
             {
                 ResultCode.AttemptNotFound =>
-                    NotFound(ReqestResult<PaginatedResult<GetAdminAttemptsResponse>>
+                    NotFound(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>
                         .Failure("No attempts found.", HttpStatusCode.NotFound)),
 
-                _ => BadRequest(ReqestResult<PaginatedResult<GetAdminAttemptsResponse>>
+                _ => BadRequest(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>
                         .Failure("Could not load attempts.", HttpStatusCode.BadRequest))
             };
         }

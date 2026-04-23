@@ -29,12 +29,12 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
 
         return result.Code switch
         {
-            ResultCode.AttemptNotFound => NotFound(ReqestResult<AnswerQuestionResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            ResultCode.AttemptNotFound => NotFound(ApiResponse<AnswerQuestionResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
             ResultCode.AttemptNotOwned => Forbid("You do not own this attempt"),
-            ResultCode.AttemptAlreadySubmitted => Conflict(ReqestResult<AnswerQuestionResponse>.Failure("Attempt is already submitted or expired", HttpStatusCode.Conflict)),
-            ResultCode.AttemptTimedOut => StatusCode(410, ReqestResult<AnswerQuestionResponse>.Failure("Time has expired. Your attempt has been auto-submitted", (HttpStatusCode)410)),
-            ResultCode.QuestionNotInQuiz => UnprocessableEntity(ReqestResult<AnswerQuestionResponse>.Failure("This question does not belong to this quiz", HttpStatusCode.UnprocessableEntity)),
-            _ => Ok(ReqestResult<AnswerQuestionResponse>.Success(result.Result, HttpStatusCode.OK))
+            ResultCode.AttemptAlreadySubmitted => Conflict(ApiResponse<AnswerQuestionResponse>.Failure("Attempt is already submitted or expired", HttpStatusCode.Conflict)),
+            ResultCode.AttemptTimedOut => StatusCode(410, ApiResponse<AnswerQuestionResponse>.Failure("Time has expired. Your attempt has been auto-submitted", (HttpStatusCode)410)),
+            ResultCode.QuestionNotInQuiz => UnprocessableEntity(ApiResponse<AnswerQuestionResponse>.Failure("This question does not belong to this quiz", HttpStatusCode.UnprocessableEntity)),
+            _ => Ok(ApiResponse<AnswerQuestionResponse>.Success(result.Result, HttpStatusCode.OK))
         };
     }
 
@@ -45,32 +45,32 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
         if (studentIdClaim is null)
         {
             return Unauthorized(
-                ReqestResult<SubmitAttemptResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+                ApiResponse<SubmitAttemptResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         }
 
         var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, _currentUser.Id.Value));
 
         if (result.Success)
-            return Ok(ReqestResult<SubmitAttemptResponse>.Success(result.Result));
+            return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Result));
 
         return result.Code switch
         {
-            ResultCode.AttemptTimedOut => StatusCode(410, new ReqestResult<SubmitAttemptResponse>(
+            ResultCode.AttemptTimedOut => StatusCode(410, new ApiResponse<SubmitAttemptResponse>(
                 success: false,
                 value: result.Result,
                 errors: ["Time has expired. Your attempt has been auto-submitted."],
                 statusCode: (HttpStatusCode)410
             )),
-            ResultCode.AttemptAlreadySubmitted => Conflict(new ReqestResult<SubmitAttemptResponse>(
+            ResultCode.AttemptAlreadySubmitted => Conflict(new ApiResponse<SubmitAttemptResponse>(
                 success: false,
                 value: result.Result,
                 errors: ["Attempt already submitted"],
                 statusCode: HttpStatusCode.Conflict
             )),
             ResultCode.AttemptNotFound => NotFound(
-                ReqestResult<SubmitAttemptResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+                ApiResponse<SubmitAttemptResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
             ResultCode.AttemptNotOwned => Forbid("You do not own this attempt."),
-            _ => BadRequest(ReqestResult<SubmitAttemptResponse>.Failure("Could not submit attempt."))
+            _ => BadRequest(ApiResponse<SubmitAttemptResponse>.Failure("Could not submit attempt."))
         };
     }
 
@@ -82,11 +82,11 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
         if (studentIdClaim is null )
         {
             return Unauthorized(
-                ReqestResult<GetAttemptTimerResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+                ApiResponse<GetAttemptTimerResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         }
 
         var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId,_currentUser.Id.Value));
-        return Ok(ReqestResult<GetAttemptTimerResponse>.Success(result));
+        return Ok(ApiResponse<GetAttemptTimerResponse>.Success(result));
     }
 
     [HttpGet]

@@ -27,8 +27,8 @@ public class DiplomasController : BaseController
     {
         var result = await _mediator.Send(command ,cancellationToken);
         if (result is null)
-            return BadRequest(ReqestResult<CreateDiplomaResponse>.Failure("Can't Create this diploma!"));
-        return Created($"/Diplomas/{result?.Result?.Id}", ReqestResult<CreateDiplomaResponse>.Success(result?.Result,HttpStatusCode.Created));
+            return BadRequest(ApiResponse<CreateDiplomaResponse>.Failure("Can't Create this diploma!"));
+        return Created($"/Diplomas/{result?.Result?.Id}", ApiResponse<CreateDiplomaResponse>.Success(result?.Result,HttpStatusCode.Created));
     }
 
     [HttpPut("{id}")]
@@ -36,8 +36,8 @@ public class DiplomasController : BaseController
     {
         var result = await _mediator.Send(command , cancellationToken);
         if (result is null)
-            return BadRequest(ReqestResult<UpdateDiplomaResult>.Failure("Can't update this diploma!"));
-        return Ok(ReqestResult<UpdateDiplomaResult>.Success(result.Result, HttpStatusCode.OK));
+            return BadRequest(ApiResponse<UpdateDiplomaResult>.Failure("Can't update this diploma!"));
+        return Ok(ApiResponse<UpdateDiplomaResult>.Success(result.Result, HttpStatusCode.OK));
     }
 
     [HttpDelete("{id}")]
@@ -46,9 +46,9 @@ public class DiplomasController : BaseController
         var result = await _mediator.Send(new DeleteDiplomaCommand(id) ,cancellationToken);
         return result.Code switch
         {
-            ResultCode.DiplomaNotFound => NotFound(ReqestResult<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),
-            ResultCode.DiplomaHasActiveEnrollmentsOrPublished => Conflict(ReqestResult<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict)),
-            _ => Ok(ReqestResult<bool>.Success(true, HttpStatusCode.OK))
+            ResultCode.DiplomaNotFound => NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),
+            ResultCode.DiplomaHasActiveEnrollmentsOrPublished => Conflict(ApiResponse<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict)),
+            _ => Ok(ApiResponse<bool>.Success(true, HttpStatusCode.OK))
         };
     }
 
@@ -62,16 +62,16 @@ public class DiplomasController : BaseController
         ));
 
         if (result.Success)
-            return Ok(ReqestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
+            return Ok(ApiResponse<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
                 .Success(result.Result, HttpStatusCode.OK));
 
         return result.Code switch
         {
             ResultCode.DiplomaNotFound =>
-                NotFound(ReqestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
+                NotFound(ApiResponse<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
                     .Failure("No diplomas found.", HttpStatusCode.NotFound)),
 
-            _ => BadRequest(ReqestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
+            _ => BadRequest(ApiResponse<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
                     .Failure("Could not load diplomas.", HttpStatusCode.BadRequest))
         };
     }
@@ -82,9 +82,9 @@ public class DiplomasController : BaseController
         var result = await _mediator.Send(new GetPublishedDiplomaQuizezQuery(id), cancellationToken );
         return result.Code switch
         {
-            ResultCode.DiplomaNotFound => NotFound(ReqestResult<List<GetPublishedDiplomaQuizezResponse>>.Failure("Diploma not found", HttpStatusCode.NotFound)),
+            ResultCode.DiplomaNotFound => NotFound(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Failure("Diploma not found", HttpStatusCode.NotFound)),
             ResultCode.StudentNotEnrolledInDiploma => Forbid("Student not enrolled in diploma"),
-            _ => Ok(ReqestResult<List<GetPublishedDiplomaQuizezResponse>>.Success(result.Result, HttpStatusCode.OK))
+            _ => Ok(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Success(result.Result, HttpStatusCode.OK))
         };
     }
     // GET /api/diplomas? page = 1 & per_page = 20
@@ -95,21 +95,21 @@ public class DiplomasController : BaseController
     {
         var studentId = GetStudentId();
         if (studentId is null)
-            return Unauthorized(ReqestResult<GetDiplomasResponse>.
+            return Unauthorized(ApiResponse<GetDiplomasResponse>.
                    Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
 
         var result = await _mediator.Send(new GetDiplomasQuery(
             Params: new PaginationParams { Page = page, PerPage = per_page }
         ));
         if (result.Success)
-            return Ok(ReqestResult<PaginatedResult<GetDiplomasResponse>>.Success(result.Result, HttpStatusCode.OK));
+            return Ok(ApiResponse<PaginatedResult<GetDiplomasResponse>>.Success(result.Result, HttpStatusCode.OK));
 
         return result.Code switch
         {
             ResultCode.DiplomaNotFound =>
-                NotFound(ReqestResult<PaginatedResult<GetDiplomasResponse>>
+                NotFound(ApiResponse<PaginatedResult<GetDiplomasResponse>>
                     .Failure("No diplomas found.", HttpStatusCode.NotFound)),
-            _ => BadRequest(ReqestResult<PaginatedResult<GetDiplomasResponse>>
+            _ => BadRequest(ApiResponse<PaginatedResult<GetDiplomasResponse>>
                     .Failure("Could not load diplomas.", HttpStatusCode.BadRequest))
         };
     }

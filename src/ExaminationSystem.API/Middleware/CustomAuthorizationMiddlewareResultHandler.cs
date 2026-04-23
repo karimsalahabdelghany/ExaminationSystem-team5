@@ -20,7 +20,7 @@ public class CustomAuthorizationMiddlewareResultHandler
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             context.Response.ContentType = "application/json";
 
-            var body = ReqestResult<object>.Failure("You are not authorized to perform this action.", HttpStatusCode.Forbidden);
+            var body = ApiResponse<object>.Failure("You are not authorized to perform this action.", HttpStatusCode.Forbidden);
             await context.Response.WriteAsJsonAsync(body);
             return;
         }

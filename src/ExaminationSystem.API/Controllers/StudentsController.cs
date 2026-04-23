@@ -25,7 +25,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpGet("dashboard")]
-        [ProducesResponseType(typeof(ReqestResult<GetStudentDashboardResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<GetStudentDashboardResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetDashboard()
@@ -33,7 +33,7 @@ namespace ExaminationSystem.API.Controllers
             var userid = GetStudentId();
             if (userid == null)
                 return Unauthorized(
-                   ReqestResult<GetStudentDashboardResponse>.
+                   ApiResponse<GetStudentDashboardResponse>.
                    Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
 
             var result = await _mediator.Send(new GetStudentDashboardQuery());
@@ -41,18 +41,18 @@ namespace ExaminationSystem.API.Controllers
             return result.Code switch
             {
                 ResultCode.StudentsDashoardQuerySucessfull =>        
-                Ok(ReqestResult<GetStudentDashboardResponse>
+                Ok(ApiResponse<GetStudentDashboardResponse>
                      .Success(result.Result, HttpStatusCode.OK)),
 
                 ResultCode.StudentStatsDataAlreadyCachedinMemory =>
-                    Ok(ReqestResult<GetStudentDashboardResponse>
+                    Ok(ApiResponse<GetStudentDashboardResponse>
                         .Success(result.Result, HttpStatusCode.OK)),
 
                 ResultCode.StudentsDashoardQueryFalied =>
-                    BadRequest(ReqestResult<GetStudentDashboardResponse>
+                    BadRequest(ApiResponse<GetStudentDashboardResponse>
                         .Failure("Could not load student dashboard.", HttpStatusCode.BadRequest)),
 
-                _ => BadRequest(ReqestResult<GetStudentDashboardResponse>
+                _ => BadRequest(ApiResponse<GetStudentDashboardResponse>
                         .Failure("Unexpected error.", HttpStatusCode.BadRequest))
             };
         
@@ -65,7 +65,7 @@ namespace ExaminationSystem.API.Controllers
        [FromQuery] Guid? diploma_id = null)
         {
             var studentId = GetStudentId();
-            if (studentId is null) return Unauthorized(ReqestResult<PaginatedResult<GetStudentAttemptsResponse>>.
+            if (studentId is null) return Unauthorized(ApiResponse<PaginatedResult<GetStudentAttemptsResponse>>.
                Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
 
             var result = await _mediator.Send(new GetStudentAttemptsQuery(
@@ -74,16 +74,16 @@ namespace ExaminationSystem.API.Controllers
                 DiplomaId: diploma_id
             ));
             if (result.Success)
-                return Ok(ReqestResult<PaginatedResult<GetStudentAttemptsResponse>>
+                return Ok(ApiResponse<PaginatedResult<GetStudentAttemptsResponse>>
                     .Success(result.Result, HttpStatusCode.OK));
 
             return result.Code switch
             {
                 ResultCode.RecentQuizAttemptsloadedSuccessfuly =>
-                    Ok(ReqestResult<PaginatedResult<GetStudentAttemptsResponse>>
+                    Ok(ApiResponse<PaginatedResult<GetStudentAttemptsResponse>>
                         .Success(result.Result, HttpStatusCode.OK)),
 
-                _ => BadRequest(ReqestResult<PaginatedResult<GetStudentAttemptsResponse>>
+                _ => BadRequest(ApiResponse<PaginatedResult<GetStudentAttemptsResponse>>
                         .Failure("Could not load attempts.", HttpStatusCode.BadRequest))
             };
 

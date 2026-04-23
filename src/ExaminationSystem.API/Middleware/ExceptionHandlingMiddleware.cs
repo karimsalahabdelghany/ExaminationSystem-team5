@@ -41,7 +41,7 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(fex, "Forbidden: {Message}", fex.Message);
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             context.Response.ContentType = "application/json";
-            var apiResponse = ReqestResult<object>
+            var apiResponse = ApiResponse<object>
                 .Failure(fex.Message, HttpStatusCode.Forbidden);
             var response = JsonConvert.SerializeObject(apiResponse);
             await context.Response.WriteAsync(response);
@@ -52,7 +52,7 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(nex, "Resource not found: {Message}", nex.Message);
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             context.Response.ContentType = "application/json";
-            var apiResponse = ReqestResult<object>
+            var apiResponse = ApiResponse<object>
                 .Failure(nex.Message, HttpStatusCode.NotFound);
             var response = JsonConvert.SerializeObject(apiResponse);
             await context.Response.WriteAsync(response);
@@ -63,7 +63,7 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(cex, "Conflict: {Message}", cex.Message);
             context.Response.StatusCode = (int)HttpStatusCode.Conflict;
             context.Response.ContentType = "application/json";
-            var apiResponse = ReqestResult<object>
+            var apiResponse = ApiResponse<object>
                 .Failure(cex.Message, HttpStatusCode.Conflict);
             var response = JsonConvert.SerializeObject(apiResponse);
             await context.Response.WriteAsync(response);
@@ -74,7 +74,7 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(gex, "Gone: {Message}", gex.Message);
             context.Response.StatusCode = (int)HttpStatusCode.Gone;
             context.Response.ContentType = "application/json";
-            var apiResponse = ReqestResult<object>
+            var apiResponse = ApiResponse<object>
                 .Failure(gex.Message, HttpStatusCode.Gone);
             var response = JsonConvert.SerializeObject(apiResponse);
             await context.Response.WriteAsync(response);
@@ -85,7 +85,7 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(uex, "Unprocessable: {Message}", uex.Message);
             context.Response.StatusCode = 422;
             context.Response.ContentType = "application/json";
-            var apiResponse = ReqestResult<object>
+            var apiResponse = ApiResponse<object>
                 .Failure(uex.Message, (HttpStatusCode)422);
             var response = JsonConvert.SerializeObject(apiResponse);
             await context.Response.WriteAsync(response);
@@ -96,12 +96,12 @@ public class ExceptionHandlingMiddleware
             _logger.LogError(ex, "An error occurred: {Message}", ex.Message);
             if (_environment.IsDevelopment())
             {
-                await context.Response.WriteAsJsonAsync(ReqestResult<object>.Failure(ex.Message, HttpStatusCode.InternalServerError));
+                await context.Response.WriteAsJsonAsync(ApiResponse<object>.Failure(ex.Message, HttpStatusCode.InternalServerError));
                 return;
             }
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/json";
-            var apiResponse = ReqestResult<object>.Failure("Somthing went wrong!");
+            var apiResponse = ApiResponse<object>.Failure("Somthing went wrong!");
             var response = JsonConvert.SerializeObject(apiResponse);
             await context.Response.WriteAsync(response);
         }
