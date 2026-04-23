@@ -15,7 +15,7 @@ public class CustomForbidResult : IActionResult
         response.StatusCode = StatusCodes.Status403Forbidden;
         response.ContentType = "application/json";
 
-        var body = ApiResponse<object>.Failure(_message ,HttpStatusCode.Forbidden);
+        var body = ReqestResult<object>.Failure(_message ,HttpStatusCode.Forbidden);
         await response.WriteAsJsonAsync(body);
     }
 }

@@ -15,10 +15,10 @@ public class QuizzesController(IMediator mediator) : BaseController(mediator)
     {
         var result = await _mediator.Send(command, cancellationToken);
         if (result is null)
-            return BadRequest(ApiResponse<QuizResponse>.Failure("Can't create this quiz!"));
+            return BadRequest(ReqestResult<QuizResponse>.Failure("Can't create this quiz!"));
         return Created(
             $"/api/admin/quizzes/{result?.Result?.Id}",
-            ApiResponse<QuizResponse>.Success(result?.Result, HttpStatusCode.Created));
+            ReqestResult<QuizResponse>.Success(result?.Result, HttpStatusCode.Created));
     }
 
     [HttpPut("{id:guid}")]
@@ -27,8 +27,8 @@ public class QuizzesController(IMediator mediator) : BaseController(mediator)
         var result = await _mediator.Send(command with { QuizId = id }, cancellationToken);
         return result.Code switch
         {
-            ResultCode.QuizNotFound => NotFound(ApiResponse<QuizResponse>.Failure("Quiz not found", HttpStatusCode.NotFound)),
-            _ => Ok(ApiResponse<QuizResponse>.Success(result.Result, HttpStatusCode.OK))
+            ResultCode.QuizNotFound => NotFound(ReqestResult<QuizResponse>.Failure("Quiz not found", HttpStatusCode.NotFound)),
+            _ => Ok(ReqestResult<QuizResponse>.Success(result.Result, HttpStatusCode.OK))
         };
     }
 
@@ -38,9 +38,9 @@ public class QuizzesController(IMediator mediator) : BaseController(mediator)
         var result = await _mediator.Send(new DeleteQuizCommand(id), cancellationToken);
         return result.Code switch
         {
-            ResultCode.QuizNotFound => NotFound(ApiResponse<bool>.Failure("Quiz not found", HttpStatusCode.NotFound)),
-            ResultCode.QuizIsPublished => Conflict(ApiResponse<bool>.Failure("Cannot delete a published quiz. Unpublish it first.", HttpStatusCode.Conflict)),
-            ResultCode.QuizHasActiveAttempts => Conflict(ApiResponse<bool>.Failure("Cannot delete while active attempts exist", HttpStatusCode.Conflict)),
+            ResultCode.QuizNotFound => NotFound(ReqestResult<bool>.Failure("Quiz not found", HttpStatusCode.NotFound)),
+            ResultCode.QuizIsPublished => Conflict(ReqestResult<bool>.Failure("Cannot delete a published quiz. Unpublish it first.", HttpStatusCode.Conflict)),
+            ResultCode.QuizHasActiveAttempts => Conflict(ReqestResult<bool>.Failure("Cannot delete while active attempts exist", HttpStatusCode.Conflict)),
             _ => NoContent()
         };
     }

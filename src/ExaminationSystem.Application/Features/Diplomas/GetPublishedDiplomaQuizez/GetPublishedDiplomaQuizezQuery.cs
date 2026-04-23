@@ -6,25 +6,26 @@ namespace ExaminationSystem.Application.Features.Diplomas.GetPublishedDiplomaQui
 
 //TODO : Read Student id From Claims
 public record GetPublishedDiplomaQuizezQuery
-(Guid dipolmaId, Guid studentId) : IRequest<RequestResult<List<GetPublishedDiplomaQuizezResponse>>>;
+(Guid dipolmaId) : IRequest<RequestResult<List<GetPublishedDiplomaQuizezResponse>>>;
 
-public class GetDiplomaQuizezQueryHandler(IUnitOfWork unitOfWork ,IMediator mediator
+public class GetDiplomaQuizezQueryHandler(IRepository<Diploma> diplomaRepo, IMediator mediator , ICurrentUser currentUser
     ) : IRequestHandler<GetPublishedDiplomaQuizezQuery, RequestResult<List<GetPublishedDiplomaQuizezResponse>>>
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IRepository<Diploma> _diplomaRepo = diplomaRepo;
     private readonly IMediator _mediator = mediator;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<RequestResult<List<GetPublishedDiplomaQuizezResponse>>> Handle(GetPublishedDiplomaQuizezQuery request, CancellationToken cancellationToken)
     {
-        var isEnrolled = await _mediator.Send(new CheckUserEnrollmentQuery(request.dipolmaId, request.studentId), cancellationToken);
+        var isEnrolled = await _mediator.Send(new CheckUserEnrollmentQuery(request.dipolmaId,_currentUser.Id.Value), cancellationToken);
         if (!isEnrolled.Result)
             return RequestResult<List<GetPublishedDiplomaQuizezResponse>>.Failure(null, ResultCode.StudentNotEnrolledInDiploma);
 
-        var _repository = _unitOfWork.Repository<Diploma>();
+        //var _repository = _unitOfWork.Repository<Diploma>();
 
-        var diploma = await _repository.GetAll(d => d.Id == request.dipolmaId
+        var diploma = await _diplomaRepo.GetAll(d => d.Id == request.dipolmaId
                                               && d.Status == DiplomaStatus.Published
-                                              && d.Enrollments.Any(e => e.UserId == request.studentId))
+                                              && d.Enrollments.Any(e => e.UserId == _currentUser.Id))
                                         .SelectMany(d => d.Quizzes
                                                          .Where(q => q.Status == QuizStatus.Published)
                                                          .Select(q => new GetPublishedDiplomaQuizezResponse
@@ -32,13 +33,13 @@ public class GetDiplomaQuizezQueryHandler(IUnitOfWork unitOfWork ,IMediator medi
                                                                           q.Id,
                                                                           q.Title,
                                                                           q.DurationMinutes,
-                                                                          q.QuizAttempts.Count(qa => qa.UserId == request.studentId),
-                                                                          q.QuizAttempts.Where(qa => qa.UserId == request.studentId)
+                                                                          q.QuizAttempts.Count(qa => qa.UserId == _currentUser.Id),
+                                                                          q.QuizAttempts.Where(qa => qa.UserId == _currentUser.Id)
                                                                                         .OrderByDescending(qa => qa.Result)
                                                                                         .Select(qa => qa.Result.Score)
                                                                                         .FirstOrDefault(),
                                                                           //q.Status
-                                                                          q.QuizAttempts.Where(qa => qa.UserId == request.studentId)
+                                                                          q.QuizAttempts.Where(qa => qa.UserId == _currentUser.Id)
                                                                                         .OrderByDescending(qa => qa.CreatedAt)
                                                                                         .Select(qa => qa.Quiz.Status)
                                                                                         .FirstOrDefault()

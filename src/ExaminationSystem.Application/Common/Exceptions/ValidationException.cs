@@ -5,12 +5,12 @@ using System.Net;
 
 public class ValidationException : Exception
 {
-    public ApiResponse<object> Failure { get; private set; } // Fixed spelling
+    public ReqestResult<object> Failure { get; private set; } // Fixed spelling
 
     public ValidationException()
         : base("One or more validation failures have occurred.")
     {
-        Failure = ApiResponse<object>.Failure("One or more validation failures have occurred.");
+        Failure = ReqestResult<object>.Failure("One or more validation failures have occurred.");
         Failure.StatusCode = HttpStatusCode.BadRequest;
     }
 
@@ -26,7 +26,7 @@ public class ValidationException : Exception
             .Select(f => f.ErrorMessage)
             .ToList();
 
-        Failure = ApiResponse<object>.Failure(errors);
+        Failure = ReqestResult<object>.Failure(errors);
         Failure.StatusCode = HttpStatusCode.BadRequest; // ← ADD THIS LINE
     }
 
@@ -42,7 +42,7 @@ public class ValidationException : Exception
             .Select(f => f.ErrorMessage)
             .ToList();
 
-        Failure = ApiResponse<object>.Failure(errors);
+        Failure = ReqestResult<object>.Failure(errors);
         Failure.StatusCode = HttpStatusCode.BadRequest; // ← ADD THIS LINE
     }
 
@@ -50,7 +50,7 @@ public class ValidationException : Exception
     public ValidationException(string errorMessage)
         : base("One or more validation failures have occurred.")
     {
-        Failure = ApiResponse<object>.Failure(errorMessage);
+        Failure = ReqestResult<object>.Failure(errorMessage);
         Failure.StatusCode = HttpStatusCode.BadRequest;
     }
 }

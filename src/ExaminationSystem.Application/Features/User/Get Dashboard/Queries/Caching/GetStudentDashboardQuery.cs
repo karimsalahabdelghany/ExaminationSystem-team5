@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Caching
 {
-    public record GetStudentDashboardQuery(Guid StudentId) : IRequest<RequestResult<GetStudentDashboardResponse>>;
+    public record GetStudentDashboardQuery() : IRequest<RequestResult<GetStudentDashboardResponse>>;
     // Handler 
     // Cache key is per-student (user_id) — as required by backend note
     // Cache dashboard response for 60 seconds per user_id
@@ -19,31 +19,32 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Cach
     {
         private readonly IMediator _mediator;
         private readonly IMemoryCache _cache;
-
+        private readonly ICurrentUser _currentUser;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(60);
 
         // Cache key includes StudentId — each student has their own cache entry
         private static string CacheKey(Guid studentId) => $"student_dashboard_{studentId}";
 
         public GetStudentDashboardQueryHandler(IMediator mediator,
-            IMemoryCache cache)
+            IMemoryCache cache ,ICurrentUser currentUser)
         {
             _mediator = mediator;
             _cache = cache;
+            currentUser = _currentUser;
         }
 
         public async Task<RequestResult<GetStudentDashboardResponse>> Handle(
             GetStudentDashboardQuery request,
             CancellationToken cancellationToken)
         {
-            var cacheKey = CacheKey(request.StudentId);
+            var cacheKey = CacheKey(_currentUser.Id ?? Guid.Empty);
 
             // Per-student cache check — different students never share cache entries
             if (_cache.TryGetValue(cacheKey, out RequestResult<GetStudentDashboardResponse>? cached)
                 && cached is not null)
                 return RequestResult<GetStudentDashboardResponse>.succeeded(cached.Result,ResultCode.StudentStatsDataAlreadyCachedinMemory);
 
-            var dashboard = await _mediator.Send(new GetStudentDashboardOrchestrator(request.StudentId), cancellationToken);
+            var dashboard = await _mediator.Send(new GetStudentDashboardOrchestrator(_currentUser.Id.Value), cancellationToken);
 
             if (!dashboard.Success)
                 return RequestResult<GetStudentDashboardResponse>

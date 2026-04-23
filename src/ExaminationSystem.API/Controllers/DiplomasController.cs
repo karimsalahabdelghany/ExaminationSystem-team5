@@ -1,22 +1,34 @@
 ﻿using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Features.Diplomas.CreateDiploma;
 using ExaminationSystem.Application.Features.Diplomas.DeleteDiploma;
+using ExaminationSystem.Application.Features.Diplomas.GetDiplomas;
 using ExaminationSystem.Application.Features.Diplomas.GetPublishedDiplomaQuizez;
 using ExaminationSystem.Application.Features.Diplomas.GetStudentDiplomas;
 using ExaminationSystem.Application.Features.Diplomas.UpdateDiploma;
+using ExaminationSystem.Application.Features.User.Orchestrators;
+using ExaminationSystem.Application.Interfaces;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace ExaminationSystem.API.Controllers;
 
-public class DiplomasController(IMediator mediator) : BaseController(mediator)
+public class DiplomasController : BaseController
 {
+    private readonly ICurrentUser _currentUser;
+
+    public DiplomasController(ICurrentUser currentUser,IMediator mediator) :base(mediator)
+    {
+        _currentUser = currentUser;
+    }
+
+    
     [HttpPost]
 
     public async Task<IActionResult> Create(CreateDiplomaCommand command , CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command ,cancellationToken);
         if (result is null)
-            return BadRequest(ApiResponse<CreateDiplomaResponse>.Failure("Can't Create this diploma!"));
-        return Created($"/Diplomas/{result?.Result?.Id}", ApiResponse<CreateDiplomaResponse>.Success(result?.Result,HttpStatusCode.Created));
+            return BadRequest(ReqestResult<CreateDiplomaResponse>.Failure("Can't Create this diploma!"));
+        return Created($"/Diplomas/{result?.Result?.Id}", ReqestResult<CreateDiplomaResponse>.Success(result?.Result,HttpStatusCode.Created));
     }
 
     [HttpPut("{id}")]
@@ -24,8 +36,8 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
     {
         var result = await _mediator.Send(command , cancellationToken);
         if (result is null)
-            return BadRequest(ApiResponse<UpdateDiplomaResult>.Failure("Can't update this diploma!"));
-        return Ok(ApiResponse<UpdateDiplomaResult>.Success(result.Result, HttpStatusCode.OK));
+            return BadRequest(ReqestResult<UpdateDiplomaResult>.Failure("Can't update this diploma!"));
+        return Ok(ReqestResult<UpdateDiplomaResult>.Success(result.Result, HttpStatusCode.OK));
     }
 
     [HttpDelete("{id}")]
@@ -34,28 +46,77 @@ public class DiplomasController(IMediator mediator) : BaseController(mediator)
         var result = await _mediator.Send(new DeleteDiplomaCommand(id) ,cancellationToken);
         return result.Code switch
         {
-            ResultCode.DiplomaNotFound => NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),
-            ResultCode.DiplomaHasActiveEnrollmentsOrPublished => Conflict(ApiResponse<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict)),
-            _ => Ok(ApiResponse<bool>.Success(true, HttpStatusCode.OK))
+            ResultCode.DiplomaNotFound => NotFound(ReqestResult<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),
+            ResultCode.DiplomaHasActiveEnrollmentsOrPublished => Conflict(ReqestResult<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict)),
+            _ => Ok(ReqestResult<bool>.Success(true, HttpStatusCode.OK))
         };
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStudentPublishedDiplomas([FromQuery] GetStudentPuplishedDiplomasQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetStudentPublishedDiplomas(
+    [FromQuery] int page = 1,
+    [FromQuery] int per_page = 20)
     {
-        var result = await _mediator.Send(query, cancellationToken);
-        return Ok(ApiResponse<PaginationResult<GetStudentPuplishedDiplomasResponse>>.Success(result.Result, HttpStatusCode.OK));
+        var result = await _mediator.Send(new GetStudentPublishedDiplomasQuery(
+            Params: new PaginationParams { Page = page, PerPage = per_page }
+        ));
+
+        if (result.Success)
+            return Ok(ReqestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
+                .Success(result.Result, HttpStatusCode.OK));
+
+        return result.Code switch
+        {
+            ResultCode.DiplomaNotFound =>
+                NotFound(ReqestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
+                    .Failure("No diplomas found.", HttpStatusCode.NotFound)),
+
+            _ => BadRequest(ReqestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
+                    .Failure("Could not load diplomas.", HttpStatusCode.BadRequest))
+        };
     }
 
     [HttpGet("{id}/quizzes")]
-    public async Task<IActionResult> GetDiplomaQuizzes(Guid id, Guid studentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDiplomaQuizzes(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetPublishedDiplomaQuizezQuery(id, studentId), cancellationToken );
+        var result = await _mediator.Send(new GetPublishedDiplomaQuizezQuery(id), cancellationToken );
         return result.Code switch
         {
-            ResultCode.DiplomaNotFound => NotFound(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Failure("Diploma not found", HttpStatusCode.NotFound)),
+            ResultCode.DiplomaNotFound => NotFound(ReqestResult<List<GetPublishedDiplomaQuizezResponse>>.Failure("Diploma not found", HttpStatusCode.NotFound)),
             ResultCode.StudentNotEnrolledInDiploma => Forbid("Student not enrolled in diploma"),
-            _ => Ok(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Success(result.Result, HttpStatusCode.OK))
+            _ => Ok(ReqestResult<List<GetPublishedDiplomaQuizezResponse>>.Success(result.Result, HttpStatusCode.OK))
         };
+    }
+    // GET /api/diplomas? page = 1 & per_page = 20
+    [HttpGet]
+    public async Task<IActionResult> GetDiplomas(
+        [FromQuery] int page = 1,
+        [FromQuery] int per_page = 20)
+    {
+        var studentId = GetStudentId();
+        if (studentId is null)
+            return Unauthorized(ReqestResult<GetDiplomasResponse>.
+                   Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+
+        var result = await _mediator.Send(new GetDiplomasQuery(
+            Params: new PaginationParams { Page = page, PerPage = per_page }
+        ));
+        if (result.Success)
+            return Ok(ReqestResult<PaginatedResult<GetDiplomasResponse>>.Success(result.Result, HttpStatusCode.OK));
+
+        return result.Code switch
+        {
+            ResultCode.DiplomaNotFound =>
+                NotFound(ReqestResult<PaginatedResult<GetDiplomasResponse>>
+                    .Failure("No diplomas found.", HttpStatusCode.NotFound)),
+            _ => BadRequest(ReqestResult<PaginatedResult<GetDiplomasResponse>>
+                    .Failure("Could not load diplomas.", HttpStatusCode.BadRequest))
+        };
+    }
+    private Guid? GetStudentId()
+    {
+        if (!_currentUser.IsAuthenticated || _currentUser.Id is null)
+            return null;
+        return _currentUser.Id;
     }
 }
