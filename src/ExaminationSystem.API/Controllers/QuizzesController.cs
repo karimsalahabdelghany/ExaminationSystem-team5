@@ -1,3 +1,4 @@
+using ExaminationSystem.Application.Features.Questions.CreateQuestion;
 using ExaminationSystem.Application.Features.Quizzes;
 using ExaminationSystem.Application.Features.Quizzes.CreateQuiz;
 using ExaminationSystem.Application.Features.Quizzes.DeleteQuiz;
@@ -75,5 +76,19 @@ public class QuizzesController(IMediator mediator) : BaseController(mediator)
         };
     }
 
+    [HttpPost("{id}/questions")]
+    public async Task<IActionResult> AddQuestion(Guid id, CreateQuestionCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command with { QuizId = id }, cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.QuizNotFound => NotFound(ApiResponse<CreateQuestionResponse>.Failure("Quiz not found", HttpStatusCode.NotFound)),
+            ResultCode.QuestionHasMoreThanOneCorrectAnswer => UnprocessableEntity(ApiResponse<CreateQuestionResponse>.Failure("Exactly one correct option required", HttpStatusCode.UnprocessableEntity)),
+            ResultCode.QuestionCreatedSuccessfully => Created(
+                $"/api/admin/quizzes/{id}/questions/{result.Result?.Id}",
+                ApiResponse<CreateQuestionResponse>.Success(result.Result, HttpStatusCode.Created)),
+            _ => BadRequest(ApiResponse<CreateQuestionResponse>.Failure("Failed to create question", HttpStatusCode.BadRequest))
+        };
+    }
 
 }
