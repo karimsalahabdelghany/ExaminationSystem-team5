@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExaminationSystem.Application.Features.Register
+namespace ExaminationSystem.Application.Features.Auth.Register
 {
     public record RegisterResponse(Guid UserId, List<string> Errors = null);
     public class RegisterCommandValidator : AbstractValidator<RegisterCommand>

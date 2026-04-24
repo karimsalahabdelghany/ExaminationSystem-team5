@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExaminationSystem.Application.Features.Login
+namespace ExaminationSystem.Application.Features.Auth.Login
 {
 
     public record LoginCommand(string password, string email) : IRequest<RequestResult<string>>;

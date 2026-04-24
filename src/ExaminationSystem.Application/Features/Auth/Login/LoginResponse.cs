@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExaminationSystem.Application.Features.Login
+namespace ExaminationSystem.Application.Features.Auth.Login
 {
     public record LoginResponse( )
     

@@ -2,13 +2,10 @@
 using ExaminationSystem.Domain.Enums;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
 
-namespace ExaminationSystem.Application.Features.Register
-{
+namespace ExaminationSystem.Application.Features.Auth.Register;
+
     public record RegisterCommand(string FullName, string Email, string Password) : IRequest<RequestResult<RegisterResponse>>;
 
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RequestResult<RegisterResponse>>
@@ -104,4 +101,4 @@ namespace ExaminationSystem.Application.Features.Register
         #endregion
     }
 
-}
+

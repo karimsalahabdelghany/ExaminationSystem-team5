@@ -1,6 +1,6 @@
-﻿using ExaminationSystem.Application.Features.OTP;
+﻿using ExaminationSystem.Application.Features.Auth.Register;
+using ExaminationSystem.Application.Features.OTP;
 using ExaminationSystem.Application.Features.Quizzes;
-using ExaminationSystem.Application.Features.Register;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
