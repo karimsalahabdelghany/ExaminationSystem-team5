@@ -1,5 +1,8 @@
-﻿using ExaminationSystem.Application.Features.Admin.Queries;
+﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Features.Admin.Queries;
+using ExaminationSystem.Application.Features.Diplomas.GetDiplomas;
 using ExaminationSystem.Application.Responses;
+using ExaminationSystem.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +17,7 @@ namespace ExaminationSystem.API.Controllers
     {
         private readonly IMediator _mediator;
 
-        public AdminController(IMediator mediator) : base(mediator) 
+        public AdminController(IMediator mediator) : base(mediator)
         {
             _mediator = mediator;
         }
@@ -33,5 +36,34 @@ namespace ExaminationSystem.API.Controllers
 
             return Ok(result);
         }
+        // GET /api/admin/attempts?page=1&per_page=20&quiz_id=&student_id=
+        [HttpGet("attempts")]
+        public async Task<IActionResult> GetAttempts(
+            [FromQuery] int page = 1,
+            [FromQuery] int per_page = 20,
+            [FromQuery] Guid? quiz_id = null,   // optional filter
+            [FromQuery] Guid? student_id = null)   // optional filter
+        {
+            var result = await _mediator.Send(new GetAdminAttemptsQuery(
+                Pagination: new PaginationParams { Page = page, PerPage = per_page },
+                QuizId: quiz_id,
+                StudentId: student_id
+            ));
+            if(result.Success)
+            {
+                return Ok(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>.Success(result.Result, HttpStatusCode.OK));
+            }
+
+            return result.Code switch
+            {
+                ResultCode.AttemptNotFound =>
+                    NotFound(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>
+                        .Failure("No attempts found.", HttpStatusCode.NotFound)),
+
+                _ => BadRequest(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>
+                        .Failure("Could not load attempts.", HttpStatusCode.BadRequest))
+            };
+        }
+     
     }
 }

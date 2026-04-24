@@ -1,35 +1,58 @@
 ﻿using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Services;
 using ExaminationSystem.Domain.Enums;
 
 namespace ExaminationSystem.Application.Features.Diplomas.GetStudentDiplomas;
 
-public record GetStudentPuplishedDiplomasQuery
-(Guid userId , int pageNumber, int pageSize) : IRequest<RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>>;
+public record GetStudentPublishedDiplomasQuery(
+    PaginationParams Params
+) : IRequest<RequestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>>;
 
-public class GetStudentPuplishedDiplomasQueryHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<GetStudentPuplishedDiplomasQuery, RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>>
+public class GetStudentPublishedDiplomasQueryHandler
+    : IRequestHandler<GetStudentPublishedDiplomasQuery, RequestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>>
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    public async Task<RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>> Handle(GetStudentPuplishedDiplomasQuery request, CancellationToken cancellationToken)
+    private readonly IRepository<Diploma> _diplomaRepo;
+    private readonly ICurrentUser _currentUser;
+
+    public GetStudentPublishedDiplomasQueryHandler(
+        IRepository<Diploma> diplomaRepo,
+        ICurrentUser currentUser)
     {
-        var _repository = _unitOfWork.Repository<Diploma>();
-        var diplomasQuery = _repository.GetAll(d => d.Status == DiplomaStatus.Published
-                                       && d.Enrollments.Any(e => e.UserId == request.userId))
-                                      .Select(d => new GetStudentPuplishedDiplomasResponse(
-                                          d.Id,
-                                          d.Title,
-                                          d.Description,
-                                          d.QuizCount,
-                                           d.Quizzes
-                                            .SelectMany(q => q.QuizAttempts
-                                                .Where(qa =>
-                                                    qa.UserId == request.userId &&
-                                                    qa.Status == QuizAttemptStatus.Submitted &&
-                                                    qa.Result != null))
-                                            .Average(qa => (decimal?)qa.Result.Score)
-                                      ));
-        var diplomas = await diplomasQuery.PaginateAsync(request.pageNumber, request.pageSize,cancellationToken);
-        return RequestResult<PaginationResult<GetStudentPuplishedDiplomasResponse>>.succeeded(diplomas, ResultCode.DiplomasRetrievedSuccessfully);
+        _diplomaRepo = diplomaRepo;
+        _currentUser = currentUser;
+    }
+
+    public async Task<RequestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>> Handle(
+        GetStudentPublishedDiplomasQuery request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _diplomaRepo
+            .GetAll()
+            .AsNoTracking()
+            .Where(d => d.Status == DiplomaStatus.Published
+                     && !d.IsDeleted
+                     && d.Enrollments.Any(e => e.UserId == _currentUser.Id))
+            .Select(d => new GetStudentPuplishedDiplomasResponse(
+                Id: d.Id,
+                Title: d.Title,
+                Description: d.Description,
+
+                QuizCount: d.Quizzes.Count(q =>
+                    q.Status == QuizStatus.Published
+                 && !q.IsDeleted),
+
+                StudentProgress: d.Quizzes
+                    .SelectMany(q => q.QuizAttempts
+                        .Where(qa =>
+                            qa.UserId == _currentUser.Id
+                         && qa.Status == QuizAttemptStatus.Submitted
+                         && qa.Result != null))
+                    .Average(qa => (decimal?)qa.Result!.Score)
+            ))
+            .ToPagedAsync(request.Params, cancellationToken);
+
+        return RequestResult<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
+            .succeeded(result, ResultCode.DiplomasRetrievedSuccessfully);
     }
 }

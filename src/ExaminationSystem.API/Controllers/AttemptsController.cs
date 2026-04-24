@@ -4,14 +4,16 @@ using ExaminationSystem.Application.Features.Attempts.GetAttempDetails;
 using ExaminationSystem.Application.Features.Attempts.GetStudentAttemptsHistory;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Attempts.Timer;
+using ExaminationSystem.Application.Interfaces;
 
 namespace ExaminationSystem.API.Controllers;
 
 //[Route("api/attempts")]
 // TODO: Uncomment when Identity setup is complete
 //[Authorize]
-public class AttemptsController(IMediator mediator) : BaseController(mediator)
+public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : BaseController(mediator)
 {
+    private readonly ICurrentUser _currentUser = currentUser;
 
     [HttpPost("{attemptId:guid}/answer")]
     public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionOrchestrator command, CancellationToken cancellationToken)
@@ -39,14 +41,14 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
     [HttpPost("{attemptId:guid}/submit")]
     public async Task<IActionResult> Submit(Guid attemptId)
     {
-        var studentIdClaim = User.FindFirstValue("user_id");
-        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var studentId))
+        var studentIdClaim = _currentUser.Id;
+        if (studentIdClaim is null)
         {
             return Unauthorized(
                 ApiResponse<SubmitAttemptResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         }
 
-        var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, studentId));
+        var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, _currentUser.Id.Value));
 
         if (result.Success)
             return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Result));
@@ -76,14 +78,14 @@ public class AttemptsController(IMediator mediator) : BaseController(mediator)
     [HttpGet("{attemptId:guid}/timer")]
     public async Task<IActionResult> Timer(Guid attemptId)
     {
-        var studentIdClaim = User.FindFirstValue("user_id");
-        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var studentId))
+        var studentIdClaim = _currentUser.Id;
+        if (studentIdClaim is null )
         {
             return Unauthorized(
                 ApiResponse<GetAttemptTimerResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         }
 
-        var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId, studentId));
+        var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId,_currentUser.Id.Value));
         return Ok(ApiResponse<GetAttemptTimerResponse>.Success(result));
     }
 

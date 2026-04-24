@@ -1,25 +1,25 @@
 namespace ExaminationSystem.Application.Common.Results;
 
 public enum ResultCode
-{   //Admin
-    AdminStatsDataAlreadyCachedinMemory = 1,
-    AdminStatsDataNotFound = 2,
-    AdminStatsQueryFiredSuccessfully = 3,
-    AvgPassRateFailed = 4,
-    AvgPassRateSuccessed = 5,
-    UsersLoginTodaySuccessfully = 6,
-    GetTotalUsersQuerySuccessed = 7,
+{   //Admin 100-200
+    AdminStatsDataAlreadyCachedinMemory = 100,
+    AdminStatsDataNotFound = 101,
+    AdminStatsQueryFiredSuccessfully = 102,
+    AvgPassRateFailed = 103,
+    AvgPassRateSuccessed = 104,
+    UsersLoginTodaySuccessfully = 105,
+    GetTotalUsersQuerySuccessed = 106,
 
 
-    //User
-    UserHasDiplomaEnrollments = 10,
-    RecentQuizAttemptsloadedSuccessfuly = 11,
-    OverAllStatsProgressQuerySucessful = 12,
-    StudentsDashoardQuerySucessfull = 13,
-    StudentsDashoardQueryFalied = 14,
-    StudentStatsDataAlreadyCachedinMemory = 15,
-    TotalAttemptsQuerySuccessfull = 16,
-    TotalQuzizesQuerySucessfull = 17,
+    //User  200-300
+    UserHasDiplomaEnrollments = 201,
+    RecentQuizAttemptsloadedSuccessfuly = 202,
+    OverAllStatsProgressQuerySucessful = 203,
+    StudentsDashoardQuerySucessfull = 204,
+    StudentsDashoardQueryFalied = 205,
+    StudentStatsDataAlreadyCachedinMemory = 206,
+    TotalAttemptsQuerySuccessfull = 207,
+    TotalQuzizesQuerySucessfull = 208,
 
 
     //Diploma
