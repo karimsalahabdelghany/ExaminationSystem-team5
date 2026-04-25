@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Caching;
 using ExaminationSystem.Application.Features.User.GetStudentAttempts;
