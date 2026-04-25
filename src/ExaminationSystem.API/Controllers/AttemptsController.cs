@@ -1,6 +1,7 @@
 using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
 using ExaminationSystem.Application.Features.Attempts.GetAttempDetails;
+using ExaminationSystem.Application.Features.Attempts.GetAttemptResults;
 using ExaminationSystem.Application.Features.Attempts.GetStudentAttemptsHistory;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Attempts.Timer;
@@ -105,6 +106,27 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
         {
             ResultCode.AttemptNotFound => NotFound(ApiResponse<GetAttempDetailsResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
             _ => Ok(ApiResponse<GetAttempDetailsResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
+    }
+
+    [HttpGet("{attemptId:guid}/results")]
+    public async Task<IActionResult> GetAttemptResults(Guid attemptId, CancellationToken cancellationToken)
+    {
+        var requesterId = _currentUser.Id;
+        var isAdmin = _currentUser.IsInRole("Admin");
+
+        var result = await _mediator.Send(
+            new GetAttemptResultsQuery(attemptId, requesterId, isAdmin),
+            cancellationToken);
+
+        return result.Code switch
+        {
+            ResultCode.AttemptNotFound => NotFound(ApiResponse<GetAttemptResultsResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            ResultCode.AttemptNotOwned => Forbid("You do not have permission to view this attempt results."),
+            ResultCode.AttemptResultsNotAvailableYet => StatusCode(StatusCodes.Status403Forbidden,
+                ApiResponse<GetAttemptResultsResponse>.Failure("Results are not available until the attempt is submitted.", HttpStatusCode.Forbidden)),
+            ResultCode.AttemptResultsNotFound => NotFound(ApiResponse<GetAttemptResultsResponse>.Failure("Attempt results not found", HttpStatusCode.NotFound)),
+            _ => Ok(ApiResponse<GetAttemptResultsResponse>.Success(result.Result, HttpStatusCode.OK))
         };
     }
 

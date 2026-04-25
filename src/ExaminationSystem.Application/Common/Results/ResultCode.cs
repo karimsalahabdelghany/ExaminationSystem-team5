@@ -64,6 +64,9 @@ public enum ResultCode
     SubmitAttemptSuccessful = 1206,
     QuizAttemptHistoryRetrievedSuccessfully = 1207,
     AttemptDetailsRetrievedSuccessfully = 1208,
+    AttemptResultsNotAvailableYet = 1209,
+    AttemptResultsRetrievedSuccessfully = 1210,
+    AttemptResultsNotFound = 1211,
 
     // Start quiz attempt (POST .../quizzes/{id}/start)
     QuizNotFoundOrNotPublished = 2000,

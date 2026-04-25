@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -34,6 +34,10 @@ namespace ExaminationSystem.Application.Services
         public string? Role
             => _httpContextAccessor.HttpContext?
                 .User?.FindFirstValue(ClaimTypes.Role);
+
+        public bool IsInRole(string role)
+            => !string.IsNullOrWhiteSpace(role)
+               && (_httpContextAccessor.HttpContext?.User?.IsInRole(role) ?? false);
 
         public bool IsAuthenticated
             => _httpContextAccessor.HttpContext?
