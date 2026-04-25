@@ -1,4 +1,9 @@
 using ExaminationSystem.API.Middleware;
+using ExaminationSystem.Application.Interfaces;
+using ExaminationSystem.Domain.Entities;
+using ExaminationSystem.Persistence.Repositories;
+using ExaminationSystem.Persistence.Services;
+using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 namespace ExaminationSystem.API;
 

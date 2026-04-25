@@ -31,4 +31,6 @@ public interface IRepository<T> where T : BaseEntity
         CancellationToken ct = default);
 
     void SaveInclude(T entity, params string[] includedProperties);
+
+
 }

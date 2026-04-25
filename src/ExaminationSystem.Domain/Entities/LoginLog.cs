@@ -2,7 +2,7 @@ namespace ExaminationSystem.Domain.Entities;
 
 public class LoginLog : BaseEntity
 {
-    private LoginLog()
+    public LoginLog()
     {
     }
 

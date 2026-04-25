@@ -2,7 +2,7 @@ namespace ExaminationSystem.Domain.Entities;
 
 public class RefreshToken : BaseEntity
 {
-    private RefreshToken()
+    public RefreshToken()
     {
     }
 

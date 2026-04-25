@@ -24,6 +24,8 @@ public enum ResultCode
 
 
     //Diploma
+    WeakPassword = 201 ,
+    ValidationError = 202 ,
     DiplomaNotFound = 1000,
     DiplomaHasEnrollments = 1001,
     DiplomaDeletedSuccessfully = 1002,
@@ -94,5 +96,28 @@ public enum ResultCode
     OptionFailedToUpdate = 1406,
     QuestionBasicInfoUpdatedSuccessfully = 1407,
 
+
+    // Register Code 
+    UserIsAlredyExist = 2000 , 
+    UserCreateSuccesfully = 2001 , 
+    UserCreateFilad = 2002 , 
+    FailedToSendRegisterEmail=2003,
+    CanNotVerifyAccount = 2004,
+    // OTP 
+    UserIsNotExsit = 20003,
+    UserEmailIsNotExistOrAccountIsNotInPendingStatus = 2010,
+    ResendLimitExceeded = 2004 , 
+    OTPResentSuccessfully = 2005,
+    AccountActivatedSuccessfully =2006 ,
+    NoActiveOTPFound =2007 ,
+    AccountLocked = 2008 , 
+    OtpExpried = 2009  ,
+    OtpNotVaild = 3001 ,
+    OtpGeneratedSuccessfully = 3002,
+    OtpVerified = 3003,
+
+    // Login 
+    Invalidcredentials = 401  ,
+    AccountNotverified = 402
 
 }
