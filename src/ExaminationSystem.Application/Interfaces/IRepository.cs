@@ -30,8 +30,6 @@ public interface IRepository<T> where T : BaseEntity
         Expression<Func<T, TKey>> selector,
         CancellationToken ct = default);
 
-
-
     void SaveInclude(T entity, params string[] includedProperties);
 
 

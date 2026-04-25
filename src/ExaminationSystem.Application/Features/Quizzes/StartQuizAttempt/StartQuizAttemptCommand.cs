@@ -1,88 +1,63 @@
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Domain.Enums;
 using System.Buffers.Binary;
 using System.Data;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
 namespace ExaminationSystem.Application.Features.Quizzes.StartQuizAttempt;
 
-public record StartQuizAttemptCommand(
-    Guid QuizId,
-    Guid StudentId
-) : ICommand<StartQuizAttemptResult>;
-
-public record StartQuizAttemptResult(
-    bool HasInProgressAttempt,
-    StartQuizAttemptResponse? Value
-);
-
-public record StartQuizAttemptResponse(
-    Guid AttemptId,
-    DateTime StartTime,
-    DateTime Deadline,
-    StartQuizMetadataResponse Quiz,
-    IReadOnlyCollection<StartQuizQuestionResponse> Questions
-);
-
-public record StartQuizMetadataResponse(
-    Guid Id,
-    string Title,
-    string Instructions,
-    int DurationMinutes,
-    int PassScore,
-    int MaxAttempts
-);
-
-public record StartQuizQuestionResponse(
-    Guid Id,
-    string Text,
-    QuestionType Type,
-    IReadOnlyCollection<StartQuizQuestionOptionResponse> Options
-);
-
-public record StartQuizQuestionOptionResponse(
-    Guid Id,
-    string Text
-);
+public record StartQuizAttemptCommand(Guid QuizId, Guid StudentId)
+    : ICommand<RequestResult<StartQuizAttemptResponse>>;
 
 public class StartQuizAttemptCommandHandler(
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider,
-    ILogger<StartQuizAttemptCommandHandler> logger
-) : IRequestHandler<StartQuizAttemptCommand, StartQuizAttemptResult>
+    ILogger<StartQuizAttemptCommandHandler> logger)
+    : IRequestHandler<StartQuizAttemptCommand, RequestResult<StartQuizAttemptResponse>>
 {
-    public async Task<StartQuizAttemptResult> Handle(StartQuizAttemptCommand request, CancellationToken cancellationToken)
+    public async Task<RequestResult<StartQuizAttemptResponse>> Handle(
+        StartQuizAttemptCommand request, CancellationToken cancellationToken)
     {
         var quiz = await GetQuiz(request.QuizId, cancellationToken);
+        if (quiz is null)
+            return RequestResult<StartQuizAttemptResponse>.Failure(null!, ResultCode.QuizNotFoundOrNotPublished);
 
         await unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         try
         {
-            var existingAttempt = await GetExistingAttempt(request.QuizId, request.StudentId);
-
-            if (existingAttempt is not null)
+            var existing = await GetExistingAttempt(request.QuizId, request.StudentId);
+            if (existing is not null)
             {
-                var existingAttemptResult = HandleExistingAttempt(request, quiz, existingAttempt);
+                var response = ToResponse(existing, quiz, request, concurrentRecovery: false);
                 await unitOfWork.CommitAsync(cancellationToken);
-                return existingAttemptResult;
+                return RequestResult<StartQuizAttemptResponse>.Failure(response, ResultCode.AttemptAlreadyInProgress);
             }
 
-            var newAttemptResult = await CreateNewAttempt(request, quiz);
+            var attempts = unitOfWork.Repository<QuizAttempt>();
+            var count = await attempts.CountAsync(a =>
+                a.QuizId == request.QuizId && a.UserId == request.StudentId);
+            if (count >= quiz.MaxAttempts)
+            {
+                logger.LogWarning(
+                    "Attempt limit reached for student {StudentId} and quiz {QuizId}. Attempts: {AttemptCount}, Max: {MaxAttempts}.",
+                    request.StudentId, request.QuizId, count, quiz.MaxAttempts);
+                await unitOfWork.RollbackAsync(cancellationToken);
+                return RequestResult<StartQuizAttemptResponse>.Failure(null!, ResultCode.AttemptLimitReached);
+            }
+
+            var created = CreateNewAttempt(request, quiz);
             await unitOfWork.CommitAsync(cancellationToken);
-            return newAttemptResult;
+            return RequestResult<StartQuizAttemptResponse>.succeeded(created, ResultCode.QuizAttemptStartedSuccessfully);
         }
         catch (DbUpdateException ex) when (IsInProgressAttemptConstraintViolation(ex))
         {
             await unitOfWork.RollbackAsync(cancellationToken);
-
-            var existingAttempt = await GetExistingAttempt(request.QuizId, request.StudentId);
-
-            if (existingAttempt is not null)
-            {
-                return HandleExistingAttempt(request, quiz, existingAttempt, isConcurrentRecovery: true);
-            }
-
-            throw new ConflictException("Attempt already in progress");
+            var recovered = await GetExistingAttempt(request.QuizId, request.StudentId);
+            if (recovered is null)
+                return RequestResult<StartQuizAttemptResponse>.Failure(null!, ResultCode.AttemptStartConflict);
+            return RequestResult<StartQuizAttemptResponse>.Failure(
+                ToResponse(recovered, quiz, request, concurrentRecovery: true),
+                ResultCode.AttemptAlreadyInProgress);
         }
         catch
         {
@@ -91,194 +66,66 @@ public class StartQuizAttemptCommandHandler(
         }
     }
 
-    private async Task<QuizStartProjection> GetQuiz(Guid quizId, CancellationToken cancellationToken)
-    {
-        var quizRepository = unitOfWork.Repository<Quiz>();
-
-        var quiz = await quizRepository
+    private async Task<QuizStartProjection?> GetQuiz(Guid quizId, CancellationToken cancellationToken) =>
+        await unitOfWork.Repository<Quiz>()
             .GetAll(q => q.Id == quizId && q.Status == QuizStatus.Published)
             .Select(q => new QuizStartProjection(
-                q.Id,
-                q.Title,
-                q.Instructions,
-                q.DurationMinutes,
-                q.PassScore,
-                q.MaxAttempts,
+                q.Id, q.Title, q.Instructions, q.DurationMinutes, q.PassScore, q.MaxAttempts,
                 q.Questions.Select(question => new QuestionStartProjection(
-                    question.Id,
-                    question.Text,
-                    question.Type,
-                    question.Options.Select(option => new QuestionOptionStartProjection(
-                        option.Id,
-                        option.Text
-                    )).ToList()
-                )).ToList()
-            ))
+                    question.Id, question.Text, question.Type,
+                    question.Options.Select(o => new QuestionOptionStartProjection(o.Id, o.Text)).ToList())).ToList()))
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (quiz is null)
-            throw new NotFoundException("Quiz not found or not published.");
+    private Task<QuizAttempt?> GetExistingAttempt(Guid quizId, Guid studentId) =>
+        unitOfWork.Repository<QuizAttempt>().FindAsync(a =>
+            a.QuizId == quizId
+            && a.UserId == studentId
+            && (a.Status == QuizAttemptStatus.InProgress || a.Status == QuizAttemptStatus.Submitting));
 
-        return quiz;
-    }
-
-    private async Task<QuizAttempt?> GetExistingAttempt(Guid quizId, Guid studentId)
+    private StartQuizAttemptResponse ToResponse(
+        QuizAttempt attempt, QuizStartProjection quiz, StartQuizAttemptCommand request, bool concurrentRecovery)
     {
-        var attemptRepository = unitOfWork.Repository<QuizAttempt>();
-        return await attemptRepository.FindAsync(a =>
-            a.QuizId == quizId &&
-            a.UserId == studentId &&
-            a.Status == QuizAttemptStatus.InProgress);
-    }
-
-    private StartQuizAttemptResult HandleExistingAttempt(
-        StartQuizAttemptCommand request,
-        QuizStartProjection quiz,
-        QuizAttempt existingAttempt,
-        bool isConcurrentRecovery = false)
-    {
-        var existingAttemptQuestions = BuildShuffledQuestions(existingAttempt.Id, quiz.Questions);
-
         logger.LogInformation(
-            "Returning existing in-progress attempt {AttemptId} for student {StudentId} and quiz {QuizId}. ConcurrentRecovery={IsConcurrentRecovery}",
-            existingAttempt.Id,
-            request.StudentId,
-            request.QuizId,
-            isConcurrentRecovery);
-
-        return new StartQuizAttemptResult(
-            HasInProgressAttempt: true,
-            Value: new StartQuizAttemptResponse(
-                AttemptId: existingAttempt.Id,
-                StartTime: existingAttempt.StartTime,
-                Deadline: existingAttempt.Deadline,
-                Quiz: BuildQuizMetadata(quiz),
-                Questions: existingAttemptQuestions
-            )
-        );
+            "Returning existing in-progress attempt {AttemptId} for student {StudentId} and quiz {QuizId}. ConcurrentRecovery={ConcurrentRecovery}",
+            attempt.Id, request.StudentId, request.QuizId, concurrentRecovery);
+        return new(attempt.Id, attempt.StartTime, attempt.Deadline, Meta(quiz), Shuffle(attempt.Id, quiz.Questions));
     }
 
-    private async Task<StartQuizAttemptResult> CreateNewAttempt(
-        StartQuizAttemptCommand request,
-        QuizStartProjection quiz)
+    private StartQuizAttemptResponse CreateNewAttempt(StartQuizAttemptCommand request, QuizStartProjection quiz)
     {
-        var attemptRepository = unitOfWork.Repository<QuizAttempt>();
-
-        var attemptCount = await attemptRepository.CountAsync(a =>
-            a.QuizId == request.QuizId &&
-            a.UserId == request.StudentId);
-
-        if (attemptCount >= quiz.MaxAttempts)
-        {
-            logger.LogWarning(
-                "Attempt limit reached for student {StudentId} and quiz {QuizId}. Attempts: {AttemptCount}, Max: {MaxAttempts}.",
-                request.StudentId,
-                request.QuizId,
-                attemptCount,
-                quiz.MaxAttempts);
-            throw new ForbiddenException("Attempt limit reached");
-        }
-
-        var startTime = dateTimeProvider.UtcNow;
-        var deadline = startTime.AddMinutes(quiz.DurationMinutes);
-
-        var attempt = attemptRepository.Add(new QuizAttempt(
-            userId: request.StudentId,
-            quizId: request.QuizId,
-            status: QuizAttemptStatus.InProgress,
-            startTime: startTime,
-            deadline: deadline
-        ));
-
-        var shuffledQuestions = BuildShuffledQuestions(attempt.Id, quiz.Questions);
-
+        var start = dateTimeProvider.UtcNow;
+        var deadline = start.AddMinutes(quiz.DurationMinutes);
+        var attempt = unitOfWork.Repository<QuizAttempt>().Add(new QuizAttempt(
+            request.StudentId, request.QuizId, QuizAttemptStatus.InProgress, start, deadline));
         logger.LogInformation(
             "Started new attempt {AttemptId} for student {StudentId} and quiz {QuizId}.",
-            attempt.Id,
-            request.StudentId,
-            request.QuizId);
-
-        return new StartQuizAttemptResult(
-            HasInProgressAttempt: false,
-            Value: new StartQuizAttemptResponse(
-                AttemptId: attempt.Id,
-                StartTime: startTime,
-                Deadline: deadline,
-                Quiz: BuildQuizMetadata(quiz),
-                Questions: shuffledQuestions
-            )
-        );
+            attempt.Id, request.StudentId, request.QuizId);
+        return new(attempt.Id, start, deadline, Meta(quiz), Shuffle(attempt.Id, quiz.Questions));
     }
 
-    private static StartQuizMetadataResponse BuildQuizMetadata(QuizStartProjection quiz)
-        => new(
-            Id: quiz.Id,
-            Title: quiz.Title,
-            Instructions: quiz.Instructions,
-            DurationMinutes: quiz.DurationMinutes,
-            PassScore: quiz.PassScore,
-            MaxAttempts: quiz.MaxAttempts
-        );
+    private static StartQuizMetadataResponse Meta(QuizStartProjection q) =>
+        new(q.Id, q.Title, q.Instructions, q.DurationMinutes, q.PassScore, q.MaxAttempts);
 
-    private static IReadOnlyCollection<StartQuizQuestionResponse> BuildShuffledQuestions(
-        Guid attemptId,
-        IReadOnlyCollection<QuestionStartProjection> questions)
+    private static IReadOnlyCollection<StartQuizQuestionResponse> Shuffle(
+        Guid attemptId, IReadOnlyCollection<QuestionStartProjection> questions) =>
+        [.. questions
+            .OrderBy(x => StableOrder(attemptId, x.Id))
+            .Select(q => new StartQuizQuestionResponse(q.Id, q.Text, q.Type,
+                [.. q.Options.OrderBy(o => StableOrder(attemptId, o.Id))
+                    .Select(o => new StartQuizQuestionOptionResponse(o.Id, o.Text))]))];
+
+    private static ulong StableOrder(Guid attemptId, Guid itemId)
     {
-        return questions
-            .OrderBy(question => GetStableOrder(attemptId, question.Id))
-            .Select(question => new StartQuizQuestionResponse(
-                Id: question.Id,
-                Text: question.Text,
-                Type: question.Type,
-                Options: question.Options
-                    .OrderBy(option => GetStableOrder(attemptId, option.Id))
-                    .Select(option => new StartQuizQuestionOptionResponse(
-                        Id: option.Id,
-                        Text: option.Text
-                    ))
-                    .ToList()
-            ))
-            .ToList();
-    }
-
-    private static ulong GetStableOrder(Guid attemptId, Guid itemId)
-    {
-        Span<byte> combined = stackalloc byte[32];
-        attemptId.TryWriteBytes(combined[..16]);
-        itemId.TryWriteBytes(combined[16..]);
-
-        Span<byte> hash = stackalloc byte[32];
-        SHA256.TryHashData(combined, hash, out _);
-
+        Span<byte> buf = stackalloc byte[32], hash = stackalloc byte[32];
+        attemptId.TryWriteBytes(buf[..16]);
+        itemId.TryWriteBytes(buf[16..]);
+        SHA256.TryHashData(buf, hash, out _);
         return BinaryPrimitives.ReadUInt64LittleEndian(hash[..8]);
     }
 
-    private static bool IsInProgressAttemptConstraintViolation(DbUpdateException exception)
+    private static bool IsInProgressAttemptConstraintViolation(DbUpdateException ex)
     {
-        const string uniqueIndexName = "UX_QuizAttempts_UserId_QuizId_InProgress";
-        var message = exception.InnerException?.Message ?? exception.Message;
-        return message.Contains(uniqueIndexName, StringComparison.OrdinalIgnoreCase);
+        var msg = ex.InnerException?.Message ?? ex.Message;
+        return msg.Contains("UX_QuizAttempts_UserId_QuizId_InProgress", StringComparison.OrdinalIgnoreCase);
     }
-
-    private sealed record QuizStartProjection(
-        Guid Id,
-        string Title,
-        string Instructions,
-        int DurationMinutes,
-        int PassScore,
-        int MaxAttempts,
-        IReadOnlyCollection<QuestionStartProjection> Questions
-    );
-
-    private sealed record QuestionStartProjection(
-        Guid Id,
-        string Text,
-        QuestionType Type,
-        IReadOnlyCollection<QuestionOptionStartProjection> Options
-    );
-
-    private sealed record QuestionOptionStartProjection(
-        Guid Id,
-        string Text
-    );
 }

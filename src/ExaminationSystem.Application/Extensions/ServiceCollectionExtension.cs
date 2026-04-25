@@ -1,6 +1,8 @@
 ﻿using ExaminationSystem.Application.Common.Behaviours;
 using ExaminationSystem.Application.Common.Helper;
+using ExaminationSystem.Application.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +21,8 @@ public static class ServiceCollectionExtension
 
         services.AddTransient(typeof(IPipelineBehavior<,>),
                             typeof(ValidationBehaviour<,>));
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, CurrentUser>();
         return services;
     }
 }

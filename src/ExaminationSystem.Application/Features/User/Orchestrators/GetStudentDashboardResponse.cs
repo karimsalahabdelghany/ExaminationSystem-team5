@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Features.Enrollments.Queries;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Features.Enrollments.Queries;
 using ExaminationSystem.Application.Features.User.Get_Dashboard.Queries;
 using ExaminationSystem.Application.Features.Users.Get_Dashboard.Queries;
 using System;

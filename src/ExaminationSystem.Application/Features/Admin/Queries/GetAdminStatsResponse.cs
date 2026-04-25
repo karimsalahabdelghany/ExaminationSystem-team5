@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Interfaces;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,7 +11,7 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
          int ActiveUsersToday,
          int TotalQuizzes,
          int TotalAttempts,
-         decimal AvgPassRate
+        decimal AvgPassRate
         );
    
 }

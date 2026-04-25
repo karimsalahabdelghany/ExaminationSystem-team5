@@ -1,85 +1,111 @@
+using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Features.Attempts.AnswerQuestion;
+using ExaminationSystem.Application.Features.Attempts.GetAttempDetails;
+using ExaminationSystem.Application.Features.Attempts.GetStudentAttemptsHistory;
 using ExaminationSystem.Application.Features.Attempts.SubmitAttempt;
 using ExaminationSystem.Application.Features.Attempts.Timer;
-using ExaminationSystem.Application.Responses;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using System.Net;
-using System.Security.Claims;
+using ExaminationSystem.Application.Interfaces;
 
 namespace ExaminationSystem.API.Controllers;
 
 [Route("api/attempts")]
-// TODO: Uncomment when Identity setup is complete
-//[Authorize]
-public class AttemptsController(IMediator mediator) : BaseController(mediator)
+[Authorize]
+public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : BaseController(mediator)
 {
+    private readonly ICurrentUser _currentUser = currentUser;
+
     [HttpPost("{attemptId:guid}/answer")]
-    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionOrchestrator command)
+    public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionOrchestrator command, CancellationToken cancellationToken)
     {
-        // TODO: replace StudentId to come from JWT claims once Identity is ready
-        // var studentIdClaim = User.FindFirstValue("user_id");
-        // if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var parsedStudentId))
-        //     return Unauthorized(
-        //         ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
-        // command = command with { StudentId = parsedStudentId };
+        var studentIdClaim = _currentUser.Id;
+        if (studentIdClaim is null)
+        {
+            return Unauthorized(
+                ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+        }
 
-        var result = await _mediator.Send(command with { AttemptId = attemptId });
+        var result = await _mediator.Send(
+            command with { AttemptId = attemptId, StudentId = _currentUser.Id.Value },
+            cancellationToken);
 
-        if (result.TimedOut)
-            return StatusCode(410, ApiResponse<AnswerQuestionResponse>
-                .Failure("Time has expired. Your attempt has been auto-submitted.", (HttpStatusCode)410));
-
-        return Ok(ApiResponse<AnswerQuestionResponse>.Success(result));
+        return result.Code switch
+        {
+            ResultCode.AttemptNotFound => NotFound(ApiResponse<AnswerQuestionResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            ResultCode.AttemptNotOwned => Forbid("You do not own this attempt"),
+            ResultCode.AttemptAlreadySubmitted => Conflict(ApiResponse<AnswerQuestionResponse>.Failure("Attempt is already submitted or expired", HttpStatusCode.Conflict)),
+            ResultCode.AttemptTimedOut => StatusCode(410, ApiResponse<AnswerQuestionResponse>.Failure("Time has expired. Your attempt has been auto-submitted", (HttpStatusCode)410)),
+            ResultCode.QuestionNotInQuiz => UnprocessableEntity(ApiResponse<AnswerQuestionResponse>.Failure("This question does not belong to this quiz", HttpStatusCode.UnprocessableEntity)),
+            _ => Ok(ApiResponse<AnswerQuestionResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
     }
 
     [HttpPost("{attemptId:guid}/submit")]
     public async Task<IActionResult> Submit(Guid attemptId)
     {
-        var studentIdClaim = User.FindFirstValue("user_id");
-        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var studentId))
+        var studentIdClaim = _currentUser.Id;
+        if (studentIdClaim is null)
         {
             return Unauthorized(
                 ApiResponse<SubmitAttemptResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         }
 
-        var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, studentId));
-        if (result.TimedOut)
+        var result = await _mediator.Send(new SubmitAttemptOrchestrator(attemptId, _currentUser.Id.Value));
+
+        if (result.Success)
+            return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Result));
+
+        return result.Code switch
         {
-            return StatusCode(410, new ApiResponse<SubmitAttemptResponse>(
+            ResultCode.AttemptTimedOut => StatusCode(410, new ApiResponse<SubmitAttemptResponse>(
                 success: false,
-                value: result.Value,
+                value: result.Result,
                 errors: ["Time has expired. Your attempt has been auto-submitted."],
                 statusCode: (HttpStatusCode)410
-            ));
-        }
-
-        if (result.AlreadySubmitted)
-        {
-            return Conflict(new ApiResponse<SubmitAttemptResponse>(
+            )),
+            ResultCode.AttemptAlreadySubmitted => Conflict(new ApiResponse<SubmitAttemptResponse>(
                 success: false,
-                value: result.Value,
+                value: result.Result,
                 errors: ["Attempt already submitted"],
                 statusCode: HttpStatusCode.Conflict
-            ));
-        }
-
-        return Ok(ApiResponse<SubmitAttemptResponse>.Success(result.Value));
+            )),
+            ResultCode.AttemptNotFound => NotFound(
+                ApiResponse<SubmitAttemptResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            ResultCode.AttemptNotOwned => Forbid("You do not own this attempt."),
+            _ => BadRequest(ApiResponse<SubmitAttemptResponse>.Failure("Could not submit attempt."))
+        };
     }
+
 
     [HttpGet("{attemptId:guid}/timer")]
     public async Task<IActionResult> Timer(Guid attemptId)
     {
-        var studentIdClaim = User.FindFirstValue("user_id");
-        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var studentId))
+        var studentIdClaim = _currentUser.Id;
+        if (studentIdClaim is null)
         {
             return Unauthorized(
                 ApiResponse<GetAttemptTimerResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         }
 
-        var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId, studentId));
+        var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId, _currentUser.Id.Value));
         return Ok(ApiResponse<GetAttemptTimerResponse>.Success(result));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetStudentAttemptsHistory([FromQuery] GetStudentAttemptsHistoryQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(ApiResponse<PaginatedResult<GetStudentAttemptHistoryResponse>>.Success(result.Result));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetAttemptDetails(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetAttempDetailsQuery(id), cancellationToken);
+        return result.Code switch
+        {
+            ResultCode.AttemptNotFound => NotFound(ApiResponse<GetAttempDetailsResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            _ => Ok(ApiResponse<GetAttempDetailsResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
+    }
+
 }
-
-

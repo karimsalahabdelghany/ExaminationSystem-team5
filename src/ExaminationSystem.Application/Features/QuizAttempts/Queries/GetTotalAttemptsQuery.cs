@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Interfaces;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -6,10 +7,10 @@ using System.Text;
 
 namespace ExaminationSystem.Application.Features.QuizAttempts.Queries
 {
-    public record GetTotalAttemptsQuery : IQuery<int>
+    public record GetTotalAttemptsQuery : IQuery<RequestResult<int>>
     {
     }
-    public class GetTotalAttemptsQueryHandler : IRequestHandler<GetTotalAttemptsQuery, int>
+    public class GetTotalAttemptsQueryHandler : IRequestHandler<GetTotalAttemptsQuery, RequestResult<int>>
     {
         private readonly IRepository<QuizAttempt> _repository;
 
@@ -17,8 +18,11 @@ namespace ExaminationSystem.Application.Features.QuizAttempts.Queries
         {
             _repository = repository;
         }
-        public async Task<int> Handle(GetTotalAttemptsQuery request, CancellationToken cancellationToken)
-         => await _repository.CountAsync();
-        
+        public async Task<RequestResult<int>> Handle(GetTotalAttemptsQuery request, CancellationToken cancellationToken)
+        {
+            var countAttempts = await _repository.CountAsync();
+            return RequestResult<int>.succeeded(countAttempts, ResultCode.TotalAttemptsQuerySuccessfull);
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Interfaces;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,10 +8,10 @@ using System.Text;
 
 namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries
 {
-    public record GetOverallStatsQuery (Guid studentid): IQuery<GetOverallStatsQueryResponse>
+    public record GetOverallStatsQuery (Guid studentid): IQuery<RequestResult<GetOverallStatsQueryResponse>>
     {
     }
-    public class GetOverallStatsQueryHandler : IRequestHandler<GetOverallStatsQuery, GetOverallStatsQueryResponse>
+    public class GetOverallStatsQueryHandler : IRequestHandler<GetOverallStatsQuery, RequestResult<GetOverallStatsQueryResponse>>
     {
         private readonly IRepository<QuizAttempt> _quizRepository;
         private readonly IRepository<AttemptResult> _attemptResultRepo;
@@ -20,7 +21,7 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries
             _quizRepository = quizrepository;
             _attemptResultRepo = AttemptResultRepo;
         }
-        public async Task<GetOverallStatsQueryResponse> Handle(GetOverallStatsQuery request, CancellationToken cancellationToken)
+        public async Task<RequestResult<GetOverallStatsQueryResponse>> Handle(GetOverallStatsQuery request, CancellationToken cancellationToken)
         {
             //  1-TotalQuizzesTaken
             //  2- avg score
@@ -42,7 +43,7 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            await Task.WhenAll(totalTakenTask, scoreStatsTask);
+            //await Task.WhenAll(totalTakenTask, scoreStatsTask);
 
             var totalTaken = await totalTakenTask;
             var scoreStats = await scoreStatsTask;
@@ -52,10 +53,11 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries
                 ? 0m
                 : Math.Round((decimal)scoreStats.TotalPassed / scoreStats.TotalScored * 100, 2);
 
-            return new GetOverallStatsQueryResponse(
+            var result = new GetOverallStatsQueryResponse(
                 TotalQuizzesTaken: totalTaken,
                 AvgScore: avgScore,
                 PassRate: passRate);
+            return RequestResult<GetOverallStatsQueryResponse>.succeeded(result, ResultCode.OverAllStatsProgressQuerySucessful);
         }
 
     }

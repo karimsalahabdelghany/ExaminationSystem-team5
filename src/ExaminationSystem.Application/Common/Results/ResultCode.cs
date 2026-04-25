@@ -1,6 +1,29 @@
-﻿namespace ExaminationSystem.Application.Common.Results;
+namespace ExaminationSystem.Application.Common.Results;
 
 public enum ResultCode
+{   //Admin 100-200
+    AdminStatsDataAlreadyCachedinMemory = 100,
+    AdminStatsDataNotFound = 101,
+    AdminStatsQueryFiredSuccessfully = 102,
+    AvgPassRateFailed = 103,
+    AvgPassRateSuccessed = 104,
+    UsersLoginTodaySuccessfully = 105,
+    GetTotalUsersQuerySuccessed = 106,
+    AdminAttemptDetailsRetrievedSuccessfully = 107,
+
+
+    //User  200-300
+    UserHasDiplomaEnrollments = 201,
+    RecentQuizAttemptsloadedSuccessfuly = 202,
+    OverAllStatsProgressQuerySucessful = 203,
+    StudentsDashoardQuerySucessfull = 204,
+    StudentsDashoardQueryFalied = 205,
+    StudentStatsDataAlreadyCachedinMemory = 206,
+    TotalAttemptsQuerySuccessfull = 207,
+    TotalQuzizesQuerySucessfull = 208,
+
+
+    //Diploma
 {
     WeakPassword = 201 ,
     ValidationError = 202 ,
@@ -16,6 +39,65 @@ public enum ResultCode
     DiplomasRetrievedSuccessfully = 1009,
     StudentNotEnrolledInDiploma = 1010,
     StudentEnrolledInDiploma = 1011,
+
+    // Quizzes (1100-1199)
+    QuizNotFound = 1100,
+    QuizCreatedSuccessfully = 1101,
+    QuizUpdatedSuccessfully = 1102,
+    QuizDeletedSuccessfully = 1103,
+    QuizIsPublished = 1104,
+    QuizHasActiveAttempts = 1105,
+    QuizAlreadyPublished = 1106,
+    QuizPublishedSuccessfully = 1107,
+    QuizHasNoQuestions = 1108,
+    QuizAlreadyDraft = 1109,
+    QuizUnpublishedSuccessfully = 1110,
+    QuizIsExist = 1111,
+
+
+    // Attempts (1200-1299)
+    AttemptNotFound = 1200,
+    AttemptNotOwned = 1201,
+    AttemptAlreadySubmitted = 1202,
+    AttemptTimedOut = 1203,
+    QuestionNotInQuiz = 1204,
+    AnswerSavedSuccessfully = 1205,
+    SubmitAttemptSuccessful = 1206,
+    QuizAttemptHistoryRetrievedSuccessfully = 1207,
+    AttemptDetailsRetrievedSuccessfully = 1208,
+
+    // Start quiz attempt (POST .../quizzes/{id}/start)
+    QuizNotFoundOrNotPublished = 2000,
+    QuizAttemptStartedSuccessfully = 2001,
+    AttemptAlreadyInProgress = 2002,
+    AttemptLimitReached = 2003,
+    AttemptStartConflict = 2004,
+
+    // Questions (1300-1399)
+    FailedToCreate = 1300,
+    QuestionCreatedSuccessfully = 1301,
+    QuestionNotFound = 1302,
+    QuestionIsExist = 1303,
+    QuestionUpdatedSuccessfully = 1304,
+    QuestionDeletedSuccessfully = 1305,
+    QuestionDeleteFailed = 1306,
+    QuestionFailedToUpdate = 1307,
+    QuestionNotFoundOrQuizPublished = 1308,
+    QuestionIsExistAndQuizPublished = 1309,
+    QuestionHasMoreThanOneCorrectAnswer = 1310,
+
+
+    //Options (1400-1499)
+    OptionsNotFound = 1400,
+    OptionIsExist = 1401,
+    OptionCreatedSuccessfully = 1402,
+    OptionUpdatedSuccessfully = 1403,
+    OptionDeletedSuccessfully = 1404,
+    OptionDeleteFailed = 1405,
+    OptionFailedToUpdate = 1406,
+    QuestionBasicInfoUpdatedSuccessfully = 1407,
+
+
     // Register Code 
     UserIsAlredyExist = 2000 , 
     UserCreateSuccesfully = 2001 , 

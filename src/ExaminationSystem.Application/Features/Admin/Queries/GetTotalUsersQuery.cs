@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Interfaces;
+﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,8 +8,8 @@ using System.Text;
 
 namespace ExaminationSystem.Application.Features.Admin.Queries
 {
-    public record GetTotalUsersQuery : IQuery<int>;
-    public class GetTotalUsersQueryHandler : IRequestHandler<GetTotalUsersQuery, int>
+    public record GetTotalUsersQuery :IQuery<RequestResult<int>>;
+    public class GetTotalUsersQueryHandler : IRequestHandler<GetTotalUsersQuery, RequestResult<int>>
     {
         private readonly UserManager<Domain.Entities.AppUser> _userManager;
 
@@ -17,10 +18,13 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
             _userManager = userManager;
         }
 
-        public async Task<int> Handle(
+        public async Task<RequestResult<int>> Handle(
             GetTotalUsersQuery request,
             CancellationToken cancellationToken)
-            => await  _userManager.Users.CountAsync<ExaminationSystem.Domain.Entities.AppUser>();
+        {
+            var Count = await _userManager.Users.CountAsync<ExaminationSystem.Domain.Entities.AppUser>(cancellationToken);
+           return RequestResult<int>.succeeded(Count, ResultCode.GetTotalUsersQuerySuccessed);
+        }
     }
 
 }

@@ -5,7 +5,6 @@ using ExaminationSystem.Persistence.Repositories;
 using ExaminationSystem.Persistence.Services;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
-
 namespace ExaminationSystem.API;
 
 public class Program
@@ -19,7 +18,9 @@ public class Program
         builder.Services.AddPersistence(builder.Configuration);
         // builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddMemoryCache();
-        builder.Services.AddScoped<IOTPRepository, OtpRepository>();
+        builder.Services.AddApiDependencies(builder.Configuration);
+
+
         var app = builder.Build();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 

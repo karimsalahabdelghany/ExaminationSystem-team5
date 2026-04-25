@@ -1,55 +1,84 @@
-﻿using ExaminationSystem.Application.Common.Results;
+﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Diplomas.CheckUserEnrollment;
 using ExaminationSystem.Domain.Enums;
 
 namespace ExaminationSystem.Application.Features.Diplomas.GetPublishedDiplomaQuizez;
 
-//TODO : Read Student id From Claims
+
 public record GetPublishedDiplomaQuizezQuery
-(Guid dipolmaId, Guid studentId) : IRequest<RequestResult<List<GetPublishedDiplomaQuizezResponse>>>;
+(Guid dipolmaId, PaginationParams Params) : IRequest<RequestResult<List<PaginatedResult<GetPublishedDiplomaQuizezResponse>>>>;
 
-public class GetDiplomaQuizezQueryHandler(IUnitOfWork unitOfWork ,IMediator mediator
-    ) : IRequestHandler<GetPublishedDiplomaQuizezQuery, RequestResult<List<GetPublishedDiplomaQuizezResponse>>>
+public record GetPublishedDiplomaQuizzesQuery(
+    Guid DiplomaId,
+    PaginationParams Params
+) : IRequest<RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>>;
+
+public class GetPublishedDiplomaQuizzesQueryHandler
+    : IRequestHandler<GetPublishedDiplomaQuizzesQuery, RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>>
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly IMediator _mediator = mediator;
+    private readonly IRepository<Diploma> _diplomaRepo;
+    private readonly IMediator _mediator;
+    private readonly ICurrentUser _currentUser;
 
-    public async Task<RequestResult<List<GetPublishedDiplomaQuizezResponse>>> Handle(GetPublishedDiplomaQuizezQuery request, CancellationToken cancellationToken)
+    public GetPublishedDiplomaQuizzesQueryHandler(
+        IRepository<Diploma> diplomaRepo,
+        IMediator mediator,
+        ICurrentUser currentUser)
     {
-        var isEnrolled = await _mediator.Send(new CheckUserEnrollmentQuery(request.dipolmaId, request.studentId), cancellationToken);
-        if (!isEnrolled.Result)
-            return RequestResult<List<GetPublishedDiplomaQuizezResponse>>.Failure(null, ResultCode.StudentNotEnrolledInDiploma);
-
-        var _repository = _unitOfWork.Repository<Diploma>();
-
-        var diploma = await _repository.GetAll(d => d.Id == request.dipolmaId
-                                              && d.Status == DiplomaStatus.Published
-                                              && d.Enrollments.Any(e => e.UserId == request.studentId))
-                                        .SelectMany(d => d.Quizzes
-                                                         .Where(q => q.Status == QuizStatus.Published)
-                                                         .Select(q => new GetPublishedDiplomaQuizezResponse
-                                                                      (
-                                                                          q.Id,
-                                                                          q.Title,
-                                                                          q.DurationMinutes,
-                                                                          q.QuizAttempts.Count(qa => qa.UserId == request.studentId),
-                                                                          q.QuizAttempts.Where(qa => qa.UserId == request.studentId)
-                                                                                        .OrderByDescending(qa => qa.Result)
-                                                                                        .Select(qa => qa.Result.Score)
-                                                                                        .FirstOrDefault(),
-                                                                          //q.Status
-                                                                          q.QuizAttempts.Where(qa => qa.UserId == request.studentId)
-                                                                                        .OrderByDescending(qa => qa.CreatedAt)
-                                                                                        .Select(qa => qa.Quiz.Status)
-                                                                                        .FirstOrDefault()
-                                                                      )
-                                                         )
-                                        ).ToListAsync(cancellationToken);
-
-
-        if (diploma == null)
-            return RequestResult<List<GetPublishedDiplomaQuizezResponse>>.Failure(null, ResultCode.DiplomaNotFound);
-
-        return RequestResult<List<GetPublishedDiplomaQuizezResponse>>.succeeded(diploma , ResultCode.DiplomasRetrievedSuccessfully);
+        _diplomaRepo = diplomaRepo;
+        _mediator = mediator;
+        _currentUser = currentUser;
     }
+
+    public async Task<RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>> Handle(
+        GetPublishedDiplomaQuizzesQuery request,
+        CancellationToken cancellationToken)
+    {
+        // Step 1 — check enrollment first
+        var isEnrolled = await _mediator.Send(
+            new CheckUserEnrollmentQuery(request.DiplomaId, _currentUser.Id.Value),
+            cancellationToken);
+
+        if (!isEnrolled.Result)
+            return RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>
+                .Failure(null, ResultCode.StudentNotEnrolledInDiploma);
+
+        var result = await _diplomaRepo
+            .GetAll(d => d.Id == request.DiplomaId
+                      && d.Status == DiplomaStatus.Published
+                      && !d.IsDeleted)
+            .SelectMany(d => d.Quizzes
+                .Where(q => q.Status == QuizStatus.Published
+                         && !q.IsDeleted)
+                .Select(q => new GetPublishedDiplomaQuizezResponse(
+                    Id: q.Id,
+                    Title: q.Title,
+                    DurationMinutes: q.DurationMinutes,
+
+                    AttemptCount: q.QuizAttempts
+                        .Count(qa => qa.UserId == _currentUser.Id),
+
+                    LastScore: q.QuizAttempts
+                        .Where(qa => qa.UserId == _currentUser.Id
+                                  && qa.Result != null)
+                        .OrderByDescending(qa => qa.CreatedAt)
+                        .Select(qa => (decimal?)qa.Result!.Score)
+                        .FirstOrDefault(),
+
+                    Status: q.Status
+                )))
+            .ToPagedAsync(request.Params, cancellationToken); 
+
+        if (!result.Data.Any())
+            return RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>
+                .Failure(null, ResultCode.DiplomaNotFound);
+
+        return RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>
+            .succeeded(result, ResultCode.DiplomasRetrievedSuccessfully);
+    }
+
 }
+
+
+
