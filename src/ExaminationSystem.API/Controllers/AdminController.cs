@@ -1,18 +1,12 @@
 ﻿using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Features.Admin.Queries;
-using ExaminationSystem.Application.Features.Diplomas.GetDiplomas;
-using ExaminationSystem.Application.Responses;
-using ExaminationSystem.Domain.Entities;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ExaminationSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    //TODO: uncomment when jwt is ready
+    //[Authorize(Roles = "Admin")]
     public class AdminController : BaseController
     {
         private readonly IMediator _mediator;
@@ -36,20 +30,24 @@ namespace ExaminationSystem.API.Controllers
 
             return Ok(result);
         }
-        // GET /api/admin/attempts?page=1&per_page=20&quiz_id=&student_id=
+        // GET /api/admin/attempts?page=1&per_page=20&quiz_id=&student_id=&sort_by=submitted_at&order=desc
         [HttpGet("attempts")]
         public async Task<IActionResult> GetAttempts(
             [FromQuery] int page = 1,
             [FromQuery] int per_page = 20,
-            [FromQuery] Guid? quiz_id = null,   // optional filter
-            [FromQuery] Guid? student_id = null)   // optional filter
+            [FromQuery] Guid? quiz_id = null,    // optional filter
+            [FromQuery] Guid? student_id = null, // optional filter
+            [FromQuery] string? sort_by = null,  // submitted_at | score | status
+            [FromQuery] string? order = null)    // asc | desc
         {
             var result = await _mediator.Send(new GetAdminAttemptsQuery(
                 Pagination: new PaginationParams { Page = page, PerPage = per_page },
                 QuizId: quiz_id,
-                StudentId: student_id
+                StudentId: student_id,
+                SortBy: sort_by,
+                Order: order
             ));
-            if(result.Success)
+            if (result.Success)
             {
                 return Ok(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>.Success(result.Result, HttpStatusCode.OK));
             }
@@ -64,6 +62,22 @@ namespace ExaminationSystem.API.Controllers
                         .Failure("Could not load attempts.", HttpStatusCode.BadRequest))
             };
         }
-     
+
+        // GET /api/admin/attempts/{attemptId}
+        [HttpGet("attempts/{attemptId:guid}")]
+        public async Task<IActionResult> GetAttemptDetails(Guid attemptId)
+        {
+            var result = await _mediator.Send(new GetAdminAttemptDetailsQuery(attemptId));
+
+            return result.Code switch
+            {
+                ResultCode.AttemptNotFound =>
+                    NotFound(ApiResponse<GetAdminAttemptDetailsResponse>
+                        .Failure("Attempt not found.", HttpStatusCode.NotFound)),
+
+                _ => Ok(ApiResponse<GetAdminAttemptDetailsResponse>.Success(result.Result, HttpStatusCode.OK))
+            };
+        }
+
     }
 }
