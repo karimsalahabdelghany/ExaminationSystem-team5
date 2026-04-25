@@ -121,6 +121,18 @@ public enum ResultCode
 
     // Login 
     Invalidcredentials = 401  ,
-    AccountNotverified = 402
+    AccountNotverified = 402,
+
+    // New Auth Codes (5000-5099)
+    LoginSucceeded = 5000,
+    InvalidCredentials = 5001,
+    AccountNotActive = 5002,
+    AccountLockedTemporarily = 5003,
+
+    TokenRefreshedSuccessfully = 5010,
+    RefreshTokenInvalid = 5011,
+    RefreshTokenExpired = 5012,
+    RefreshTokenRevoked = 5013
+
 
 }

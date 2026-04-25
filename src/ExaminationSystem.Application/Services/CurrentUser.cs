@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace ExaminationSystem.Application.Services
 {
     // Reads JWT claims from HttpContext — injected as Scoped
-    
+
     public class CurrentUser : ICurrentUser
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -15,17 +16,26 @@ namespace ExaminationSystem.Application.Services
         public CurrentUser(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
-
-            var userIdString = _httpContextAccessor.HttpContext?
-                .User?.FindFirst("UserId")?.Value;
-
-            if (Guid.TryParse(userIdString, out Guid userId))
-                Id = userId;
-            else
-                Id = Guid.Parse("019b280b-92cc-7715-8e04-f21087b2c9db");
         }
 
-        public Guid? Id { get; set; }
+        public Guid? Id
+        {
+            get
+            {
+                var user = _httpContextAccessor.HttpContext?.User;
+                if (user is null) return null;
+
+                var claim = user.FindFirst("user_id")?.Value
+                            ?? user.FindFirst("UserId")?.Value
+                            ?? user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                            ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (Guid.TryParse(claim, out var id))
+                    return id;
+
+                return null;
+            }
+        }
 
         public string? Email
             => _httpContextAccessor.HttpContext?

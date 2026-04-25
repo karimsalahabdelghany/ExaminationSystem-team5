@@ -1,4 +1,6 @@
-﻿using ExaminationSystem.Application.Features.Auth.Register;
+﻿using ExaminationSystem.Application.Features.Auth.Login;
+using ExaminationSystem.Application.Features.Auth.RefreshAccessToken;
+using ExaminationSystem.Application.Features.Auth.Register;
 using ExaminationSystem.Application.Features.Auth.ResendOtpForAccountVerification;
 using ExaminationSystem.Application.Features.Auth.VerifyAccount;
 using ExaminationSystem.Application.Features.OTP;
@@ -7,19 +9,20 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExaminationSystem.API.Controllers
 {
-    
+
     public class AuthController : BaseController
     {
-       
+
         public AuthController(IMediator mediator) : base(mediator)
         {
-            
+
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync (RegisterOrchestrator registerCommand , CancellationToken cancellationToken)
+        [EnableRateLimiting("register-policy")]
+        public async Task<IActionResult> RegisterAsync(RegisterOrchestrator registerCommand, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(registerCommand , cancellationToken);
+            var result = await _mediator.Send(registerCommand, cancellationToken);
             return result.Code switch
             {
                 ResultCode.UserCreateSuccesfully =>
@@ -44,7 +47,73 @@ namespace ExaminationSystem.API.Controllers
 
         }
 
+        [HttpPost("login")]
+        [EnableRateLimiting("login-policy")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.Code switch
+            {
+                ResultCode.LoginSucceeded =>
+                    Ok(ApiResponse<LoginResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<LoginResponse>.Failure(
+                        "Invalid email or password",
+                        HttpStatusCode.Unauthorized)),
+
+                ResultCode.AccountNotActive =>
+                    StatusCode(403, ApiResponse<LoginResponse>.Failure(
+                        "Account is not active",
+                        HttpStatusCode.Forbidden)),
+
+                ResultCode.AccountLockedTemporarily =>
+                    StatusCode(423, ApiResponse<LoginResponse>.Failure(
+                        "Account locked. Try again later.",
+                        HttpStatusCode.Locked)),
+
+                _ =>
+                    StatusCode(500, ApiResponse<LoginResponse>.Failure(
+                        "Unexpected error",
+                        HttpStatusCode.InternalServerError))
+            };
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.Code switch
+            {
+                ResultCode.TokenRefreshedSuccessfully =>
+                    Ok(ApiResponse<RefreshTokenResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.RefreshTokenInvalid =>
+                    Unauthorized(ApiResponse<RefreshTokenResponse>.Failure(
+                        "Invalid refresh token",
+                        HttpStatusCode.Unauthorized)),
+
+                ResultCode.RefreshTokenExpired =>
+                    Unauthorized(ApiResponse<RefreshTokenResponse>.Failure(
+                        "Refresh token expired",
+                        HttpStatusCode.Unauthorized)),
+
+                ResultCode.RefreshTokenRevoked =>
+                    Unauthorized(ApiResponse<RefreshTokenResponse>.Failure(
+                        "Refresh token revoked",
+                        HttpStatusCode.Unauthorized)),
+
+                _ =>
+                    StatusCode(500, ApiResponse<RefreshTokenResponse>.Failure(
+                        "Unexpected error",
+                        HttpStatusCode.InternalServerError))
+            };
+        }
+
         [HttpPost("verify-account")]
+        [EnableRateLimiting("verify-otp-policy")]
         public async Task<IActionResult> VerifyAccount([FromBody] VerifyAccountOrchestrator request,
                                                   CancellationToken ct)
         {
@@ -55,7 +124,7 @@ namespace ExaminationSystem.API.Controllers
                 ResultCode.AccountActivatedSuccessfully =>
                     Ok(ApiResponse<string>.Success("Account activated successfully", HttpStatusCode.OK)),
 
-                ResultCode.OtpExpried=>
+                ResultCode.OtpExpried =>
                     BadRequest(ApiResponse<string>.Failure("OTP expired", HttpStatusCode.BadRequest)),
 
                 ResultCode.OtpNotVaild =>
@@ -86,7 +155,7 @@ namespace ExaminationSystem.API.Controllers
                     Ok(ApiResponse<string>.Success("OTP sent successfully", HttpStatusCode.OK)),
 
                 ResultCode.ResendLimitExceeded =>
-                    UnprocessableEntity( ApiResponse<string>.Failure(
+                    UnprocessableEntity(ApiResponse<string>.Failure(
                         "Resend limit exceeded",
                         HttpStatusCode.TooManyRequests)),
 
