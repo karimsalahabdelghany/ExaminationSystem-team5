@@ -2,6 +2,7 @@
 using ExaminationSystem.Application.Features.Diplomas.CreateDiploma;
 using ExaminationSystem.Application.Features.Diplomas.DeleteDiploma;
 using ExaminationSystem.Application.Features.Diplomas.GetDiplomas;
+using ExaminationSystem.Application.Features.Diplomas.GetDiplomasQuizzes;
 using ExaminationSystem.Application.Features.Diplomas.GetPublishedDiplomaQuizez;
 using ExaminationSystem.Application.Features.Diplomas.GetStudentDiplomas;
 using ExaminationSystem.Application.Features.Diplomas.UpdateDiploma;
@@ -77,15 +78,45 @@ public class DiplomasController : BaseController
     }
 
     [HttpGet("{id}/quizzes")]
-    public async Task<IActionResult> GetDiplomaQuizzes(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDiplomaQuizzes(
+    Guid diplomaId,
+    [FromQuery] int page = 1,
+    [FromQuery] int per_page = 20)
     {
-        var result = await _mediator.Send(new GetPublishedDiplomaQuizezQuery(id), cancellationToken );
+        var result = await _mediator.Send(new GetPublishedDiplomaQuizzesQuery(
+            DiplomaId: diplomaId,
+            Params: new PaginationParams { Page = page, PerPage = per_page }
+        ));
+
+        if (result.Success)
+            return Ok(ApiResponse<IEnumerable<GetPublishedDiplomaQuizezResponse>>.Success(
+                value : result.Result.Data,
+                statusCode : HttpStatusCode.OK,
+                meta : new
+                {
+                    page = result.Result.Page,
+                    per_page = result.Result.PerPage,
+                    total = result.Result.Total,
+                    totalPages = result.Result.TotalPages
+
+                }
+            ));
+
         return result.Code switch
         {
-            ResultCode.DiplomaNotFound => NotFound(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Failure("Diploma not found", HttpStatusCode.NotFound)),
-            ResultCode.StudentNotEnrolledInDiploma => Forbid("Student not enrolled in diploma"),
-            _ => Ok(ApiResponse<List<GetPublishedDiplomaQuizezResponse>>.Success(result.Result, HttpStatusCode.OK))
+            ResultCode.DiplomaNotFound =>
+                NotFound(ApiResponse<IEnumerable<GetPublishedDiplomaQuizezResponse>>
+                    .Failure("Diploma not found.", HttpStatusCode.NotFound)),
+
+            ResultCode.StudentNotEnrolledInDiploma =>
+                StatusCode(403, ApiResponse<IEnumerable<GetPublishedDiplomaQuizezResponse>>
+                    .Failure("You are not enrolled in this diploma.",
+                        HttpStatusCode.Forbidden)),
+
+            _ => BadRequest(ApiResponse < IEnumerable < GetPublishedDiplomaQuizezResponse >>
+                    .Failure("Could not load quizzes.", HttpStatusCode.BadRequest))
         };
+    
     }
     // GET /api/diplomas? page = 1 & per_page = 20
     [HttpGet]
@@ -102,7 +133,17 @@ public class DiplomasController : BaseController
             Params: new PaginationParams { Page = page, PerPage = per_page }
         ));
         if (result.Success)
-            return Ok(ApiResponse<PaginatedResult<GetDiplomasResponse>>.Success(result.Result, HttpStatusCode.OK));
+            return Ok(ApiResponse<PaginatedResult<GetDiplomasResponse>>.Success(
+                value : result.Result,
+                statusCode: HttpStatusCode.OK,
+                meta : new
+                { 
+                    page = result.Result.Page,
+                    per_page = result.Result.PerPage,
+                    total = result.Result.Total,
+                    totalPages =result.Result.TotalPages
+                }
+                ));
 
         return result.Code switch
         {

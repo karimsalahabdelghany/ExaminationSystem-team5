@@ -51,7 +51,16 @@ namespace ExaminationSystem.API.Controllers
             ));
             if(result.Success)
             {
-                return Ok(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>.Success(result.Result, HttpStatusCode.OK));
+                return Ok(ApiResponse<PaginatedResult<GetAdminAttemptsResponse>>.Success(
+                    value:result.Result
+                    ,meta : new
+                    {
+                        page = result.Result.Page,
+                        perPage = result.Result.PerPage,
+                        total = result.Result.Total,
+                        totalPages = result.Result.TotalPages
+                    }
+                    , HttpStatusCode.OK));
             }
 
             return result.Code switch

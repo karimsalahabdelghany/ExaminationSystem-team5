@@ -14,6 +14,7 @@ namespace ExaminationSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class StudentsController : BaseController
     {
         private readonly ICurrentUser _currentUser;
@@ -75,7 +76,16 @@ namespace ExaminationSystem.API.Controllers
             ));
             if (result.Success)
                 return Ok(ApiResponse<PaginatedResult<GetStudentAttemptsResponse>>
-                    .Success(result.Result, HttpStatusCode.OK));
+                    .Success(
+                    value: result.Result,
+                    meta: new
+                    {
+                        page = result.Result.Page,
+                        per_page = result.Result.PerPage,
+                        total= result.Result.Total,
+                        totalpages = result.Result.TotalPages
+                    },
+                    HttpStatusCode.OK));
 
             return result.Code switch
             {

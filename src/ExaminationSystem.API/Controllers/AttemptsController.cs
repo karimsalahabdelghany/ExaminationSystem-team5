@@ -8,9 +8,8 @@ using ExaminationSystem.Application.Interfaces;
 
 namespace ExaminationSystem.API.Controllers;
 
-//[Route("api/attempts")]
-// TODO: Uncomment when Identity setup is complete
-//[Authorize]
+[Route("api/attempts")]
+[Authorize]
 public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : BaseController(mediator)
 {
     private readonly ICurrentUser _currentUser = currentUser;
@@ -93,7 +92,7 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
     public async Task<IActionResult> GetStudentAttemptsHistory([FromQuery] GetStudentAttemptsHistoryQuery query , CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);
-        return Ok(ApiResponse<PaginationResult<GetStudentAttemptHistoryResponse>>.Success(result.Result));
+        return Ok(ApiResponse<PaginatedResult<GetStudentAttemptHistoryResponse>>.Success(result.Result));
     }
 
     [HttpGet("{id}")]
