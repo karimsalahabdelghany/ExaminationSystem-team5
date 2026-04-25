@@ -24,7 +24,6 @@ public enum ResultCode
 
 
     //Diploma
-{
     WeakPassword = 201 ,
     ValidationError = 202 ,
     DiplomaNotFound = 1000,

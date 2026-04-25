@@ -40,7 +40,7 @@ public class ResendOtpForAccountVerificationOrchestratorHandler(UserManager<AppU
         var sendEmailResult = await emailService.SendAsync(new EmailRequest {
             To = request.UserEmail,
             Subject = "Your OTP Code for Account Verification",
-            Body = $"Your OTP code is: {generateOtpResult?.Result?.OtpId}. It will expire in 10 minutes."
+            Body = $"Your OTP code is: {generateOtpResult?.Result?.otpCode}. It will expire in 10 minutes."
         }, cancellationToken);
 
         if(!sendEmailResult.IsSuccess)
