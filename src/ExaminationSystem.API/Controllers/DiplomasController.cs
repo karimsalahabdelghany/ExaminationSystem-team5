@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace ExaminationSystem.API.Controllers;
 
+[Authorize]
 public class DiplomasController : BaseController
 {
     private readonly ICurrentUser _currentUser;
@@ -20,7 +21,6 @@ public class DiplomasController : BaseController
     {
         _currentUser = currentUser;
     }
-
     
     [HttpPost]
 
@@ -64,7 +64,17 @@ public class DiplomasController : BaseController
 
         if (result.Success)
             return Ok(ApiResponse<PaginatedResult<GetStudentPuplishedDiplomasResponse>>
-                .Success(result.Result, HttpStatusCode.OK));
+                .Success(
+                value: result.Result,
+                meta: new
+                {
+                    page = result.Result.Page,
+                    per_page = result.Result.PerPage,
+                    total = result.Result.Total,
+                    totalPages = result.Result.TotalPages
+
+                },
+                HttpStatusCode.OK));
 
         return result.Code switch
         {

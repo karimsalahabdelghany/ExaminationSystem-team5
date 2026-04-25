@@ -83,7 +83,9 @@ namespace ExaminationSystem.API.Controllers
                     NotFound(ApiResponse<GetAdminAttemptDetailsResponse>
                         .Failure("Attempt not found.", HttpStatusCode.NotFound)),
 
-                _ => Ok(ApiResponse<GetAdminAttemptDetailsResponse>.Success(result.Result, HttpStatusCode.OK))
+                _ => Ok(ApiResponse<GetAdminAttemptDetailsResponse>.Success(
+                    value :result.Result, HttpStatusCode.OK))
+                
             };
         }
 
