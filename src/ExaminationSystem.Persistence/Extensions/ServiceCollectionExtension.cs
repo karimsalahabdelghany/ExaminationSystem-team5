@@ -39,6 +39,7 @@ public static class ServiceCollectionExtension
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IQuizAttemptAutoSubmitClaim, QuizAttemptAutoSubmitClaim>();
         services.AddScoped<ITokenServies, TokenServices>();
+        services.AddScoped<ILoggerService, LoggerService>();
 
         services.Configure<EmailSettings>(
         configuration.GetSection("EmailSettings"));

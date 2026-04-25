@@ -8,17 +8,23 @@ public record SetUserLockStateCommand(Guid UserId, bool IsLocked) : ICommand<Req
 
 public class SetUserLockStateCommandHandler(
     UserManager<AppUser> userManager,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ILoggerService loggerService)
     : IRequestHandler<SetUserLockStateCommand, RequestResult<bool>>
 {
     public async Task<RequestResult<bool>> Handle(SetUserLockStateCommand request, CancellationToken cancellationToken)
     {
+        loggerService.LogInformation(
+            "Admin lock-state request received for user {UserId}. Requested state: {RequestedState}",
+            request.UserId, request.IsLocked ? "Locked" : "Unlocked");
+
         await unitOfWork.BeginTransactionAsync(ct: cancellationToken);
         try
         {
             var user = await userManager.FindByIdAsync(request.UserId.ToString());
             if (user is null)
             {
+                loggerService.LogWarning("Set lock-state failed: user {UserId} was not found", request.UserId);
                 await unitOfWork.RollbackAsync(cancellationToken);
                 return RequestResult<bool>.Failure(false, ResultCode.UserIsNotExsit);
             }
@@ -56,6 +62,7 @@ public class SetUserLockStateCommandHandler(
 
                 await unitOfWork.SaveChangesAsync(cancellationToken);
                 await unitOfWork.CommitAsync(cancellationToken);
+                loggerService.LogInformation("User {UserId} was locked by admin and active refresh tokens were revoked", user.Id);
                 return RequestResult<bool>.succeeded(true, ResultCode.AccountLockedByAdmin);
             }
 
@@ -79,10 +86,12 @@ public class SetUserLockStateCommandHandler(
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
+            loggerService.LogInformation("User {UserId} was unlocked by admin", user.Id);
             return RequestResult<bool>.succeeded(true, ResultCode.AccountUnlockedByAdmin);
         }
-        catch
+        catch (Exception ex)
         {
+            loggerService.LogError(ex, "Unexpected error while setting lock-state for user {UserId}", request.UserId);
             await unitOfWork.RollbackAsync(cancellationToken);
             throw;
         }
