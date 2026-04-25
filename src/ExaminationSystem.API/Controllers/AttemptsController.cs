@@ -17,14 +17,16 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
     [HttpPost("{attemptId:guid}/answer")]
     public async Task<IActionResult> Answer(Guid attemptId, AnswerQuestionOrchestrator command, CancellationToken cancellationToken)
     {
-        // TODO: replace StudentId to come from JWT claims once Identity is ready
-        // var studentIdClaim = User.FindFirstValue("user_id");
-        // if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var parsedStudentId))
-        //     return Unauthorized(
-        //         ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
-        // command = command with { StudentId = parsedStudentId };
+        var studentIdClaim = _currentUser.Id;
+        if (studentIdClaim is null)
+        {
+            return Unauthorized(
+                ApiResponse<AnswerQuestionResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+        }
 
-        var result = await _mediator.Send(command with { AttemptId = attemptId }, cancellationToken);
+        var result = await _mediator.Send(
+            command with { AttemptId = attemptId, StudentId = _currentUser.Id.Value },
+            cancellationToken);
 
         return result.Code switch
         {
@@ -78,27 +80,27 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
     public async Task<IActionResult> Timer(Guid attemptId)
     {
         var studentIdClaim = _currentUser.Id;
-        if (studentIdClaim is null )
+        if (studentIdClaim is null)
         {
             return Unauthorized(
                 ApiResponse<GetAttemptTimerResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
         }
 
-        var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId,_currentUser.Id.Value));
+        var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId, _currentUser.Id.Value));
         return Ok(ApiResponse<GetAttemptTimerResponse>.Success(result));
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStudentAttemptsHistory([FromQuery] GetStudentAttemptsHistoryQuery query , CancellationToken cancellationToken)
+    public async Task<IActionResult> GetStudentAttemptsHistory([FromQuery] GetStudentAttemptsHistoryQuery query, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(ApiResponse<PaginatedResult<GetStudentAttemptHistoryResponse>>.Success(result.Result));
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetAttemptDetails(Guid id , CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAttemptDetails(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetAttempDetailsQuery(id) , cancellationToken);
+        var result = await _mediator.Send(new GetAttempDetailsQuery(id), cancellationToken);
         return result.Code switch
         {
             ResultCode.AttemptNotFound => NotFound(ApiResponse<GetAttempDetailsResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),

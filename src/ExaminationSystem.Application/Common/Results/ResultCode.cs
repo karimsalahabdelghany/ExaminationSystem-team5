@@ -9,6 +9,7 @@ public enum ResultCode
     AvgPassRateSuccessed = 104,
     UsersLoginTodaySuccessfully = 105,
     GetTotalUsersQuerySuccessed = 106,
+    AdminAttemptDetailsRetrievedSuccessfully = 107,
 
 
     //User  200-300
@@ -48,6 +49,7 @@ public enum ResultCode
     QuizHasNoQuestions = 1108,
     QuizAlreadyDraft = 1109,
     QuizUnpublishedSuccessfully = 1110,
+    QuizIsExist = 1111,
 
 
     // Attempts (1200-1299)
@@ -67,4 +69,30 @@ public enum ResultCode
     AttemptAlreadyInProgress = 2002,
     AttemptLimitReached = 2003,
     AttemptStartConflict = 2004,
+
+    // Questions (1300-1399)
+    FailedToCreate = 1300,
+    QuestionCreatedSuccessfully = 1301,
+    QuestionNotFound = 1302,
+    QuestionIsExist = 1303,
+    QuestionUpdatedSuccessfully = 1304,
+    QuestionDeletedSuccessfully = 1305,
+    QuestionDeleteFailed = 1306,
+    QuestionFailedToUpdate = 1307,
+    QuestionNotFoundOrQuizPublished = 1308,
+    QuestionIsExistAndQuizPublished = 1309,
+    QuestionHasMoreThanOneCorrectAnswer = 1310,
+
+
+    //Options (1400-1499)
+    OptionsNotFound = 1400,
+    OptionIsExist = 1401,
+    OptionCreatedSuccessfully = 1402,
+    OptionUpdatedSuccessfully = 1403,
+    OptionDeletedSuccessfully = 1404,
+    OptionDeleteFailed = 1405,
+    OptionFailedToUpdate = 1406,
+    QuestionBasicInfoUpdatedSuccessfully = 1407,
+
+
 }
