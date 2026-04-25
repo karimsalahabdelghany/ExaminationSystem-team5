@@ -30,6 +30,27 @@ namespace ExaminationSystem.API.Controllers
 
             return Ok(result);
         }
+
+        // GET /api/admin/analytics?from=&to=&diploma_id=
+        [HttpGet("analytics")]
+        [ProducesResponseType(typeof(ApiResponse<GetAdminAnalyticsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetAnalytics(
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null,
+            [FromQuery(Name = "diploma_id")] Guid? diplomaId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await _mediator.Send(
+                new GetAdminAnalyticsQuery(from, to, diplomaId),
+                cancellationToken);
+
+            if (result.Success)
+                return Ok(ApiResponse<GetAdminAnalyticsResponse>.Success(result.Result, HttpStatusCode.OK));
+
+            return BadRequest(ApiResponse<GetAdminAnalyticsResponse>.Failure("Invalid analytics filters.", HttpStatusCode.BadRequest));
+        }
         // GET /api/admin/attempts?page=1&per_page=20&quiz_id=&student_id=&sort_by=submitted_at&order=desc
         [HttpGet("attempts")]
         public async Task<IActionResult> GetAttempts(

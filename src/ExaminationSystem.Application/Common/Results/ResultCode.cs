@@ -11,6 +11,7 @@ public enum ResultCode
     GetTotalUsersQuerySuccessed = 106,
     AdminAttemptDetailsRetrievedSuccessfully = 107,
     AdminUserStatusRetrievedSuccessfully = 108,
+    AdminAnalyticsRetrievedSuccessfully = 109,
 
 
     //User  200-300
