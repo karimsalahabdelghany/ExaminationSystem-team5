@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Diplomas.CheckUserEnrollment;
 using ExaminationSystem.Domain.Enums;
@@ -35,9 +35,13 @@ public class GetPublishedDiplomaQuizzesQueryHandler
         GetPublishedDiplomaQuizzesQuery request,
         CancellationToken cancellationToken)
     {
+        if (!_currentUser.TryGetUserId(out var studentId))
+            return RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>
+                .Failure(null, ResultCode.InvalidCredentials);
+
         // Step 1 — check enrollment first
         var isEnrolled = await _mediator.Send(
-            new CheckUserEnrollmentQuery(request.DiplomaId, _currentUser.Id.Value),
+            new CheckUserEnrollmentQuery(request.DiplomaId, studentId),
             cancellationToken);
 
         if (!isEnrolled.Result)

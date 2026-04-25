@@ -36,7 +36,9 @@ namespace ExaminationSystem.Application.Services
 
         public string? Email
             => _httpContextAccessor.HttpContext?
-                .User?.FindFirstValue(ClaimTypes.Email);
+                .User?.FindFirstValue(ClaimTypes.Email)
+               ?? _httpContextAccessor.HttpContext?
+                .User?.FindFirstValue(JwtRegisteredClaimNames.Email);
 
         public string? Role
             => _httpContextAccessor.HttpContext?

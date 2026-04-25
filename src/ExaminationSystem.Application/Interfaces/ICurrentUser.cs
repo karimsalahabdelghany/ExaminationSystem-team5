@@ -11,6 +11,8 @@ namespace ExaminationSystem.Application.Interfaces
         string? Role { get; }
         bool IsInRole(string role);
         bool IsAuthenticated { get; }
+        bool TryGetUserId(out Guid userId);
+        Guid GetRequiredUserId();
     }
 
 }

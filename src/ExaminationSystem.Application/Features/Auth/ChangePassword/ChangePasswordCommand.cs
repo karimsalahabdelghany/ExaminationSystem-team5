@@ -15,10 +15,10 @@ public class ChangePasswordCommandHandler(
 {
     public async Task<RequestResult<bool>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
-        if (currentUser.Id is null)
+        if (!currentUser.TryGetUserId(out var userId))
             return RequestResult<bool>.Failure(false, ResultCode.InvalidCredentials);
 
-        var user = await userManager.FindByIdAsync(currentUser.Id.Value.ToString());
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null || user.Status != AccountStatus.Active)
             return RequestResult<bool>.Failure(false, ResultCode.InvalidCredentials);
 
