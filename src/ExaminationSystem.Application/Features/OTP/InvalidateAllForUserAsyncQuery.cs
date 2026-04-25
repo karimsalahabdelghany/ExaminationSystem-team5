@@ -16,14 +16,14 @@ namespace ExaminationSystem.Application.Features.OTP
         {
            _repository = repository;
         }
-        public Task<GetActiveOptByUserResponse> Handle(InvalidateAllForUserAsyncQuery request, CancellationToken ct)
+        public async Task<GetActiveOptByUserResponse> Handle(InvalidateAllForUserAsyncQuery request, CancellationToken ct)
         {
-         var res = _repository.GetAll(x => x.UserId == request.userId && !x.IsUsed)
+         var res = await _repository.GetAll(x => x.UserId == request.userId && !x.IsUsed)
                 .OrderByDescending(x => x.ExpiresAt)
                 .FirstOrDefaultAsync(ct);
 
 
-            return RequestResult<GetActiveOptByUserResponse>.succeeded(res.Adapt<GetActiveOptByUserResponse>(), ); 
+            return null; /*RequestResult<GetActiveOptByUserResponse>.succeeded(res.Adapt<GetActiveOptByUserResponse>(), ResultCode.AccountActivatedSuccessfully); */
 
         }
     }

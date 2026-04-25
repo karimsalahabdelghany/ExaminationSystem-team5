@@ -4,6 +4,6 @@ using System.Text;
 
 namespace ExaminationSystem.Application.Features.Auth.Login
 {
-    public record LoginResponse( )
+    public record LoginResponse();
     
 }

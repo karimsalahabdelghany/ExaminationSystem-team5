@@ -6,9 +6,9 @@ using System.Text;
 namespace ExaminationSystem.Application.Features.Auth.Register
 {
     public record RegisterResponse(Guid UserId, List<string> Errors = null);
-    public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+    public class RegisterOrchestratorValidator : AbstractValidator<RegisterOrchestrator>
     {
-        public RegisterCommandValidator()
+        public RegisterOrchestratorValidator()
         {
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email is required")

@@ -1,8 +1,7 @@
 ﻿using ExaminationSystem.Application.Features.Auth.Register;
+using ExaminationSystem.Application.Features.Auth.ResendOtpForAccountVerification;
 using ExaminationSystem.Application.Features.OTP;
-using ExaminationSystem.Application.Features.Quizzes;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExaminationSystem.API.Controllers
@@ -17,7 +16,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync (RegisterCommand registerCommand , CancellationToken cancellationToken)
+        public async Task<IActionResult> RegisterAsync (RegisterOrchestrator registerCommand , CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(registerCommand , cancellationToken);
             return result.Code switch
@@ -76,7 +75,7 @@ namespace ExaminationSystem.API.Controllers
         [HttpPost("resend-otp")]
         [EnableRateLimiting("resend-otp-policy")]
         public async Task<IActionResult> ResendOtp(
-            [FromBody] ResendOtpCommand request,
+            [FromBody] ResendOtpForAccountVerificationOrchestrator request,
             CancellationToken ct)
         {
             var result = await _mediator.Send(request, ct);
@@ -84,16 +83,16 @@ namespace ExaminationSystem.API.Controllers
             return result.Code switch
             {
                 ResultCode.OTPResentSuccessfully =>
-                    Ok(ApiResponse<string>.Success(result.Result, HttpStatusCode.OK)),
+                    Ok(ApiResponse<string>.Success("OTP sent successfully", HttpStatusCode.OK)),
 
                 ResultCode.ResendLimitExceeded =>
-                    StatusCode(429, ApiResponse<string>.Failure(
+                    UnprocessableEntity( ApiResponse<string>.Failure(
                         "Resend limit exceeded",
                         HttpStatusCode.TooManyRequests)),
 
-                ResultCode.UserIsNotExsit =>
+                ResultCode.UserEmailIsNotExistOrAccountIsNotInPendingStatus =>
                     NotFound(ApiResponse<string>.Failure(
-                        "User not found",
+                        "User not found or account is not in pending status",
                         HttpStatusCode.NotFound)),
 
                 ResultCode.NoActiveOTPFound =>

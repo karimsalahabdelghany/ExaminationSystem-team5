@@ -14,8 +14,8 @@ namespace ExaminationSystem.Application.Features.OTP
         private readonly UserManager<AppUser> _userManager;
         private readonly IOTPRepository _oTPRepository;
         private readonly IPasswordHasher<AppUser> _passwordHasher;
-        private readonly IEmailServices _emailService;
-        public ResendOtpCommandHandler(UserManager<AppUser> userManager, IOTPRepository oTPRepository, IPasswordHasher<AppUser> passwordHasher , IEmailServices emailService)
+        private readonly IEmailService _emailService;
+        public ResendOtpCommandHandler(UserManager<AppUser> userManager, IOTPRepository oTPRepository, IPasswordHasher<AppUser> passwordHasher , IEmailService emailService)
         {
             _userManager = userManager;
             _oTPRepository = oTPRepository;
@@ -46,7 +46,7 @@ namespace ExaminationSystem.Application.Features.OTP
                 exsitOtp.Refresh(hashedOtp);
                 await _oTPRepository.UpdateAsync(exsitOtp, cancellationToken);
             }
-            await _emailService.SendOtpEmailAsync(user.Email!, rawOtp);
+            //await _emailService.SendOtpEmailAsync(user.Email!, rawOtp);
 
             return RequestResult<string>.succeeded("OTP resent successfully." , ResultCode.OTPResentSuccessfully);
 

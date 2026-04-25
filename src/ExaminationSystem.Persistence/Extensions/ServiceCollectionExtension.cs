@@ -1,4 +1,5 @@
 using ExaminationSystem.Application.Interfaces;
+using ExaminationSystem.Application.Services.EmailService;
 using ExaminationSystem.Persistence.Interceptors;
 using ExaminationSystem.Persistence.Repositories;
 using ExaminationSystem.Persistence.Services;
@@ -36,6 +37,11 @@ public static class ServiceCollectionExtension
 
         //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.Configure<EmailSettings>(
+        configuration.GetSection("EmailSettings"));
+
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }

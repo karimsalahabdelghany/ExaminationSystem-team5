@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+using ExaminationSystem.Application.Common.Services.EmailService;
+using ExaminationSystem.Application.Services.EmailService;
 
-namespace ExaminationSystem.Application.Interfaces
+namespace ExaminationSystem.Application.Interfaces;
+
+ public  interface IEmailService
 {
-    public  interface IEmailServices
-    {
-        Task SendOtpEmailAsync(string email, string otp);
-    }
-}
+    //Task SendOtpEmailAsync(string email, string otp);
+    Task<EmailResult> SendAsync(EmailRequest  emailRequest , CancellationToken cancellationToken);
+ }
+

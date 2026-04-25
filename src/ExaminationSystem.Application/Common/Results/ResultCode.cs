@@ -20,15 +20,18 @@ public enum ResultCode
     UserIsAlredyExist = 2000 , 
     UserCreateSuccesfully = 2001 , 
     UserCreateFilad = 2002 , 
+    FailedToSendRegisterEmail=2003,
     // OTP 
     UserIsNotExsit = 20003,
+    UserEmailIsNotExistOrAccountIsNotInPendingStatus = 2010,
     ResendLimitExceeded = 2004 , 
     OTPResentSuccessfully = 2005,
     AccountActivatedSuccessfully =2006 ,
     NoActiveOTPFound =2007 ,
     AccountLocked = 2008 , 
     OtpExpried = 2009  ,
-    OtpNotVaild = 3001 , 
+    OtpNotVaild = 3001 ,
+    OtpGeneratedSuccessfully = 3002,
 
     // Login 
     Invalidcredentials = 401  ,

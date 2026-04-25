@@ -20,11 +20,6 @@ public class Program
         // builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<IOTPRepository, OtpRepository>();
-
-        // Microsoft Identity Hasher (لـ OTP hashing)
-        builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
-        builder.Services.AddScoped<IEmailServices, EmailServices>();
-
         var app = builder.Build();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
