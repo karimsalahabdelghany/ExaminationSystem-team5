@@ -308,3 +308,5 @@ node_modules/
 *.msix
 *.msm
 *.msp
+Logs/
+*.log
