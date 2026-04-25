@@ -5,8 +5,7 @@ namespace ExaminationSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //TODO: uncomment when jwt is ready
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : BaseController
     {
         private readonly IMediator _mediator;
