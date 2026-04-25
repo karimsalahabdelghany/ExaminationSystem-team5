@@ -23,14 +23,14 @@ public static class ServiceCollectionExtension
         }).AddLogging(c => c.SetMinimumLevel(LogLevel.Information));
 
         services.AddIdentityCore<AppUser>(options =>
-            {
-                options.User.RequireUniqueEmail = true;
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 8;
-            })
+        {
+            options.User.RequireUniqueEmail = true;
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredLength = 8;
+        })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationContext>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -38,6 +38,7 @@ public static class ServiceCollectionExtension
         //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IQuizAttemptAutoSubmitClaim, QuizAttemptAutoSubmitClaim>();
+        services.AddScoped<ITokenServies, TokenServices>();
 
         services.Configure<EmailSettings>(
         configuration.GetSection("EmailSettings"));

@@ -18,7 +18,6 @@ public class Program
         builder.Services.AddPersistence(builder.Configuration);
         // builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddMemoryCache();
-        builder.Services.AddApiDependencies(builder.Configuration);
 
 
         var app = builder.Build();
@@ -41,6 +40,8 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+
+        app.UseRateLimiter();
 
         app.UseAuthentication();
         app.UseAuthorization();

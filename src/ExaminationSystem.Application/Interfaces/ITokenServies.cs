@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ExaminationSystem.Application.Interfaces
+﻿namespace ExaminationSystem.Application.Interfaces
 {
-    public  interface ITokenServies
+    public interface ITokenServies
     {
         public Task<string> CreateToken(AppUser appUser);
         public string GenerateRefreshToken();
+        public string HashRefreshToken(string rawToken);
     }
 }
