@@ -9,8 +9,7 @@ using ExaminationSystem.Application.Features.Quizzes.UpdateQuiz;
 namespace ExaminationSystem.API.Controllers;
 
 [Route("api/admin/quizzes")]
-// TODO: Uncomment when Identity setup is complete
-//[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin")]
 public class QuizzesController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost]
