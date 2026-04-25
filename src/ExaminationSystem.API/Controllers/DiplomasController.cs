@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Features.Diplomas.CreateDiploma;
 using ExaminationSystem.Application.Features.Diplomas.DeleteDiploma;
 using ExaminationSystem.Application.Features.Diplomas.GetDiplomas;

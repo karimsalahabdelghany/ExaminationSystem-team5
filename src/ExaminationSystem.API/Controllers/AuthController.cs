@@ -22,6 +22,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         [EnableRateLimiting("register-policy")]
         public async Task<IActionResult> RegisterAsync(RegisterOrchestrator registerCommand, CancellationToken cancellationToken)
         {
@@ -51,6 +52,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         [EnableRateLimiting("login-policy")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
         {
@@ -89,6 +91,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("refresh")]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
@@ -121,6 +124,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("verify-account")]
+        [AllowAnonymous]
         [EnableRateLimiting("verify-otp-policy")]
         public async Task<IActionResult> VerifyAccount([FromBody] VerifyAccountOrchestrator request,
                                                   CancellationToken ct)
@@ -150,6 +154,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("resend-otp")]
+        [AllowAnonymous]
         [EnableRateLimiting("resend-otp-policy")]
         public async Task<IActionResult> ResendOtp(
             [FromBody] ResendOtpForAccountVerificationOrchestrator request,
@@ -185,6 +190,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("forgot-password")]
+        [AllowAnonymous]
         [EnableRateLimiting("forgot-password-policy")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordOrchestrator request, CancellationToken cancellationToken)
         {
@@ -209,6 +215,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("reset-password")]
+        [AllowAnonymous]
         [EnableRateLimiting("verify-otp-policy")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordOrchestrator request, CancellationToken cancellationToken)
         {
