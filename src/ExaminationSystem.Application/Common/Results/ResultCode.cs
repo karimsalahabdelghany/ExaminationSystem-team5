@@ -21,6 +21,7 @@ public enum ResultCode
     UserCreateSuccesfully = 2001 , 
     UserCreateFilad = 2002 , 
     FailedToSendRegisterEmail=2003,
+    CanNotVerifyAccount = 2004,
     // OTP 
     UserIsNotExsit = 20003,
     UserEmailIsNotExistOrAccountIsNotInPendingStatus = 2010,
@@ -32,16 +33,10 @@ public enum ResultCode
     OtpExpried = 2009  ,
     OtpNotVaild = 3001 ,
     OtpGeneratedSuccessfully = 3002,
+    OtpVerified = 3003,
 
     // Login 
     Invalidcredentials = 401  ,
     AccountNotverified = 402
-
-
-
-
-
-
-
 
 }

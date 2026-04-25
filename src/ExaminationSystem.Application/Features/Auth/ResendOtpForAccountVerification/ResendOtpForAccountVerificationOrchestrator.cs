@@ -17,20 +17,19 @@ public class ResendOtpForAccountVerificationOrchestratorHandler(UserManager<AppU
     public async Task<RequestResult<bool>> Handle(ResendOtpForAccountVerificationOrchestrator request, CancellationToken cancellationToken)
     {
         var normalizedEmail = userManager.NormalizeEmail(request.UserEmail);
-        var userId = await userManager.Users
-                                                              .Where
-                                                              (
-                                                                  u => u.NormalizedEmail == normalizedEmail
-                                                                    && u.Status == AccountStatus.PendingVerification
-                                                              ).Select(u => u.Id)
-                                                              .FirstOrDefaultAsync(cancellationToken);
+        var userId = await userManager.Users.Where
+                                            (
+                                                u => u.NormalizedEmail == normalizedEmail
+                                                  && u.Status == AccountStatus.PendingVerification
+                                            ).Select(u => u.Id)
+                                            .FirstOrDefaultAsync(cancellationToken);
         if(userId == Guid.Empty)
         {
             logger.LogWarning("User with Email :{userEmail} not Exist or already Verfiy his account" ,request.UserEmail);
             return RequestResult<bool>.Failure(false, ResultCode.UserEmailIsNotExistOrAccountIsNotInPendingStatus);
         }    
         await unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-        var generateOtpResult = await mediator.Send(new GenerateNewOtpCommand(userId ,OtpPurpose.EmailConfirmation) ,cancellationToken);
+        var generateOtpResult = await mediator.Send(new GenerateNewOtpCommand(userId ,OtpPurpose.AccountVerification) ,cancellationToken);
         if(!generateOtpResult.Success)
         {
             await unitOfWork.RollbackAsync(cancellationToken);

@@ -1,5 +1,6 @@
 ﻿using ExaminationSystem.Application.Features.Auth.Register;
 using ExaminationSystem.Application.Features.Auth.ResendOtpForAccountVerification;
+using ExaminationSystem.Application.Features.Auth.VerifyAccount;
 using ExaminationSystem.Application.Features.OTP;
 
 using Microsoft.AspNetCore.RateLimiting;
@@ -43,17 +44,16 @@ namespace ExaminationSystem.API.Controllers
 
         }
 
-        [HttpPost("verify-otp")]
-        public async Task<IActionResult> VerifyOtp(
-    [FromBody] VerifyOtpCommand request,
-    CancellationToken ct)
+        [HttpPost("verify-account")]
+        public async Task<IActionResult> VerifyAccount([FromBody] VerifyAccountOrchestrator request,
+                                                  CancellationToken ct)
         {
             var result = await _mediator.Send(request, ct);
 
             return result.Code switch
             {
                 ResultCode.AccountActivatedSuccessfully =>
-                    Ok(ApiResponse<string>.Success(result.Result, HttpStatusCode.OK)),
+                    Ok(ApiResponse<string>.Success("Account activated successfully", HttpStatusCode.OK)),
 
                 ResultCode.OtpExpried=>
                     BadRequest(ApiResponse<string>.Failure("OTP expired", HttpStatusCode.BadRequest)),

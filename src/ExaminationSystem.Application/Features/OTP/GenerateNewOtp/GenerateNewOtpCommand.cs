@@ -19,17 +19,22 @@ public class GenerateNewOtpCommandHandler(IRepository<OtpCode> repository)
         var otp = GenerateSecureOtp();
         var hashedOtp = OtpHasher.Hash(otp);
         var expirationTime = DateTime.UtcNow.AddMinutes(10);
-        var otpEntity = new OtpCode(request.UserId , hashedOtp , request.Purpose , expirationTime);
+        var otpEntity = new OtpCode
+        {
+            UserId = request.UserId,
+            CodeHash = hashedOtp,
+            Purpose = request.Purpose,
+            ExpiresAt = expirationTime
+        };
         otpEntity.Id = Guid.CreateVersion7();
         repository.Add(otpEntity);
-        var result = new GenerateNewOtpResponse(otpEntity.Id ,hashedOtp);
+        var result = new GenerateNewOtpResponse(otpEntity.Id , otp);
     
         return Task.FromResult(RequestResult<GenerateNewOtpResponse>.succeeded(result,ResultCode.OtpGeneratedSuccessfully));
     }
 
     private static string GenerateSecureOtp()
     {
-
         var bytes = new byte[4];
         RandomNumberGenerator.Fill(bytes);
         var number = BitConverter.ToUInt32(bytes) % 1_000_000;

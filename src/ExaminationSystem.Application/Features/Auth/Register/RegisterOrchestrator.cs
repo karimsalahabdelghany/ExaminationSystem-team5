@@ -53,7 +53,7 @@ namespace ExaminationSystem.Application.Features.Auth.Register;
                 return RequestResult<RegisterResponse>
                     .Failure(new RegisterResponse(newUser.Id, errors), ResultCode.UserCreateFilad);
             }
-            var otp = await _mediator.Send(new GenerateNewOtpCommand(newUser.Id ,OtpPurpose.EmailConfirmation), cancellationToken);
+            var otp = await _mediator.Send(new GenerateNewOtpCommand(newUser.Id ,OtpPurpose.AccountVerification), cancellationToken);
             if(!otp.Success)
             {
                await _unitOfWork.RollbackAsync(cancellationToken);
