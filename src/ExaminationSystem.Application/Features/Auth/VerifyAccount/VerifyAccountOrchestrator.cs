@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.OTP.VerifyOtpCommand;
 using ExaminationSystem.Domain.Enums;
 using Microsoft.AspNetCore.Identity;

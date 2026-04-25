@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Features.Admin.Commands.SetUserLockState;
 using ExaminationSystem.Application.Features.Admin.Queries;
 
 namespace ExaminationSystem.API.Controllers
@@ -86,6 +87,58 @@ namespace ExaminationSystem.API.Controllers
                 _ => Ok(ApiResponse<GetAdminAttemptDetailsResponse>.Success(
                     value :result.Result, HttpStatusCode.OK))
                 
+            };
+        }
+
+        [HttpPost("users/{userId:guid}/lock")]
+        public async Task<IActionResult> LockUser(Guid userId, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new SetUserLockStateCommand(userId, true), cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.AccountLockedByAdmin =>
+                    Ok(ApiResponse<string>.Success("User account locked successfully.", HttpStatusCode.OK)),
+
+                ResultCode.UserIsNotExsit =>
+                    NotFound(ApiResponse<string>.Failure("User not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure("Could not lock user account.", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [HttpPost("users/{userId:guid}/unlock")]
+        public async Task<IActionResult> UnlockUser(Guid userId, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new SetUserLockStateCommand(userId, false), cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.AccountUnlockedByAdmin =>
+                    Ok(ApiResponse<string>.Success("User account unlocked successfully.", HttpStatusCode.OK)),
+
+                ResultCode.UserIsNotExsit =>
+                    NotFound(ApiResponse<string>.Failure("User not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure("Could not unlock user account.", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [HttpGet("users/{id:guid}/status")]
+        public async Task<IActionResult> GetUserStatus(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new GetAdminUserStatusQuery(id), cancellationToken);
+
+            return result.Code switch
+            {
+                ResultCode.AdminUserStatusRetrievedSuccessfully =>
+                    Ok(ApiResponse<GetAdminUserStatusResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.UserIsNotExsit =>
+                    NotFound(ApiResponse<GetAdminUserStatusResponse>.Failure("User not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<GetAdminUserStatusResponse>.Failure("Could not get user status.", HttpStatusCode.BadRequest))
             };
         }
 

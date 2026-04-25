@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace ExaminationSystem.Application.Services
 {
@@ -52,6 +49,25 @@ namespace ExaminationSystem.Application.Services
         public bool IsAuthenticated
             => _httpContextAccessor.HttpContext?
                 .User?.Identity?.IsAuthenticated ?? false;
+
+        public bool TryGetUserId(out Guid userId)
+        {
+            userId = Guid.Empty;
+            var id = Id;
+            if (!id.HasValue)
+                return false;
+
+            userId = id.Value;
+            return true;
+        }
+
+        public Guid GetRequiredUserId()
+        {
+            if (!TryGetUserId(out var userId))
+                throw new UnauthorizedAccessException("Current user is not authenticated or user id claim is missing.");
+
+            return userId;
+        }
 
     }
 
