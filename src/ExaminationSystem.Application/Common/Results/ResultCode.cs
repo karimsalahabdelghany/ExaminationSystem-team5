@@ -9,6 +9,7 @@ public enum ResultCode
     AvgPassRateSuccessed = 104,
     UsersLoginTodaySuccessfully = 105,
     GetTotalUsersQuerySuccessed = 106,
+    AdminAttemptDetailsRetrievedSuccessfully = 107,
 
 
     //User  200-300
@@ -48,7 +49,7 @@ public enum ResultCode
     QuizHasNoQuestions = 1108,
     QuizAlreadyDraft = 1109,
     QuizUnpublishedSuccessfully = 1110,
-    QuizIsExist  = 1111,
+    QuizIsExist = 1111,
 
 
     // Attempts (1200-1299)

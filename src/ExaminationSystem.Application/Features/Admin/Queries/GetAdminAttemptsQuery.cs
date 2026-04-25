@@ -1,16 +1,15 @@
 ﻿using ExaminationSystem.Application.Common.Helper.Pagination;
 using ExaminationSystem.Application.Common.Results;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ExaminationSystem.Application.Features.Admin.Queries
 {
     public record GetAdminAttemptsQuery(
-    
+
     PaginationParams Pagination,
-    Guid? QuizId = null,   // optional filter
-    Guid? StudentId = null    // optional filter
+    Guid? QuizId = null,        // optional filter
+    Guid? StudentId = null,     // optional filter
+    string? SortBy = null,      // submitted_at | score | status  (default: submitted_at)
+    string? Order = null        // asc | desc  (default: desc)
     ) : IRequest<RequestResult<PaginatedResult<GetAdminAttemptsResponse>>>;
 
     // Handler 
@@ -38,8 +37,10 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
             if (request.StudentId.HasValue)
                 query = query.Where(a => a.UserId == request.StudentId.Value);
 
-            var result = await query
-                .OrderByDescending(a => a.SubmittedAt ?? a.StartTime)
+            // Apply sort: ?sort_by= & ?order=
+            var orderedQuery = ApplySorting(query, request.SortBy, request.Order);
+
+            var result = await orderedQuery
                 .Select(a => new GetAdminAttemptsResponse(
                     AttemptId: a.Id,
                     StudentId: a.UserId,
@@ -51,7 +52,26 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
                 ))
                 .ToPagedAsync(request.Pagination, cancellationToken); ;
 
-            return RequestResult<PaginatedResult<GetAdminAttemptsResponse>>.succeeded(result,ResultCode.TotalAttemptsQuerySuccessfull);
+            return RequestResult<PaginatedResult<GetAdminAttemptsResponse>>.succeeded(result, ResultCode.TotalAttemptsQuerySuccessfull);
+        }
+
+        // Default sort: submitted_at DESC
+        private static IQueryable<QuizAttempt> ApplySorting(IQueryable<QuizAttempt> query, string? sortBy, string? order)
+        {
+            var isAscending = string.Equals(order, "asc", StringComparison.OrdinalIgnoreCase);
+
+            return sortBy?.ToLowerInvariant() switch
+            {
+                "score" => isAscending
+                    ? query.OrderBy(a => a.Result!.Score)
+                    : query.OrderByDescending(a => a.Result!.Score),
+                "status" => isAscending
+                    ? query.OrderBy(a => a.Status)
+                    : query.OrderByDescending(a => a.Status),
+                _ => isAscending
+                    ? query.OrderBy(a => a.SubmittedAt ?? a.StartTime)
+                    : query.OrderByDescending(a => a.SubmittedAt ?? a.StartTime)
+            };
         }
     }
 

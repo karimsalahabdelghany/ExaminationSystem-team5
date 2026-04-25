@@ -90,11 +90,11 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStudentAttemptsHistory([FromQuery] GetStudentAttemptsHistoryQuery query , CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(query, cancellationToken);
-        return Ok(ApiResponse<PaginationResult<GetStudentAttemptHistoryResponse>>.Success(result.Result));
-    }
+    //public async Task<IActionResult> GetStudentAttemptsHistory([FromQuery] GetStudentAttemptsHistoryQuery query , CancellationToken cancellationToken)
+    //{
+    //    var result = await _mediator.Send(query, cancellationToken);
+    //    return Ok(ApiResponse<PaginationResult<GetStudentAttemptHistoryResponse>>.Success(result.Result));
+    //}
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetAttemptDetails(Guid id , CancellationToken cancellationToken)
