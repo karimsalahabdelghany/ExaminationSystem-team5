@@ -13,6 +13,7 @@ public static class DependencyInjectionExtensions
         services.AddApplication();
         services.AddPersistence(configuration);
         services.AddSingleton<IDateTimeProvider, UtcDateTimeProvider>();
+        services.AddScoped<IProfileImageService, ProfileImageService>();
 
         services.AddJwtAuthentication(configuration);
         services.AddAuthRateLimiting();

@@ -6,4 +6,5 @@ public enum OtpPurpose : byte
     PasswordReset = 1,
     Login = 2,
     AccountVerification = 3,
+    EmailChange = 4,
 }

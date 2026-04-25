@@ -23,6 +23,9 @@ public enum ResultCode
     StudentStatsDataAlreadyCachedinMemory = 206,
     TotalAttemptsQuerySuccessfull = 207,
     TotalQuzizesQuerySucessfull = 208,
+    UserProfileRetrievedSuccessfully = 209,
+    UserProfileUpdatedSuccessfully = 210,
+    UserProfileNotFound = 211,
 
 
     // Common validation/errors
@@ -144,7 +147,13 @@ public enum ResultCode
     PasswordResetOtpExpired = 5103,
     PasswordResetCompleted = 5104,
     CurrentPasswordInvalid = 5105,
-    PasswordChangedSuccessfully = 5106
+    PasswordChangedSuccessfully = 5106,
+    EmailChangeOtpSentSuccessfully = 5107,
+    EmailChangedSuccessfully = 5108,
+    PendingEmailChangeNotFound = 5109,
+    EmailAlreadyInUse = 5110,
+    ProfileImageUpdatedSuccessfully = 5111,
+    ProfileImageRemovedSuccessfully = 5112
 
 
 }

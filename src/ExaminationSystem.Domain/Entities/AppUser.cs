@@ -10,6 +10,9 @@ public class AppUser : IdentityUser<Guid>, IBaseEntity
     private readonly List<LoginLog> _loginLogs = [];
 
     public string FullName { get; set; } = string.Empty;
+    public string? ProfileImageUrl { get; set; }
+    public string? PendingEmail { get; set; }
+    public DateTime? PendingEmailRequestedAt { get; set; }
     public AccountStatus Status { get; set; } = AccountStatus.PendingVerification;
     public int FailedLoginAttempts { get; set; }
     public DateTime? LockedUntil { get; set; }

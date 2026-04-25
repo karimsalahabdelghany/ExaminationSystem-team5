@@ -7,8 +7,10 @@ using ExaminationSystem.Application.Features.Auth.ResetPassword;
 using ExaminationSystem.Application.Features.Auth.ResendOtpForAccountVerification;
 using ExaminationSystem.Application.Features.Auth.VerifyAccount;
 using ExaminationSystem.Application.Features.OTP;
+using ExaminationSystem.Application.Features.User.ProfileManagement;
 
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Http;
 
 namespace ExaminationSystem.API.Controllers
 {
@@ -236,6 +238,165 @@ namespace ExaminationSystem.API.Controllers
 
                 _ =>
                     BadRequest(ApiResponse<string>.Failure("Unexpected error", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new GetMyProfileQuery(), cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.UserProfileRetrievedSuccessfully =>
+                    Ok(ApiResponse<ProfileResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<ProfileResponse>.Failure("Unauthorized.", HttpStatusCode.Unauthorized)),
+
+                ResultCode.UserProfileNotFound =>
+                    NotFound(ApiResponse<ProfileResponse>.Failure("User profile not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Unexpected error", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [Authorize]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateMyProfileCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.UserProfileUpdatedSuccessfully =>
+                    Ok(ApiResponse<ProfileResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<ProfileResponse>.Failure("Unauthorized.", HttpStatusCode.Unauthorized)),
+
+                ResultCode.UserProfileNotFound =>
+                    NotFound(ApiResponse<ProfileResponse>.Failure("User profile not found.", HttpStatusCode.NotFound)),
+
+                ResultCode.ValidationError =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Invalid profile data.", HttpStatusCode.BadRequest)),
+
+                _ =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Unexpected error", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [Authorize]
+        [HttpPost("profile/image")]
+        [RequestSizeLimit(5 * 1024 * 1024)]
+        public async Task<IActionResult> UploadProfileImage([FromForm] IFormFile image, CancellationToken cancellationToken)
+        {
+            if (image is null || image.Length == 0)
+                return BadRequest(ApiResponse<ProfileResponse>.Failure("Image is required.", HttpStatusCode.BadRequest));
+
+            var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            await using var stream = image.OpenReadStream();
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream, cancellationToken);
+
+            var command = new UpdateProfileImageCommand(memoryStream.ToArray(), extension);
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.Code switch
+            {
+                ResultCode.ProfileImageUpdatedSuccessfully =>
+                    Ok(ApiResponse<ProfileResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<ProfileResponse>.Failure("Unauthorized.", HttpStatusCode.Unauthorized)),
+
+                ResultCode.UserProfileNotFound =>
+                    NotFound(ApiResponse<ProfileResponse>.Failure("User profile not found.", HttpStatusCode.NotFound)),
+
+                ResultCode.ValidationError =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Invalid image format or size.", HttpStatusCode.BadRequest)),
+
+                _ =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Unexpected error", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [Authorize]
+        [HttpDelete("profile/image")]
+        public async Task<IActionResult> DeleteProfileImage(CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new DeleteProfileImageCommand(), cancellationToken);
+
+            return result.Code switch
+            {
+                ResultCode.ProfileImageRemovedSuccessfully =>
+                    Ok(ApiResponse<ProfileResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<ProfileResponse>.Failure("Unauthorized.", HttpStatusCode.Unauthorized)),
+
+                ResultCode.UserProfileNotFound =>
+                    NotFound(ApiResponse<ProfileResponse>.Failure("User profile not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Unexpected error", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [Authorize]
+        [HttpPost("profile/change-email/request-otp")]
+        [EnableRateLimiting("verify-otp-policy")]
+        public async Task<IActionResult> RequestEmailChangeOtp([FromBody] RequestEmailChangeOtpCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.EmailChangeOtpSentSuccessfully =>
+                    Ok(ApiResponse<string>.Success("OTP sent to new email successfully.", HttpStatusCode.OK)),
+
+                ResultCode.EmailAlreadyInUse =>
+                    BadRequest(ApiResponse<string>.Failure("This email is already in use.", HttpStatusCode.BadRequest)),
+
+                ResultCode.ValidationError =>
+                    BadRequest(ApiResponse<string>.Failure("Invalid email.", HttpStatusCode.BadRequest)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<string>.Failure("Unauthorized.", HttpStatusCode.Unauthorized)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure("Unexpected error", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [Authorize]
+        [HttpPost("profile/change-email/confirm")]
+        [EnableRateLimiting("verify-otp-policy")]
+        public async Task<IActionResult> ConfirmEmailChange([FromBody] ConfirmEmailChangeCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.Code switch
+            {
+                ResultCode.EmailChangedSuccessfully =>
+                    Ok(ApiResponse<ProfileResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.OtpNotVaild =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Invalid OTP.", HttpStatusCode.BadRequest)),
+
+                ResultCode.OtpExpried =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("OTP expired.", HttpStatusCode.BadRequest)),
+
+                ResultCode.PendingEmailChangeNotFound =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("No pending email change found.", HttpStatusCode.BadRequest)),
+
+                ResultCode.EmailAlreadyInUse =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("This email is already in use.", HttpStatusCode.BadRequest)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<ProfileResponse>.Failure("Unauthorized.", HttpStatusCode.Unauthorized)),
+
+                _ =>
+                    BadRequest(ApiResponse<ProfileResponse>.Failure("Unexpected error", HttpStatusCode.BadRequest))
             };
         }
 

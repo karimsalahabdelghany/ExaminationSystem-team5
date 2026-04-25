@@ -39,6 +39,15 @@ public sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.Property(x => x.FullName)
             .HasMaxLength(256)
             .IsRequired();
+        
+        builder.Property(x => x.ProfileImageUrl)
+            .HasMaxLength(1024);
+
+        builder.Property(x => x.PendingEmail)
+            .HasMaxLength(256);
+
+        builder.Property(x => x.PendingEmailRequestedAt)
+            .HasColumnType("datetime2");
 
         builder.Property(x => x.Status)
             .HasConversion<byte>()
@@ -88,6 +97,9 @@ public sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
                 LockoutEnabled = true,
                 AccessFailedCount = 0,
                 FullName = "System Administrator",
+                ProfileImageUrl = (string?)null,
+                PendingEmail = (string?)null,
+                PendingEmailRequestedAt = (DateTime?)null,
                 Status = AccountStatus.Active,
                 FailedLoginAttempts = 0,
                 LockedUntil = (DateTime?)null,
