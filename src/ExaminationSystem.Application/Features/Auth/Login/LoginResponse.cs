@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace ExaminationSystem.Application.Features.Auth.Login;
 
-namespace ExaminationSystem.Application.Features.Auth.Login
-{
-    public record LoginResponse();
-    
-}
+public record LoginResponse(
+    string AccessToken,
+    string RefreshToken,
+    DateTime AccessTokenExpiresAt
+);
