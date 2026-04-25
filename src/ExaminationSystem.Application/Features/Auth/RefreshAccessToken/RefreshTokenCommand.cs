@@ -4,7 +4,7 @@ using ExaminationSystem.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace ExaminationSystem.Application.Features.Auth.RefreshToken;
+namespace ExaminationSystem.Application.Features.Auth.RefreshAccessToken;
 
 public record RefreshTokenCommand(string RefreshToken) : ICommand<RequestResult<RefreshTokenResponse>>;
 

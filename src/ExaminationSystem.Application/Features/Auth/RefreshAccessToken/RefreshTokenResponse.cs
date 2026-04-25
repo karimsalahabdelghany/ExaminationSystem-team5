@@ -1,4 +1,4 @@
-namespace ExaminationSystem.Application.Features.Auth.RefreshToken;
+namespace ExaminationSystem.Application.Features.Auth.RefreshAccessToken;
 
 public record RefreshTokenResponse(
     string AccessToken,

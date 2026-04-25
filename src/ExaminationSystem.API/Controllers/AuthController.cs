@@ -1,5 +1,5 @@
 ﻿using ExaminationSystem.Application.Features.Auth.Login;
-using ExaminationSystem.Application.Features.Auth.RefreshToken;
+using ExaminationSystem.Application.Features.Auth.RefreshAccessToken;
 using ExaminationSystem.Application.Features.Auth.Register;
 using ExaminationSystem.Application.Features.Auth.ResendOtpForAccountVerification;
 using ExaminationSystem.Application.Features.Auth.VerifyAccount;
