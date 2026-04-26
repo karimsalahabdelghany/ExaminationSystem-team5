@@ -28,7 +28,7 @@ public static class ServiceCollectionExtension
             options.Password.RequireDigit = true;
             options.Password.RequireLowercase = true;
             options.Password.RequireUppercase = true;
-            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireNonAlphanumeric = true;
             options.Password.RequiredLength = 8;
         })
             .AddRoles<IdentityRole<Guid>>()
@@ -39,6 +39,7 @@ public static class ServiceCollectionExtension
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IQuizAttemptAutoSubmitClaim, QuizAttemptAutoSubmitClaim>();
         services.AddScoped<ITokenServies, TokenServices>();
+        services.AddScoped<ILoggerService, LoggerService>();
 
         services.Configure<EmailSettings>(
         configuration.GetSection("EmailSettings"));

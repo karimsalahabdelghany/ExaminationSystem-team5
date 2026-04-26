@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Options;
+using ExaminationSystem.Application.Common.Options;
 using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Domain.Enums;
 using Microsoft.AspNetCore.Http;
@@ -64,6 +64,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, RequestResult<L
 
             return RequestResult<LoginResponse>.Failure(null!, ResultCode.InvalidCredentials);
         }
+
+        if (user.Status == AccountStatus.Locked)
+            return RequestResult<LoginResponse>.Failure(null!, ResultCode.AccountLockedByAdmin);
 
         if (user.Status != AccountStatus.Active)
             return RequestResult<LoginResponse>.Failure(null!, ResultCode.AccountNotActive);

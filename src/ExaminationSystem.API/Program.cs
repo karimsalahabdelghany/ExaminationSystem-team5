@@ -5,6 +5,7 @@ using ExaminationSystem.Persistence.Repositories;
 using ExaminationSystem.Persistence.Services;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
+using Serilog;
 namespace ExaminationSystem.API;
 
 public class Program
@@ -12,6 +13,8 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        //builder.Host.UseSerilog((context, loggerConfiguration) =>
+        //    loggerConfiguration.ReadFrom.Configuration(context.Configuration));
 
         builder.Services.AddApiDependencies(builder.Configuration);
         builder.Services.AddApplication();
@@ -21,6 +24,7 @@ public class Program
 
 
         var app = builder.Build();
+        //app.UseSerilogRequestLogging();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         app.ApplyDatabaseMigrations();

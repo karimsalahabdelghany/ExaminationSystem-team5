@@ -10,6 +10,8 @@ public enum ResultCode
     UsersLoginTodaySuccessfully = 105,
     GetTotalUsersQuerySuccessed = 106,
     AdminAttemptDetailsRetrievedSuccessfully = 107,
+    AdminUserStatusRetrievedSuccessfully = 108,
+    AdminAnalyticsRetrievedSuccessfully = 109,
 
 
     //User  200-300
@@ -23,9 +25,9 @@ public enum ResultCode
     TotalQuzizesQuerySucessfull = 208,
 
 
-    //Diploma
-    WeakPassword = 201 ,
-    ValidationError = 202 ,
+    // Common validation/errors
+    WeakPassword = 9001,
+    ValidationError = 9002,
     DiplomaNotFound = 1000,
     DiplomaHasEnrollments = 1001,
     DiplomaDeletedSuccessfully = 1002,
@@ -102,24 +104,23 @@ public enum ResultCode
     QuestionBasicInfoUpdatedSuccessfully = 1407,
 
 
-    // Register Code 
-    UserIsAlredyExist = 2000 , 
-    UserCreateSuccesfully = 2001 , 
-    UserCreateFilad = 2002 , 
-    FailedToSendRegisterEmail=2003,
-    CanNotVerifyAccount = 2004,
-    // OTP 
-    UserIsNotExsit = 20003,
-    UserEmailIsNotExistOrAccountIsNotInPendingStatus = 2010,
-    ResendLimitExceeded = 2004 , 
-    OTPResentSuccessfully = 2005,
-    AccountActivatedSuccessfully =2006 ,
-    NoActiveOTPFound =2007 ,
-    AccountLocked = 2008 , 
-    OtpExpried = 2009  ,
-    OtpNotVaild = 3001 ,
-    OtpGeneratedSuccessfully = 3002,
-    OtpVerified = 3003,
+    // Register / OTP Codes (5200-5299)
+    UserIsAlredyExist = 5200,
+    UserCreateSuccesfully = 5201,
+    UserCreateFilad = 5202,
+    FailedToSendRegisterEmail = 5203,
+    CanNotVerifyAccount = 5204,
+    UserIsNotExsit = 5205,
+    UserEmailIsNotExistOrAccountIsNotInPendingStatus = 5210,
+    ResendLimitExceeded = 5211,
+    OTPResentSuccessfully = 5212,
+    AccountActivatedSuccessfully = 5213,
+    NoActiveOTPFound = 5214,
+    AccountLocked = 5215,
+    OtpExpried = 5216,
+    OtpNotVaild = 5217,
+    OtpGeneratedSuccessfully = 5218,
+    OtpVerified = 5219,
 
     // Login 
     Invalidcredentials = 401  ,
@@ -134,7 +135,18 @@ public enum ResultCode
     TokenRefreshedSuccessfully = 5010,
     RefreshTokenInvalid = 5011,
     RefreshTokenExpired = 5012,
-    RefreshTokenRevoked = 5013
+    RefreshTokenRevoked = 5013,
+    AccountLockedByAdmin = 5020,
+    AccountUnlockedByAdmin = 5021,
+
+    // Password Management (5100-5199)
+    PasswordResetOtpSentIfAccountExists = 5100,
+    FailedToSendPasswordResetOtpEmail = 5101,
+    InvalidPasswordResetOtp = 5102,
+    PasswordResetOtpExpired = 5103,
+    PasswordResetCompleted = 5104,
+    CurrentPasswordInvalid = 5105,
+    PasswordChangedSuccessfully = 5106
 
 
 }

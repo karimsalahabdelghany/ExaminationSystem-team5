@@ -1,7 +1,5 @@
-﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using FluentValidation;
+using ExaminationSystem.Application.Common.Validation;
 
 namespace ExaminationSystem.Application.Features.Auth.Register
 {
@@ -19,10 +17,7 @@ namespace ExaminationSystem.Application.Features.Auth.Register
                 .MinimumLength(2).WithMessage("Name must be at least 2 characters");
 
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Password is required")
-                .MinimumLength(8).WithMessage("Password must be at least 8 characters")
-                .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter")
-                .Matches(@"[!@#$%^&*(),.?""':{}|<>]").WithMessage("Password must contain at least one special character");
+                .StrongPassword("Password");
         }
 
     }

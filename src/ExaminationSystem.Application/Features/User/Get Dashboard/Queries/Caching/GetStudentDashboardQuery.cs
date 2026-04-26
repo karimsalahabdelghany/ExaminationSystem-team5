@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Admin.Queries;
 using ExaminationSystem.Application.Features.User.Orchestrators;
 using ExaminationSystem.Application.Responses;
@@ -12,8 +12,7 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Cach
 {
     public record GetStudentDashboardQuery() : IRequest<RequestResult<GetStudentDashboardResponse>>;
     // Handler 
-    // Cache key is per-student (user_id) — as required by backend note
-    // Cache dashboard response for 60 seconds per user_id
+    
     public class GetStudentDashboardQueryHandler
         : IRequestHandler<GetStudentDashboardQuery, RequestResult<GetStudentDashboardResponse>>
     {
@@ -30,28 +29,34 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Cach
         {
             _mediator = mediator;
             _cache = cache;
-            currentUser = _currentUser;
+            _currentUser = currentUser;
         }
 
         public async Task<RequestResult<GetStudentDashboardResponse>> Handle(
             GetStudentDashboardQuery request,
             CancellationToken cancellationToken)
         {
-            var cacheKey = CacheKey(_currentUser.Id ?? Guid.Empty);
+            if (!_currentUser.TryGetUserId(out var studentId))
+                return RequestResult<GetStudentDashboardResponse>
+                    .Failure(null, ResultCode.InvalidCredentials);
 
-            // Per-student cache check — different students never share cache entries
-            if (_cache.TryGetValue(cacheKey, out RequestResult<GetStudentDashboardResponse>? cached)
+            var cacheKey = CacheKey(studentId);
+
+            if (_cache.TryGetValue(cacheKey, out GetStudentDashboardResponse? cached)
                 && cached is not null)
-                return RequestResult<GetStudentDashboardResponse>.succeeded(cached.Result,ResultCode.StudentStatsDataAlreadyCachedinMemory);
+            {
+                return RequestResult<GetStudentDashboardResponse>.succeeded(
+                    cached,
+                    ResultCode.StudentStatsDataAlreadyCachedinMemory);
+            }
 
-            var dashboard = await _mediator.Send(new GetStudentDashboardOrchestrator(_currentUser.Id.Value), cancellationToken);
+            var dashboard = await _mediator.Send(new GetStudentDashboardOrchestrator(studentId), cancellationToken);
 
             if (!dashboard.Success)
                 return RequestResult<GetStudentDashboardResponse>
                 .Failure(dashboard.Result, ResultCode.StudentsDashoardQueryFalied);
 
-            // Store per student_id for 60 seconds
-            _cache.Set(cacheKey, dashboard.Result, CacheDuration); // cach data
+            _cache.Set(cacheKey, dashboard.Result, CacheDuration);
             return RequestResult<GetStudentDashboardResponse>.succeeded(dashboard.Result,dashboard.Code);
 
         }

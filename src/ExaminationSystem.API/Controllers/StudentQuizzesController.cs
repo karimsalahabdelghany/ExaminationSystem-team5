@@ -1,17 +1,19 @@
 using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Quizzes.StartQuizAttempt;
+using ExaminationSystem.Application.Interfaces;
 
 namespace ExaminationSystem.API.Controllers;
 
 [Route("api/quizzes")]
 [Authorize(Roles = "Student")]
-public class StudentQuizzesController(IMediator mediator) : BaseController(mediator)
+public class StudentQuizzesController(IMediator mediator, ICurrentUser currentUser) : BaseController(mediator)
 {
+    private readonly ICurrentUser _currentUser = currentUser;
+
     [HttpPost("{id:guid}/start")]
     public async Task<IActionResult> Start(Guid id)
     {
-        var studentIdClaim = User.FindFirstValue("user_id");
-        if (studentIdClaim is null || !Guid.TryParse(studentIdClaim, out var studentId))
+        if (!_currentUser.TryGetUserId(out var studentId))
         {
             return Unauthorized(
                 ApiResponse<StartQuizAttemptResponse>.Failure("Invalid token claims.", HttpStatusCode.Unauthorized));

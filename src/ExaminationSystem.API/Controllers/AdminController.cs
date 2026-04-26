@@ -1,4 +1,5 @@
-﻿using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Common.Helper.Pagination;
+using ExaminationSystem.Application.Features.Admin.Commands.SetUserLockState;
 using ExaminationSystem.Application.Features.Admin.Queries;
 
 namespace ExaminationSystem.API.Controllers
@@ -27,7 +28,28 @@ namespace ExaminationSystem.API.Controllers
                 return BadRequest(
                     ApiResponse<GetAdminStatsResponse>.Failure("Can't retrieve stats!"));
 
-            return Ok(result);
+            return Ok(ApiResponse<GetAdminStatsResponse>.Success(result.Result,HttpStatusCode.OK));
+        }
+
+        // GET /api/admin/analytics?from=&to=&diploma_id=
+        [HttpGet("analytics")]
+        [ProducesResponseType(typeof(ApiResponse<GetAdminAnalyticsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetAnalytics(
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null,
+            [FromQuery(Name = "diploma_id")] Guid? diplomaId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await _mediator.Send(
+                new GetAdminAnalyticsQuery(from, to, diplomaId),
+                cancellationToken);
+
+            if (result.Success)
+                return Ok(ApiResponse<GetAdminAnalyticsResponse>.Success(result.Result, HttpStatusCode.OK));
+
+            return BadRequest(ApiResponse<GetAdminAnalyticsResponse>.Failure("Invalid analytics filters.", HttpStatusCode.BadRequest));
         }
         // GET /api/admin/attempts?page=1&per_page=20&quiz_id=&student_id=&sort_by=submitted_at&order=desc
         [HttpGet("attempts")]
@@ -86,6 +108,58 @@ namespace ExaminationSystem.API.Controllers
                 _ => Ok(ApiResponse<GetAdminAttemptDetailsResponse>.Success(
                     value :result.Result, HttpStatusCode.OK))
                 
+            };
+        }
+
+        [HttpPost("users/{userId:guid}/lock")]
+        public async Task<IActionResult> LockUser(Guid userId, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new SetUserLockStateCommand(userId, true), cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.AccountLockedByAdmin =>
+                    Ok(ApiResponse<string>.Success("User account locked successfully.", HttpStatusCode.OK)),
+
+                ResultCode.UserIsNotExsit =>
+                    NotFound(ApiResponse<string>.Failure("User not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure("Could not lock user account.", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [HttpPost("users/{userId:guid}/unlock")]
+        public async Task<IActionResult> UnlockUser(Guid userId, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new SetUserLockStateCommand(userId, false), cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.AccountUnlockedByAdmin =>
+                    Ok(ApiResponse<string>.Success("User account unlocked successfully.", HttpStatusCode.OK)),
+
+                ResultCode.UserIsNotExsit =>
+                    NotFound(ApiResponse<string>.Failure("User not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure("Could not unlock user account.", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [HttpGet("users/{id:guid}/status")]
+        public async Task<IActionResult> GetUserStatus(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new GetAdminUserStatusQuery(id), cancellationToken);
+
+            return result.Code switch
+            {
+                ResultCode.AdminUserStatusRetrievedSuccessfully =>
+                    Ok(ApiResponse<GetAdminUserStatusResponse>.Success(result.Result, HttpStatusCode.OK)),
+
+                ResultCode.UserIsNotExsit =>
+                    NotFound(ApiResponse<GetAdminUserStatusResponse>.Failure("User not found.", HttpStatusCode.NotFound)),
+
+                _ =>
+                    BadRequest(ApiResponse<GetAdminUserStatusResponse>.Failure("Could not get user status.", HttpStatusCode.BadRequest))
             };
         }
 

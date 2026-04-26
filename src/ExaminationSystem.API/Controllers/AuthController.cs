@@ -1,6 +1,9 @@
-﻿using ExaminationSystem.Application.Features.Auth.Login;
+using ExaminationSystem.Application.Features.Auth.Login;
+using ExaminationSystem.Application.Features.Auth.ChangePassword;
+using ExaminationSystem.Application.Features.Auth.ForgotPassword;
 using ExaminationSystem.Application.Features.Auth.RefreshAccessToken;
 using ExaminationSystem.Application.Features.Auth.Register;
+using ExaminationSystem.Application.Features.Auth.ResetPassword;
 using ExaminationSystem.Application.Features.Auth.ResendOtpForAccountVerification;
 using ExaminationSystem.Application.Features.Auth.VerifyAccount;
 using ExaminationSystem.Application.Features.OTP;
@@ -19,6 +22,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         [EnableRateLimiting("register-policy")]
         public async Task<IActionResult> RegisterAsync(RegisterOrchestrator registerCommand, CancellationToken cancellationToken)
         {
@@ -48,6 +52,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         [EnableRateLimiting("login-policy")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
         {
@@ -68,6 +73,11 @@ namespace ExaminationSystem.API.Controllers
                         "Account is not active",
                         HttpStatusCode.Forbidden)),
 
+                ResultCode.AccountLockedByAdmin =>
+                    StatusCode(423, ApiResponse<LoginResponse>.Failure(
+                        "Account is locked by admin. Please contact support.",
+                        HttpStatusCode.Locked)),
+
                 ResultCode.AccountLockedTemporarily =>
                     StatusCode(423, ApiResponse<LoginResponse>.Failure(
                         "Account locked. Try again later.",
@@ -81,6 +91,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("refresh")]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
@@ -113,6 +124,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("verify-account")]
+        [AllowAnonymous]
         [EnableRateLimiting("verify-otp-policy")]
         public async Task<IActionResult> VerifyAccount([FromBody] VerifyAccountOrchestrator request,
                                                   CancellationToken ct)
@@ -142,6 +154,7 @@ namespace ExaminationSystem.API.Controllers
         }
 
         [HttpPost("resend-otp")]
+        [AllowAnonymous]
         [EnableRateLimiting("resend-otp-policy")]
         public async Task<IActionResult> ResendOtp(
             [FromBody] ResendOtpForAccountVerificationOrchestrator request,
@@ -173,6 +186,80 @@ namespace ExaminationSystem.API.Controllers
                     BadRequest(ApiResponse<string>.Failure(
                         "Unexpected error",
                         HttpStatusCode.BadRequest))
+            };
+        }
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        [EnableRateLimiting("forgot-password-policy")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordOrchestrator request, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(request, cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.PasswordResetOtpSentIfAccountExists =>
+                    Ok(ApiResponse<string>.Success(
+                        "If this account exists, a reset OTP has been sent to the email.",
+                        HttpStatusCode.OK)),
+
+                ResultCode.FailedToSendPasswordResetOtpEmail =>
+                    StatusCode(500, ApiResponse<string>.Failure(
+                        "Failed to send password reset OTP email.",
+                        HttpStatusCode.InternalServerError)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure(
+                        "Unexpected error",
+                        HttpStatusCode.BadRequest))
+            };
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        [EnableRateLimiting("verify-otp-policy")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordOrchestrator request, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(request, cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.PasswordResetCompleted =>
+                    Ok(ApiResponse<string>.Success("Password reset successfully.", HttpStatusCode.OK)),
+
+                ResultCode.InvalidPasswordResetOtp =>
+                    BadRequest(ApiResponse<string>.Failure("Invalid OTP.", HttpStatusCode.BadRequest)),
+
+                ResultCode.PasswordResetOtpExpired =>
+                    BadRequest(ApiResponse<string>.Failure("OTP expired.", HttpStatusCode.BadRequest)),
+
+                ResultCode.WeakPassword =>
+                    BadRequest(ApiResponse<string>.Failure("Password does not meet policy requirements.", HttpStatusCode.BadRequest)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure("Unexpected error", HttpStatusCode.BadRequest))
+            };
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+            return result.Code switch
+            {
+                ResultCode.PasswordChangedSuccessfully =>
+                    Ok(ApiResponse<string>.Success("Password changed successfully.", HttpStatusCode.OK)),
+
+                ResultCode.CurrentPasswordInvalid =>
+                    BadRequest(ApiResponse<string>.Failure("Current password is invalid.", HttpStatusCode.BadRequest)),
+
+                ResultCode.WeakPassword =>
+                    BadRequest(ApiResponse<string>.Failure("Password does not meet policy requirements.", HttpStatusCode.BadRequest)),
+
+                ResultCode.InvalidCredentials =>
+                    Unauthorized(ApiResponse<string>.Failure("Unauthorized.", HttpStatusCode.Unauthorized)),
+
+                _ =>
+                    BadRequest(ApiResponse<string>.Failure("Unexpected error", HttpStatusCode.BadRequest))
             };
         }
 
