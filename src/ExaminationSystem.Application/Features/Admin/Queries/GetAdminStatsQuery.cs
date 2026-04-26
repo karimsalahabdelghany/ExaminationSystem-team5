@@ -1,4 +1,4 @@
-﻿using ExaminationSystem.Application.Common.Results;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Features.Admin.Orchestrators;
 using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Application.Responses;
@@ -44,9 +44,12 @@ namespace ExaminationSystem.Application.Features.Admin.Queries
                 .Failure(statsDashboard.Result, statsDashboard.Code);
 
 
-            // Cache result for 5 minutes 
-            _cache.Set(CacheKey, statsDashboard.Result, CacheDuration);
-            return RequestResult<GetAdminStatsResponse>.succeeded(statsDashboard.Result,statsDashboard.Code);
+            var response = RequestResult<GetAdminStatsResponse>
+                .succeeded(statsDashboard.Result, statsDashboard.Code);
+
+            // Cache and read the same type to preserve cache hits.
+            _cache.Set(CacheKey, response, CacheDuration);
+            return response;
 
 
         }
