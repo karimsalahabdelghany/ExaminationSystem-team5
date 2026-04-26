@@ -90,7 +90,7 @@ public class DiplomasController : BaseController
 
     [HttpGet("{id}/quizzes")]
     public async Task<IActionResult> GetDiplomaQuizzes(
-    Guid diplomaId,
+    [FromRoute(Name = "id")] Guid diplomaId,
     [FromQuery] int page = 1,
     [FromQuery] int per_page = 20)
     {
