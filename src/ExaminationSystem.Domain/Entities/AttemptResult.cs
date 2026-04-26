@@ -24,7 +24,6 @@ public class AttemptResult : BaseEntity
         QuestionBreakdownJson = questionBreakdownJson;
     }
 
-    public Guid Id { get; set; }
     public Guid AttemptId { get; set; }
     public decimal Score { get; set; }
     public bool Passed { get; set; }
