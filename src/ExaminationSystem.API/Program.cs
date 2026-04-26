@@ -13,8 +13,8 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Host.UseSerilog((context, loggerConfiguration) =>
-            loggerConfiguration.ReadFrom.Configuration(context.Configuration));
+        //builder.Host.UseSerilog((context, loggerConfiguration) =>
+        //    loggerConfiguration.ReadFrom.Configuration(context.Configuration));
 
         builder.Services.AddApiDependencies(builder.Configuration);
         builder.Services.AddApplication();
@@ -24,7 +24,7 @@ public class Program
 
 
         var app = builder.Build();
-        app.UseSerilogRequestLogging();
+        //app.UseSerilogRequestLogging();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         app.ApplyDatabaseMigrations();

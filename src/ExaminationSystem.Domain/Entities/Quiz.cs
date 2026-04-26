@@ -9,6 +9,11 @@ public class Quiz : BaseEntity
     {
     }
 
+    public Quiz(Guid Id)
+    {
+        this.Id = Id;
+    }
+
     public Quiz(Guid diplomaId, string title, string instructions, int durationMinutes, int passScore, int maxAttempts, QuizStatus status)
     {
         DiplomaId = diplomaId;
