@@ -28,7 +28,7 @@ namespace ExaminationSystem.API.Controllers
                 return BadRequest(
                     ApiResponse<GetAdminStatsResponse>.Failure("Can't retrieve stats!"));
 
-            return Ok(result);
+            return Ok(ApiResponse<GetAdminStatsResponse>.Success(result.Result,HttpStatusCode.OK));
         }
 
         // GET /api/admin/analytics?from=&to=&diploma_id=

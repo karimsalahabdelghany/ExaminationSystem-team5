@@ -6,6 +6,7 @@ using ExaminationSystem.Application.Features.Diplomas.GetDiplomasQuizzes;
 using ExaminationSystem.Application.Features.Diplomas.GetPublishedDiplomaQuizez;
 using ExaminationSystem.Application.Features.Diplomas.GetStudentDiplomas;
 using ExaminationSystem.Application.Features.Diplomas.UpdateDiploma;
+using ExaminationSystem.Application.Features.User.GetStudentAttempts;
 using ExaminationSystem.Application.Features.User.Orchestrators;
 using ExaminationSystem.Application.Interfaces;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -93,6 +94,12 @@ public class DiplomasController : BaseController
     [FromQuery] int page = 1,
     [FromQuery] int per_page = 20)
     {
+        bool isValidUserid = _currentUser.TryGetUserId(out Guid studentId);
+        if (!isValidUserid)
+            return Unauthorized(ApiResponse<PaginatedResult<GetPublishedDiplomaQuizezResponse>>
+                .Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
+
+
         var result = await _mediator.Send(new GetPublishedDiplomaQuizzesQuery(
             DiplomaId: diplomaId,
             Params: new PaginationParams { Page = page, PerPage = per_page }
@@ -128,14 +135,14 @@ public class DiplomasController : BaseController
         };
     
     }
-    // GET /api/diplomas? page = 1 & per_page = 20
-    [HttpGet]
+    // GET /api/diplomas/Diploma? page = 1 & per_page = 20
+    [HttpGet("Diploma")]
     public async Task<IActionResult> GetDiplomas(
         [FromQuery] int page = 1,
         [FromQuery] int per_page = 20)
     {
-        var studentId = GetStudentId();
-        if (studentId is null)
+        bool isvaliduser = _currentUser.TryGetUserId(out Guid studentId);
+        if (!isvaliduser)
             return Unauthorized(ApiResponse<GetDiplomasResponse>.
                    Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
 
@@ -164,10 +171,5 @@ public class DiplomasController : BaseController
                     .Failure("Could not load diplomas.", HttpStatusCode.BadRequest))
         };
     }
-    private Guid? GetStudentId()
-    {
-        if (!_currentUser.IsAuthenticated || _currentUser.Id is null)
-            return null;
-        return _currentUser.Id;
-    }
+    
 }

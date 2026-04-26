@@ -14,7 +14,7 @@ namespace ExaminationSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Student")]
     public class StudentsController : BaseController
     {
         private readonly ICurrentUser _currentUser;
@@ -31,8 +31,9 @@ namespace ExaminationSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetDashboard()
         {
-            var userid = GetStudentId();
-            if (userid == null)
+            bool isvaliduser = _currentUser.TryGetUserId(out Guid studentId);
+
+            if (!isvaliduser)
                 return Unauthorized(
                    ApiResponse<GetStudentDashboardResponse>.
                    Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
@@ -65,8 +66,9 @@ namespace ExaminationSystem.API.Controllers
        [FromQuery] Guid? quiz_id = null,
        [FromQuery] Guid? diploma_id = null)
         {
-            var studentId = GetStudentId();
-            if (studentId is null) return Unauthorized(ApiResponse<PaginatedResult<GetStudentAttemptsResponse>>.
+            //checks if Id claim is valid Guid
+            bool isvaliduser = _currentUser.TryGetUserId(out Guid studentId);
+            if (!isvaliduser) return Unauthorized(ApiResponse<PaginatedResult<GetStudentAttemptsResponse>>.
                Failure("Invalid token claims.", HttpStatusCode.Unauthorized));
 
             var result = await _mediator.Send(new GetStudentAttemptsQuery(
@@ -100,12 +102,7 @@ namespace ExaminationSystem.API.Controllers
 
         }     
 
-        private Guid? GetStudentId()
-        {
-            if (!_currentUser.IsAuthenticated || _currentUser.Id is null)
-                 return null;
-            return _currentUser.Id;
-        }
+        
     }
 }
 

@@ -12,8 +12,7 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Cach
 {
     public record GetStudentDashboardQuery() : IRequest<RequestResult<GetStudentDashboardResponse>>;
     // Handler 
-    // Cache key is per-student (user_id) — as required by backend note
-    // Cache dashboard response for 60 seconds per user_id
+    
     public class GetStudentDashboardQueryHandler
         : IRequestHandler<GetStudentDashboardQuery, RequestResult<GetStudentDashboardResponse>>
     {
@@ -57,7 +56,7 @@ namespace ExaminationSystem.Application.Features.User.Get_Dashboard.Queries.Cach
                 return RequestResult<GetStudentDashboardResponse>
                 .Failure(dashboard.Result, ResultCode.StudentsDashoardQueryFalied);
 
-            _cache.Set(cacheKey, dashboard.Result, CacheDuration); 
+            _cache.Set(cacheKey, dashboard.Result, CacheDuration);
             return RequestResult<GetStudentDashboardResponse>.succeeded(dashboard.Result,dashboard.Code);
 
         }
