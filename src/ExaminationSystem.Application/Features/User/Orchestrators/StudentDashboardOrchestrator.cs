@@ -23,7 +23,6 @@ namespace ExaminationSystem.Application.Features.User.Orchestrators
         public async Task<RequestResult<GetStudentDashboardResponse>> Handle(GetStudentDashboardOrchestrator request,
             CancellationToken ct)
         {
-            // All 3 sub-queries fired in parallel — independent of each other
             var diplomasTask = _mediator.Send(new GetEnrolledDiplomasQuery(request.StudentId), ct);
             var recentAttemptTask = _mediator.Send(new GetRecentQuizAttemptsQuery(request.StudentId), ct);
             var overallStatsTask = _mediator.Send(new GetOverallStatsQuery(request.StudentId), ct);

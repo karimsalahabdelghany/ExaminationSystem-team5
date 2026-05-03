@@ -7,11 +7,13 @@ namespace ExaminationSystem.Application.Features.Diplomas.GetPublishedDiplomaQui
 
 
 public record GetPublishedDiplomaQuizezQuery
-(Guid dipolmaId, PaginationParams Params) : IRequest<RequestResult<List<PaginatedResult<GetPublishedDiplomaQuizezResponse>>>>;
+(Guid dipolmaId, PaginationParams Params, CancellationToken ct) : IRequest<RequestResult<List<PaginatedResult<GetPublishedDiplomaQuizezResponse>>>>;
 
 public record GetPublishedDiplomaQuizzesQuery(
     Guid DiplomaId,
-    PaginationParams Params
+    PaginationParams Params,
+    CancellationToken CancellationToken
+    
 ) : IRequest<RequestResult<PaginatedResult<GetPublishedDiplomaQuizezResponse>>>;
 
 public class GetPublishedDiplomaQuizzesQueryHandler

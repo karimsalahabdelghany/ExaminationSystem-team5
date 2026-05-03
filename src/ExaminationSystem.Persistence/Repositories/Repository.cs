@@ -19,7 +19,10 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
 
     public T Add(T entity)
     {
-        entity.Id = Guid.CreateVersion7();
+        if (entity.Id == Guid.Empty)
+        {
+            entity.Id = Guid.CreateVersion7();
+        }
         _dbSet.Add(entity);
         return entity;
     }
@@ -39,7 +42,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         return _dbSet.Where(predicate);
     }
 
-    public async Task PatchAsync(
+    public void Patch(
        T entity,
        CancellationToken ct = default,
        params Expression<Func<T, object>>[] updatedProperties)
@@ -50,7 +53,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
             entry.Property(prop).IsModified = true;
     }
 
-    public async Task DeleteAsync(T entity, CancellationToken ct = default)
+    public void Delete(T entity, CancellationToken ct = default)
     {
         if (_context.Entry(entity).State == EntityState.Detached)
             _dbSet.Attach(entity);
@@ -111,10 +114,11 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         entity.IsDeleted = true;
         SaveInclude(entity, nameof(entity.DeletedAt), nameof(entity.IsDeleted));
     }
-    public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate)
+    public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken ct = default)
     {
-
-        return await _dbSet.CountAsync(predicate);
+        return predicate is null
+            ? await _dbSet.CountAsync(ct)
+            : await _dbSet.CountAsync(predicate, ct);
     }
     public async Task<int> CountAsync()
     {

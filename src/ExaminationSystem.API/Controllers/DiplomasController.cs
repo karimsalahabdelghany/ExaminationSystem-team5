@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace ExaminationSystem.API.Controllers;
 
-[Authorize]
+[Authorize(Roles ="Admin")]
 public class DiplomasController : BaseController
 {
     private readonly ICurrentUser _currentUser;
@@ -24,7 +24,6 @@ public class DiplomasController : BaseController
     }
     
     [HttpPost]
-
     public async Task<IActionResult> Create(CreateDiplomaCommand command , CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command ,cancellationToken);
@@ -50,11 +49,12 @@ public class DiplomasController : BaseController
         {
             ResultCode.DiplomaNotFound => NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),
             ResultCode.DiplomaHasActiveEnrollmentsOrPublished => Conflict(ApiResponse<bool>.Failure("Can't delete this diploma because it has active enrollments or is published", HttpStatusCode.Conflict)),
-            _ => Ok(ApiResponse<bool>.Success(true, HttpStatusCode.OK))
+            _ => Ok(ApiResponse<bool>.Success(true, HttpStatusCode.NoContent))
         };
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetStudentPublishedDiplomas(
     [FromQuery] int page = 1,
     [FromQuery] int per_page = 20)
@@ -88,11 +88,12 @@ public class DiplomasController : BaseController
         };
     }
 
-    [HttpGet("{id}/quizzes")]
+    [HttpGet("{id:guid}/quizzes")]
     public async Task<IActionResult> GetDiplomaQuizzes(
-    Guid diplomaId,
+    Guid id,
     [FromQuery] int page = 1,
-    [FromQuery] int per_page = 20)
+    [FromQuery] int per_page = 20,
+    CancellationToken cancellation = default)
     {
         bool isValidUserid = _currentUser.TryGetUserId(out Guid studentId);
         if (!isValidUserid)
@@ -101,9 +102,10 @@ public class DiplomasController : BaseController
 
 
         var result = await _mediator.Send(new GetPublishedDiplomaQuizzesQuery(
-            DiplomaId: diplomaId,
-            Params: new PaginationParams { Page = page, PerPage = per_page }
-        ));
+            DiplomaId: id,
+            Params: new PaginationParams { Page = page, PerPage = per_page },
+            CancellationToken : cancellation)
+        );
 
         if (result.Success)
             return Ok(ApiResponse<IEnumerable<GetPublishedDiplomaQuizezResponse>>.Success(

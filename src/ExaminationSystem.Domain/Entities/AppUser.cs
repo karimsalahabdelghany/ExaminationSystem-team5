@@ -25,6 +25,6 @@ public class AppUser : IdentityUser<Guid>, IBaseEntity
     public IReadOnlyCollection<PasswordResetToken> PasswordResetTokens => _passwordResetTokens;
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens;
     public IReadOnlyCollection<LoginLog> LoginLogs => _loginLogs;
-   
+
     public byte[] RowVersion { get; set; } = [];
 }

@@ -10,12 +10,12 @@ public interface IRepository<T> where T : BaseEntity
     T Add(T entity);
     void AddRange(IEnumerable<T> entities);
 
-    Task PatchAsync(
+    void Patch(
         T entity,
         CancellationToken ct = default,
         params Expression<Func<T, object>>[] updatedProperties);
 
-    Task DeleteAsync(T entity, CancellationToken ct = default);
+    void Delete(T entity, CancellationToken ct = default);
     void Delete(T entity);
     void Update(T entity);
     Task<T?> GetByIdAsync(Guid id);
