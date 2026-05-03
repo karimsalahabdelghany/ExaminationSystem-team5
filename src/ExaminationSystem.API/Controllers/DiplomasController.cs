@@ -44,7 +44,7 @@ public class DiplomasController : BaseController
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id , CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeleteDiplomaCommand(id) ,cancellationToken);
+        var result = await _mediator.Send(new DeleteDiplomaOrchestrator(id) ,cancellationToken);
         return result.Code switch
         {
             ResultCode.DiplomaNotFound => NotFound(ApiResponse<bool>.Failure("Diploma not found", HttpStatusCode.NotFound)),

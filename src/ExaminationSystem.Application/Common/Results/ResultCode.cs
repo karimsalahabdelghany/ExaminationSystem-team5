@@ -40,6 +40,8 @@ public enum ResultCode
     DiplomasRetrievedSuccessfully = 1009,
     StudentNotEnrolledInDiploma = 1010,
     StudentEnrolledInDiploma = 1011,
+    DiplomaQuizzesDeletedSuccessfully = 1012,
+    DiplomaQuizQuestionsDeletedSuccessfully = 1013,
 
     // Quizzes (1100-1199)
     QuizNotFound = 1100,

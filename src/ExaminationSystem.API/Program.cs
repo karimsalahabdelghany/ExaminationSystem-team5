@@ -13,18 +13,18 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Host.UseSerilog((context, loggerConfiguration) =>
-            loggerConfiguration.ReadFrom.Configuration(context.Configuration));
+        //builder.Host.UseSerilog((context, loggerConfiguration) =>
+        //    loggerConfiguration.ReadFrom.Configuration(context.Configuration));
 
         builder.Services.AddApiDependencies(builder.Configuration);
-        builder.Services.AddApplication();
-        builder.Services.AddPersistence(builder.Configuration);
+        //builder.Services.AddApplication();
+        //builder.Services.AddPersistence(builder.Configuration);
         // builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddMemoryCache();
 
 
         var app = builder.Build();
-        app.UseSerilogRequestLogging();
+        //app.UseSerilogRequestLogging();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         app.ApplyDatabaseMigrations();
@@ -33,14 +33,14 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
+            app.MapOpenApi().AllowAnonymous();
             app.MapScalarApiReference(options =>
             {
                 options
                     .WithTitle("Examination System")
                     .WithTheme(ScalarTheme.Purple)
                     .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-            });
+            }).AllowAnonymous();
         }
 
         app.UseHttpsRedirection();

@@ -1,4 +1,4 @@
-using ExaminationSystem.Application.Common.Exceptions;
+using ExaminationSystem.Application.Common.Results;
 using ExaminationSystem.Application.Interfaces;
 using ExaminationSystem.Domain.Enums;
 
@@ -7,44 +7,44 @@ namespace ExaminationSystem.Application.Features.Attempts.Timer;
 public record GetAttemptTimerQuery(
     Guid AttemptId,
     Guid StudentId
-) : IQuery<GetAttemptTimerResponse>;
+) : IQuery<RequestResult<GetAttemptTimerResponse>>;
 
 public record GetAttemptTimerResponse(int SecondsRemaining);
 
 public class GetAttemptTimerQueryHandler(
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider
-) : IRequestHandler<GetAttemptTimerQuery, GetAttemptTimerResponse>
+) : IRequestHandler<GetAttemptTimerQuery, RequestResult<GetAttemptTimerResponse>>
 {
-    public async Task<GetAttemptTimerResponse> Handle(GetAttemptTimerQuery request, CancellationToken cancellationToken)
+    public async Task<RequestResult<GetAttemptTimerResponse>> Handle(GetAttemptTimerQuery request, CancellationToken cancellationToken)
     {
         var attemptRepository = unitOfWork.Repository<QuizAttempt>();
         var attempt = await attemptRepository.GetByIdAsync(request.AttemptId);
 
         if (attempt is null)
-            throw new NotFoundException("Attempt", request.AttemptId);
+            return RequestResult<GetAttemptTimerResponse>.Failure(null!, ResultCode.AttemptNotFound);
 
         if (attempt.UserId != request.StudentId)
-            throw new ForbiddenException("You do not own this attempt.");
+            return RequestResult<GetAttemptTimerResponse>.Failure(null!, ResultCode.AttemptNotOwned);
 
         if (attempt.Status == QuizAttemptStatus.Submitting)
-            throw new GoneException(
-                "Your attempt is being finalized automatically; try again in a moment.");
+            return RequestResult<GetAttemptTimerResponse>.Failure(null!, ResultCode.AttemptTimedOut);
 
         var now = dateTimeProvider.UtcNow;
         if (attempt.Status == QuizAttemptStatus.InProgress && now > attempt.Deadline)
         {
-            throw new GoneException(
-                "Time has expired. Your attempt is being finalized automatically; refresh in a moment.");
+            return RequestResult<GetAttemptTimerResponse>.Failure(null!, ResultCode.AttemptTimedOut);
         }
 
         if (attempt.Status == QuizAttemptStatus.Expired)
-            throw new GoneException("Time has expired. Your attempt has been auto-submitted.");
+            return RequestResult<GetAttemptTimerResponse>.Failure(null!, ResultCode.AttemptTimedOut);
 
         if (attempt.Status != QuizAttemptStatus.InProgress)
-            throw new ConflictException("Attempt", "Attempt is already submitted.");
+            return RequestResult<GetAttemptTimerResponse>.Failure(null!, ResultCode.AttemptAlreadySubmitted);
 
         var secondsRemaining = (int)Math.Max(0, (attempt.Deadline - now).TotalSeconds);
-        return new GetAttemptTimerResponse(secondsRemaining);
+        return RequestResult<GetAttemptTimerResponse>.succeeded(
+            new GetAttemptTimerResponse(secondsRemaining),
+            ResultCode.AttemptDetailsRetrievedSuccessfully);
     }
 }

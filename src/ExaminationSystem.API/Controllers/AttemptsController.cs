@@ -85,7 +85,14 @@ public class AttemptsController(IMediator mediator,ICurrentUser currentUser) : B
         }
 
         var result = await _mediator.Send(new GetAttemptTimerQuery(attemptId, studentId));
-        return Ok(ApiResponse<GetAttemptTimerResponse>.Success(result));
+        return result.Code switch
+        {
+            ResultCode.AttemptNotFound => NotFound(ApiResponse<GetAttemptTimerResponse>.Failure("Attempt not found", HttpStatusCode.NotFound)),
+            ResultCode.AttemptNotOwned => Forbid("You do not own this attempt."),
+            ResultCode.AttemptTimedOut => StatusCode(410, ApiResponse<GetAttemptTimerResponse>.Failure("Time has expired. Your attempt has been auto-submitted", (HttpStatusCode)410)),
+            ResultCode.AttemptAlreadySubmitted => Conflict(ApiResponse<GetAttemptTimerResponse>.Failure("Attempt is already submitted", HttpStatusCode.Conflict)),
+            _ => Ok(ApiResponse<GetAttemptTimerResponse>.Success(result.Result, HttpStatusCode.OK))
+        };
     }
 
     [HttpGet]
