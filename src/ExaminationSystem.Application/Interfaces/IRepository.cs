@@ -22,7 +22,7 @@ public interface IRepository<T> where T : BaseEntity
     Task<T?> GetByIdWithNoTracking(Guid id);
     Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
     Task<T?> FindAsync(Expression<Func<T, bool>> predicate);
-    Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
+    Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null , CancellationToken cancellationtoken =default);
     Task<int> CountAsync();
     // Pushes SELECT COUNT(DISTINCT col) to SQL — used for active_users_today handler
     Task<int> CountDistinctAsync<TKey>(
